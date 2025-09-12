@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,12 +11,15 @@ import {
 } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/components/ui/use-toast'
+import { ReviewDrawer } from '@/components/ReviewDrawer'
 
 const mockHistory = [
   { date: '15/09/2025', service: 'Clareamento', status: 'Realizado' },
   { date: '25/10/2025', service: 'Limpeza de Rotina', status: 'Confirmado' },
   { date: '05/08/2025', service: 'Restauração', status: 'Cancelado' },
 ]
+
+type Appointment = (typeof mockHistory)[0]
 
 const getStatusVariant = (status: string) => {
   switch (status) {
@@ -31,8 +35,17 @@ const getStatusVariant = (status: string) => {
 }
 
 export default function Profile() {
+  const [isReviewDrawerOpen, setReviewDrawerOpen] = useState(false)
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null)
+
   const handleSaveChanges = () => {
     toast({ title: 'Alterações salvas com sucesso!' })
+  }
+
+  const handleOpenReview = (appointment: Appointment) => {
+    setSelectedAppointment(appointment)
+    setReviewDrawerOpen(true)
   }
 
   return (
@@ -82,10 +95,18 @@ export default function Profile() {
                 {item.date} - {item.service}
               </AccordionTrigger>
               <AccordionContent className="flex justify-between items-center">
-                <p>Status da consulta:</p>
                 <Badge variant={getStatusVariant(item.status)}>
                   {item.status}
                 </Badge>
+                {item.status === 'Realizado' && (
+                  <Button
+                    variant="link"
+                    className="text-accent"
+                    onClick={() => handleOpenReview(item)}
+                  >
+                    Avaliar
+                  </Button>
+                )}
               </AccordionContent>
             </AccordionItem>
           ))}
@@ -110,6 +131,12 @@ export default function Profile() {
       <Button variant="destructive" className="w-full">
         Sair
       </Button>
+
+      <ReviewDrawer
+        appointment={selectedAppointment}
+        open={isReviewDrawerOpen}
+        onOpenChange={setReviewDrawerOpen}
+      />
     </div>
   )
 }

@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Calendar, BookOpen, User } from 'lucide-react'
+import { Home, Calendar, BookOpen, User, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { to: '/', label: 'Início', icon: Home },
   { to: '/schedule', label: 'Agendar', icon: Calendar },
+  { to: '/loyalty', label: 'Fidelidade', icon: Trophy },
   { to: '/content', label: 'Conteúdo', icon: BookOpen },
   { to: '/profile', label: 'Perfil', icon: User },
 ]
@@ -17,10 +18,10 @@ export const BottomNav = () => {
           <NavLink
             key={item.label}
             to={item.to}
-            end
+            end={item.to === '/'}
             className={({ isActive }) =>
               cn(
-                'flex flex-col items-center justify-center w-full text-neutral-dark/70 transition-all duration-200',
+                'flex flex-col items-center justify-center w-full text-neutral-dark/70 transition-all duration-200 pt-1',
                 { 'text-accent scale-105 font-semibold': isActive },
               )
             }
