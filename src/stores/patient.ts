@@ -20,7 +20,7 @@ interface PatientState {
   }) => void
   updatePatient: (
     originalCpf: string,
-    data: { name: string; cpf: string; whatsapp: string; email: string },
+    data: Partial<Omit<Patient, 'registered'>>,
   ) => void
   deletePatient: (cpf: string) => void
 }

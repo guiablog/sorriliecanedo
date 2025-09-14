@@ -2,18 +2,49 @@ import { useState } from 'react'
 import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { useAppointmentStore, Appointment } from '@/stores/appointment'
+import { RescheduleModal } from '@/components/RescheduleModal'
+import { toast } from '@/components/ui/use-toast'
+import { cn } from '@/lib/utils'
+
+type StatusFilter = 'all' | 'Pendente' | 'Confirmado'
 
 export default function AdminAgenda() {
   const [date, setDate] = useState<Date | undefined>(
     new Date('2025-10-25T12:00:00Z'),
   )
-  const appointments = useAppointmentStore((state) => state.appointments)
+  const { appointments, rescheduleAppointment } = useAppointmentStore()
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [isRescheduleModalOpen, setRescheduleModalOpen] = useState(false)
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null)
 
   const selectedDateString = date?.toISOString().split('T')[0]
-  const todaysAppointments: Appointment[] = selectedDateString
-    ? appointments.filter((appt) => appt.date === selectedDateString)
-    : []
+  const todaysAppointments: Appointment[] = (
+    selectedDateString
+      ? appointments.filter((appt) => appt.date === selectedDateString)
+      : []
+  ).filter((appt) => {
+    if (statusFilter === 'all') return true
+    return appt.status === statusFilter
+  })
+
+  const handleRescheduleClick = (appointment: Appointment) => {
+    setSelectedAppointment(appointment)
+    setRescheduleModalOpen(true)
+  }
+
+  const handleConfirmReschedule = (
+    id: string,
+    newDate: Date,
+    newTime: string,
+  ) => {
+    rescheduleAppointment(id, newDate, newTime)
+    toast({ title: 'Consulta reagendada com sucesso!' })
+    setRescheduleModalOpen(false)
+    setSelectedAppointment(null)
+  }
 
   return (
     <div className="space-y-6">
@@ -35,12 +66,36 @@ export default function AdminAgenda() {
                 {date?.toLocaleDateString('pt-BR') ||
                   'Nenhuma data selecionada'}
               </CardTitle>
+              <div className="flex gap-2 pt-2">
+                <Button
+                  variant={statusFilter === 'all' ? 'secondary' : 'outline'}
+                  onClick={() => setStatusFilter('all')}
+                >
+                  Todos
+                </Button>
+                <Button
+                  variant={
+                    statusFilter === 'Confirmado' ? 'secondary' : 'outline'
+                  }
+                  onClick={() => setStatusFilter('Confirmado')}
+                >
+                  Confirmados
+                </Button>
+                <Button
+                  variant={
+                    statusFilter === 'Pendente' ? 'secondary' : 'outline'
+                  }
+                  onClick={() => setStatusFilter('Pendente')}
+                >
+                  Pendentes
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {todaysAppointments.length > 0 ? (
-                todaysAppointments.map((appt, i) => (
+                todaysAppointments.map((appt) => (
                   <div
-                    key={i}
+                    key={appt.id}
                     className="p-3 border rounded-md flex justify-between items-start"
                   >
                     <div>
@@ -50,28 +105,41 @@ export default function AdminAgenda() {
                       <p className="text-sm text-muted-foreground">
                         {appt.service} com {appt.professional}
                       </p>
+                      <Button
+                        variant="link"
+                        className="p-0 h-auto text-accent"
+                        onClick={() => handleRescheduleClick(appt)}
+                      >
+                        Reagendar
+                      </Button>
                     </div>
                     <Badge
-                      variant={
-                        appt.status === 'Confirmado' ||
-                        appt.status === 'Realizado'
-                          ? 'secondary'
-                          : appt.status === 'Cancelado'
-                            ? 'destructive'
-                            : 'default'
-                      }
+                      className={cn({
+                        'bg-green-100 text-green-800':
+                          appt.status === 'Confirmado' ||
+                          appt.status === 'Realizado',
+                        'bg-yellow-100 text-yellow-800':
+                          appt.status === 'Pendente',
+                        'bg-red-100 text-red-800': appt.status === 'Cancelado',
+                      })}
                     >
                       {appt.status}
                     </Badge>
                   </div>
                 ))
               ) : (
-                <p>Nenhum agendamento para esta data.</p>
+                <p>Nenhum agendamento para esta data e filtro.</p>
               )}
             </CardContent>
           </Card>
         </div>
       </div>
+      <RescheduleModal
+        appointment={selectedAppointment}
+        open={isRescheduleModalOpen}
+        onOpenChange={setRescheduleModalOpen}
+        onConfirm={handleConfirmReschedule}
+      />
     </div>
   )
 }

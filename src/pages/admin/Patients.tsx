@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -25,12 +26,39 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { MoreHorizontal, FileDown } from 'lucide-react'
-import { usePatientStore } from '@/stores/patient'
+import { usePatientStore, Patient } from '@/stores/patient'
 import { toast } from '@/components/ui/use-toast'
+import { PatientDetailsModal } from '@/components/PatientDetailsModal'
+import { PatientForm, PatientFormValues } from '@/components/PatientForm'
 
 export default function AdminPatients() {
-  const { patients, deletePatient } = usePatientStore()
+  const { patients, addPatient, updatePatient, deletePatient } =
+    usePatientStore()
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
+  const [isDetailsModalOpen, setDetailsModalOpen] = useState(false)
+  const [isFormModalOpen, setFormModalOpen] = useState(false)
+
+  const handleViewDetails = (patient: Patient) => {
+    setSelectedPatient(patient)
+    setDetailsModalOpen(true)
+  }
+
+  const handleEdit = (patient: Patient) => {
+    setSelectedPatient(patient)
+    setFormModalOpen(true)
+  }
+
+  const handleAdd = () => {
+    setSelectedPatient(null)
+    setFormModalOpen(true)
+  }
 
   const handleDelete = (cpf: string) => {
     deletePatient(cpf)
@@ -38,6 +66,18 @@ export default function AdminPatients() {
       title: 'Sucesso',
       description: 'Paciente excluído com sucesso.',
     })
+  }
+
+  const handleFormSubmit = (data: PatientFormValues) => {
+    if (selectedPatient) {
+      updatePatient(selectedPatient.cpf, data)
+      toast({ title: 'Paciente atualizado com sucesso!' })
+    } else {
+      addPatient({ ...data, fullName: data.name })
+      toast({ title: 'Paciente adicionado com sucesso!' })
+    }
+    setFormModalOpen(false)
+    setSelectedPatient(null)
   }
 
   return (
@@ -48,7 +88,10 @@ export default function AdminPatients() {
           <Button variant="outline">
             <FileDown className="mr-2 h-4 w-4" /> Exportar CSV
           </Button>
-          <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
+          <Button
+            onClick={handleAdd}
+            className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+          >
             Adicionar Paciente
           </Button>
         </div>
@@ -61,7 +104,6 @@ export default function AdminPatients() {
               <TableHead>Nome</TableHead>
               <TableHead>CPF</TableHead>
               <TableHead>WhatsApp</TableHead>
-              <TableHead>E-mail</TableHead>
               <TableHead>Cadastro</TableHead>
               <TableHead>Status</TableHead>
               <TableHead></TableHead>
@@ -73,7 +115,6 @@ export default function AdminPatients() {
                 <TableCell className="font-medium">{p.name}</TableCell>
                 <TableCell>{p.cpf}</TableCell>
                 <TableCell>{p.whatsapp}</TableCell>
-                <TableCell>{p.email}</TableCell>
                 <TableCell>{p.registered}</TableCell>
                 <TableCell>{p.status}</TableCell>
                 <TableCell>
@@ -84,8 +125,12 @@ export default function AdminPatients() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Ver Detalhes</DropdownMenuItem>
-                      <DropdownMenuItem>Editar</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleViewDetails(p)}>
+                        Ver Detalhes
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleEdit(p)}>
+                        Editar
+                      </DropdownMenuItem>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <DropdownMenuItem
@@ -123,6 +168,28 @@ export default function AdminPatients() {
           </TableBody>
         </Table>
       </div>
+      <PatientDetailsModal
+        patient={selectedPatient}
+        open={isDetailsModalOpen}
+        onOpenChange={setDetailsModalOpen}
+      />
+      <Dialog open={isFormModalOpen} onOpenChange={setFormModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {selectedPatient ? 'Editar' : 'Adicionar'} Paciente
+            </DialogTitle>
+          </DialogHeader>
+          <PatientForm
+            patient={selectedPatient}
+            onSubmit={handleFormSubmit}
+            onCancel={() => {
+              setFormModalOpen(false)
+              setSelectedPatient(null)
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

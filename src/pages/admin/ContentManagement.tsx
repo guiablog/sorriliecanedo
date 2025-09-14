@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -8,29 +9,52 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-
-const tips = [
-  {
-    title: 'A Importância da Escovação Noturna',
-    published: '10/10/2025',
-    status: 'Publicado',
-  },
-  {
-    title: 'Use o Fio Dental Diariamente',
-    published: '08/10/2025',
-    status: 'Publicado',
-  },
-]
-
-const news = [
-  {
-    title: 'Novas Tecnologias em Clareamento a Laser',
-    published: '05/10/2025',
-    status: 'Rascunho',
-  },
-]
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { useContentStore, ContentItem, ContentType } from '@/stores/content'
+import { ContentForm, ContentFormValues } from '@/components/ContentForm'
+import { toast } from '@/components/ui/use-toast'
+import { format } from 'date-fns'
 
 export default function AdminContentManagement() {
+  const { content, addContent, updateContent } = useContentStore()
+  const [isModalOpen, setModalOpen] = useState(false)
+  const [editingContent, setEditingContent] = useState<ContentItem | null>(null)
+  const [contentType, setContentType] = useState<ContentType>('tip')
+
+  const tips = content.filter((c) => c.type === 'tip')
+  const news = content.filter((c) => c.type === 'news')
+
+  const openModal = (
+    type: ContentType,
+    contentItem: ContentItem | null = null,
+  ) => {
+    setContentType(type)
+    setEditingContent(contentItem)
+    setModalOpen(true)
+  }
+
+  const handleFormSubmit = (data: ContentFormValues) => {
+    if (editingContent) {
+      updateContent({ ...editingContent, ...data })
+      toast({ title: 'Conteúdo atualizado com sucesso!' })
+    } else {
+      addContent({
+        ...data,
+        type: contentType,
+        content: data.content,
+        publishedDate: format(new Date(), 'yyyy-MM-dd'),
+      })
+      toast({ title: 'Conteúdo adicionado com sucesso!' })
+    }
+    setEditingContent(null)
+    setModalOpen(false)
+  }
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Gerenciamento de Conteúdos</h1>
@@ -41,7 +65,10 @@ export default function AdminContentManagement() {
         </TabsList>
         <TabsContent value="tips" className="mt-4">
           <div className="flex justify-end mb-4">
-            <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
+            <Button
+              onClick={() => openModal('tip')}
+              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+            >
               Adicionar Dica
             </Button>
           </div>
@@ -56,9 +83,13 @@ export default function AdminContentManagement() {
               </TableHeader>
               <TableBody>
                 {tips.map((item) => (
-                  <TableRow key={item.title}>
+                  <TableRow
+                    key={item.id}
+                    onClick={() => openModal('tip', item)}
+                    className="cursor-pointer"
+                  >
                     <TableCell>{item.title}</TableCell>
-                    <TableCell>{item.published}</TableCell>
+                    <TableCell>{item.publishedDate}</TableCell>
                     <TableCell>{item.status}</TableCell>
                   </TableRow>
                 ))}
@@ -68,7 +99,10 @@ export default function AdminContentManagement() {
         </TabsContent>
         <TabsContent value="news" className="mt-4">
           <div className="flex justify-end mb-4">
-            <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
+            <Button
+              onClick={() => openModal('news')}
+              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+            >
               Adicionar Novidade
             </Button>
           </div>
@@ -83,9 +117,13 @@ export default function AdminContentManagement() {
               </TableHeader>
               <TableBody>
                 {news.map((item) => (
-                  <TableRow key={item.title}>
+                  <TableRow
+                    key={item.id}
+                    onClick={() => openModal('news', item)}
+                    className="cursor-pointer"
+                  >
                     <TableCell>{item.title}</TableCell>
-                    <TableCell>{item.published}</TableCell>
+                    <TableCell>{item.publishedDate}</TableCell>
                     <TableCell>{item.status}</TableCell>
                   </TableRow>
                 ))}
@@ -94,6 +132,25 @@ export default function AdminContentManagement() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={isModalOpen} onOpenChange={setModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {editingContent ? 'Editar' : 'Adicionar'}{' '}
+              {contentType === 'tip' ? 'Dica' : 'Novidade'}
+            </DialogTitle>
+          </DialogHeader>
+          <ContentForm
+            contentItem={editingContent}
+            onSubmit={handleFormSubmit}
+            onCancel={() => {
+              setEditingContent(null)
+              setModalOpen(false)
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

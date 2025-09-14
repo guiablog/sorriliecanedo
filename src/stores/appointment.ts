@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
+import { format } from 'date-fns'
 
 export interface Appointment {
   id: string
@@ -15,6 +16,7 @@ interface AppointmentState {
   appointments: Appointment[]
   addAppointment: (appointment: Omit<Appointment, 'id'>) => void
   updateAppointmentStatus: (id: string, status: Appointment['status']) => void
+  rescheduleAppointment: (id: string, newDate: Date, newTime: string) => void
 }
 
 const initialAppointments: Appointment[] = [
@@ -91,6 +93,14 @@ export const useAppointmentStore = create<AppointmentState>()(
         set((state) => ({
           appointments: state.appointments.map((appt) =>
             appt.id === id ? { ...appt, status } : appt,
+          ),
+        })),
+      rescheduleAppointment: (id, newDate, newTime) =>
+        set((state) => ({
+          appointments: state.appointments.map((appt) =>
+            appt.id === id
+              ? { ...appt, date: format(newDate, 'yyyy-MM-dd'), time: newTime }
+              : appt,
           ),
         })),
     }),
