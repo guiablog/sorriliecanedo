@@ -1,6 +1,13 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from '@/components/ui/card'
 import { Calendar } from '@/components/ui/calendar'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
@@ -13,11 +20,16 @@ import {
 } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { useProfessionalStore } from '@/stores/professional'
+import { useAppointmentStore } from '@/stores/appointment'
+import { useAuthStore } from '@/stores/auth'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
 const services = ['Limpeza', 'Clareamento', 'Restauração', 'Avaliação']
 const availableTimes = ['09:00', '10:30', '11:00', '14:00', '15:30']
 
 export default function Schedule() {
+  const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [selectedService, setSelectedService] = useState<string | null>(null)
   const [selectedProfessional, setSelectedProfessional] = useState<
@@ -27,7 +39,57 @@ export default function Schedule() {
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
 
   const { professionals } = useProfessionalStore()
+  const { addAppointment } = useAppointmentStore()
+  const { fullName } = useAuthStore()
+
   const activeProfessionals = professionals.filter((p) => p.status === 'Ativo')
+
+  const handleNext = () => {
+    if (step === 1 && !selectedService) {
+      toast({
+        title: 'Campo obrigatório',
+        description: 'Por favor, selecione um serviço.',
+        variant: 'destructive',
+      })
+      return
+    }
+    if (step === 2 && !selectedProfessional) {
+      toast({
+        title: 'Campo obrigatório',
+        description: 'Por favor, selecione um profissional.',
+        variant: 'destructive',
+      })
+      return
+    }
+    if (step === 3 && (!selectedDate || !selectedTime)) {
+      toast({
+        title: 'Campo obrigatório',
+        description: 'Por favor, selecione uma data e horário.',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    if (step === 3 && selectedDate && selectedTime) {
+      if (selectedService && selectedProfessional && fullName) {
+        addAppointment({
+          date: format(selectedDate, 'yyyy-MM-dd'),
+          time: selectedTime,
+          patient: fullName,
+          service: selectedService,
+          professional: selectedProfessional,
+          status: 'Pendente',
+        })
+        setStep(4)
+        toast({
+          title: 'Agendamento realizado com sucesso!',
+          description: 'Sua consulta está pendente de confirmação.',
+        })
+      }
+    } else {
+      setStep(step + 1)
+    }
+  }
 
   const renderStep = () => {
     switch (step) {
@@ -43,6 +105,7 @@ export default function Schedule() {
                   key={s}
                   variant={selectedService === s ? 'secondary' : 'outline'}
                   onClick={() => setSelectedService(s)}
+                  className="h-12"
                 >
                   {s}
                 </Button>
@@ -63,7 +126,7 @@ export default function Schedule() {
                   variant={
                     selectedProfessional === p.name ? 'secondary' : 'outline'
                   }
-                  className="w-full justify-start"
+                  className="w-full justify-start h-12"
                   onClick={() => setSelectedProfessional(p.name)}
                 >
                   <User className="mr-2 h-4 w-4" /> {p.name}
@@ -83,6 +146,7 @@ export default function Schedule() {
                 mode="single"
                 selected={selectedDate}
                 onSelect={setSelectedDate}
+                disabled={(date) => date < new Date()}
                 className="rounded-md border"
               />
               <RadioGroup
@@ -95,7 +159,7 @@ export default function Schedule() {
                     <RadioGroupItem value={t} id={t} className="peer sr-only" />
                     <Label
                       htmlFor={t}
-                      className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-secondary [&:has([data-state=checked])]:border-secondary"
+                      className="flex h-10 w-full items-center justify-center rounded-md border-2 border-muted bg-popover p-2 text-sm hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-secondary [&:has([data-state=checked])]:border-secondary"
                     >
                       {t}
                     </Label>
@@ -110,26 +174,37 @@ export default function Schedule() {
           <Card className="text-center">
             <CardHeader>
               <CheckCircle className="mx-auto h-12 w-12 text-success" />
-              <CardTitle>Agendamento Confirmado!</CardTitle>
+              <CardTitle>Agendamento Realizado!</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-left">
               <p className="flex items-center">
                 <Stethoscope className="mr-2 h-4 w-4 text-accent" />
-                <strong>Serviço:</strong> {selectedService}
+                <strong>Serviço:</strong>&nbsp;{selectedService}
               </p>
               <p className="flex items-center">
                 <User className="mr-2 h-4 w-4 text-accent" />
-                <strong>Profissional:</strong> {selectedProfessional}
+                <strong>Profissional:</strong>&nbsp;{selectedProfessional}
               </p>
               <p className="flex items-center">
                 <CalendarIcon className="mr-2 h-4 w-4 text-accent" />
-                <strong>Data:</strong> {selectedDate?.toLocaleDateString()}
+                <strong>Data:</strong>&nbsp;
+                {selectedDate
+                  ? format(selectedDate, "dd 'de' MMMM, yyyy", { locale: ptBR })
+                  : ''}
               </p>
               <p className="flex items-center">
                 <Clock className="mr-2 h-4 w-4 text-accent" />
-                <strong>Horário:</strong> {selectedTime}
+                <strong>Horário:</strong>&nbsp;{selectedTime}
               </p>
             </CardContent>
+            <CardFooter>
+              <Button
+                onClick={() => navigate('/home')}
+                className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+              >
+                Voltar para o Início
+              </Button>
+            </CardFooter>
           </Card>
         )
       default:
@@ -137,38 +212,27 @@ export default function Schedule() {
     }
   }
 
-  const handleNext = () => {
-    if (step === 1 && selectedService) setStep(2)
-    else if (step === 2 && selectedProfessional) setStep(3)
-    else if (step === 3 && selectedDate && selectedTime) {
-      setStep(4)
-      toast({ title: 'Agendamento realizado com sucesso!' })
-    }
+  const getButtonText = () => {
+    if (step < 3) return 'Próximo'
+    if (step === 3) return 'Confirmar Agendamento'
+    return ''
   }
 
   return (
     <div className="p-4 space-y-4 animate-fade-in-up">
       {renderStep()}
-      <div className="flex justify-between">
+      <div className="flex justify-between gap-2">
         {step > 1 && step < 4 && (
           <Button variant="outline" onClick={() => setStep(step - 1)}>
             Voltar
           </Button>
         )}
-        {step < 3 && (
-          <Button
-            onClick={handleNext}
-            className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground ml-auto"
-          >
-            Próximo
-          </Button>
-        )}
-        {step === 3 && (
+        {step < 4 && (
           <Button
             onClick={handleNext}
             className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
           >
-            Confirmar Agendamento
+            {getButtonText()}
           </Button>
         )}
       </div>
