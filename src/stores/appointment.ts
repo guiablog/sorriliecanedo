@@ -133,6 +133,7 @@ export const useAppointmentStore = create<AppointmentState>()(
                 ...appt,
                 date: format(newDate, 'yyyy-MM-dd'),
                 time: newTime,
+                status: appt.status, // Explicitly keep the status the same
                 rescheduleHistory: [
                   ...(appt.rescheduleHistory || []),
                   historyEntry,

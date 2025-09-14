@@ -29,7 +29,7 @@ export default function AdminAgenda() {
   const { appointments, rescheduleAppointment } = useAppointmentStore()
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(),
-    to: addDays(new Date(), 7),
+    to: addDays(new Date(), 30),
   })
   const [patientNameFilter, setPatientNameFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -38,21 +38,27 @@ export default function AdminAgenda() {
     useState<Appointment | null>(null)
 
   const filteredAppointments = useMemo(() => {
-    return appointments.filter((appt) => {
-      const apptDate = new Date(appt.date)
-      const isDateInRange =
-        dateRange?.from &&
-        dateRange?.to &&
-        apptDate >= dateRange.from &&
-        apptDate <= dateRange.to
-      const isPatientMatch = appt.patient
-        .toLowerCase()
-        .includes(patientNameFilter.toLowerCase())
-      const isStatusMatch =
-        statusFilter === 'all' || appt.status === statusFilter
+    return appointments
+      .filter((appt) => {
+        const apptDate = new Date(`${appt.date}T00:00:00`) // Ensure date is parsed correctly without timezone issues
+        const isDateInRange =
+          dateRange?.from &&
+          dateRange?.to &&
+          apptDate >= dateRange.from &&
+          apptDate <= dateRange.to
+        const isPatientMatch = appt.patient
+          .toLowerCase()
+          .includes(patientNameFilter.toLowerCase())
+        const isStatusMatch =
+          statusFilter === 'all' || appt.status === statusFilter
 
-      return isDateInRange && isPatientMatch && isStatusMatch
-    })
+        return isDateInRange && isPatientMatch && isStatusMatch
+      })
+      .sort(
+        (a, b) =>
+          new Date(a.date).getTime() - new Date(b.date).getTime() ||
+          a.time.localeCompare(b.time),
+      )
   }, [appointments, dateRange, patientNameFilter, statusFilter])
 
   const handleRescheduleClick = (appointment: Appointment) => {
@@ -121,8 +127,8 @@ export default function AdminAgenda() {
                   >
                     <div>
                       <p className="font-semibold">
-                        {format(new Date(appt.date), 'dd/MM/yy')} às {appt.time}{' '}
-                        - {appt.patient}
+                        {format(new Date(`${appt.date}T00:00:00`), 'dd/MM/yy')}{' '}
+                        às {appt.time} - {appt.patient}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {appt.service} com {appt.professional}
