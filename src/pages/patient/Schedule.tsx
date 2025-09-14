@@ -12,13 +12,9 @@ import {
   Clock,
 } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
+import { useProfessionalStore } from '@/stores/professional'
 
 const services = ['Limpeza', 'Clareamento', 'Restauração', 'Avaliação']
-const professionals = [
-  'Dr. Ricardo Alves',
-  'Dra. Ana Costa',
-  'Dr. Pedro Martins',
-]
 const availableTimes = ['09:00', '10:30', '11:00', '14:00', '15:30']
 
 export default function Schedule() {
@@ -29,6 +25,9 @@ export default function Schedule() {
   >(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
+
+  const { professionals } = useProfessionalStore()
+  const activeProfessionals = professionals.filter((p) => p.status === 'Ativo')
 
   const renderStep = () => {
     switch (step) {
@@ -58,14 +57,16 @@ export default function Schedule() {
               <CardTitle>2. Escolha o Profissional</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {professionals.map((p) => (
+              {activeProfessionals.map((p) => (
                 <Button
-                  key={p}
-                  variant={selectedProfessional === p ? 'secondary' : 'outline'}
+                  key={p.id}
+                  variant={
+                    selectedProfessional === p.name ? 'secondary' : 'outline'
+                  }
                   className="w-full justify-start"
-                  onClick={() => setSelectedProfessional(p)}
+                  onClick={() => setSelectedProfessional(p.name)}
                 >
-                  <User className="mr-2 h-4 w-4" /> {p}
+                  <User className="mr-2 h-4 w-4" /> {p.name}
                 </Button>
               ))}
             </CardContent>
