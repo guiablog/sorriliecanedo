@@ -22,10 +22,10 @@ import { toast } from '@/components/ui/use-toast'
 import { useProfessionalStore } from '@/stores/professional'
 import { useAppointmentStore } from '@/stores/appointment'
 import { useAuthStore } from '@/stores/auth'
+import { useServiceStore } from '@/stores/service'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-const services = ['Limpeza', 'Clareamento', 'Restauração', 'Avaliação']
 const availableTimes = ['09:00', '10:30', '11:00', '14:00', '15:30']
 
 export default function Schedule() {
@@ -39,10 +39,12 @@ export default function Schedule() {
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
 
   const { professionals } = useProfessionalStore()
+  const { services } = useServiceStore()
   const { addAppointment } = useAppointmentStore()
   const { fullName } = useAuthStore()
 
   const activeProfessionals = professionals.filter((p) => p.status === 'Ativo')
+  const activeServices = services.filter((s) => s.status === 'Ativo')
 
   const handleNext = () => {
     if (step === 1 && !selectedService) {
@@ -100,14 +102,14 @@ export default function Schedule() {
               <CardTitle>1. Escolha o Serviço</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
-              {services.map((s) => (
+              {activeServices.map((s) => (
                 <Button
-                  key={s}
-                  variant={selectedService === s ? 'secondary' : 'outline'}
-                  onClick={() => setSelectedService(s)}
+                  key={s.id}
+                  variant={selectedService === s.name ? 'secondary' : 'outline'}
+                  onClick={() => setSelectedService(s.name)}
                   className="h-12"
                 >
-                  {s}
+                  {s.name}
                 </Button>
               ))}
             </CardContent>
