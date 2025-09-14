@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import {
@@ -16,13 +17,12 @@ import {
 } from '@/components/ui/carousel'
 import { Calendar, Stethoscope, Lightbulb } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth'
-
-const mockAppointment = {
-  date: '25 de Outubro, 2025',
-  time: '10:30',
-  professional: 'Dr. Ricardo Alves',
-  service: 'Limpeza de Rotina',
-}
+import { useAppointmentStore, Appointment } from '@/stores/appointment'
+import { AppointmentDetailsModal } from '@/components/AppointmentDetailsModal'
+import { CancelConfirmationDialog } from '@/components/CancelConfirmationDialog'
+import { toast } from '@/components/ui/use-toast'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
 const mockPromotions = [
   {
@@ -35,17 +35,52 @@ const mockPromotions = [
     description: 'Agende sua avaliação e previna problemas futuros.',
     image: 'https://img.usecurling.com/p/400/200?q=dental%20checkup',
   },
-  {
-    title: 'Implantes Dentários',
-    description: 'Recupere seu sorriso com tecnologia de ponta.',
-    image: 'https://img.usecurling.com/p/400/200?q=dental%20implant',
-  },
 ]
 
 export default function PatientHome() {
-  const fullName = useAuthStore((state) => state.fullName)
+  const { fullName } = useAuthStore()
+  const { appointments, updateAppointmentStatus } = useAppointmentStore()
+  const [isDetailsModalOpen, setDetailsModalOpen] = useState(false)
+  const [isCancelDialogOpen, setCancelDialogOpen] = useState(false)
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null)
+
   const patientName = fullName ? fullName.split(' ')[0] : 'Paciente'
-  const hasAppointment = true // Mock data
+
+  const nextAppointment = appointments
+    .filter(
+      (appt) =>
+        appt.patient === fullName &&
+        (appt.status === 'Confirmado' || appt.status === 'Pendente') &&
+        new Date(`${appt.date}T${appt.time}`) >= new Date(),
+    )
+    .sort(
+      (a, b) =>
+        new Date(`${a.date}T${a.time}`).getTime() -
+        new Date(`${b.date}T${b.time}`).getTime(),
+    )[0]
+
+  const handleViewDetails = (appointment: Appointment) => {
+    setSelectedAppointment(appointment)
+    setDetailsModalOpen(true)
+  }
+
+  const handleCancelClick = (appointment: Appointment) => {
+    setSelectedAppointment(appointment)
+    setCancelDialogOpen(true)
+  }
+
+  const handleConfirmCancel = () => {
+    if (selectedAppointment) {
+      updateAppointmentStatus(selectedAppointment.id, 'Cancelado')
+      toast({
+        title: 'Consulta Cancelada',
+        description: 'Sua consulta foi cancelada com sucesso.',
+      })
+    }
+    setCancelDialogOpen(false)
+    setSelectedAppointment(null)
+  }
 
   return (
     <div className="p-4 space-y-6 animate-fade-in-up">
@@ -57,7 +92,7 @@ export default function PatientHome() {
       </section>
 
       <section>
-        {hasAppointment ? (
+        {nextAppointment ? (
           <Card className="bg-secondary text-secondary-foreground">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -67,23 +102,32 @@ export default function PatientHome() {
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Data:</strong> {mockAppointment.date} às{' '}
-                {mockAppointment.time}
+                <strong>Data:</strong>{' '}
+                {format(
+                  new Date(`${nextAppointment.date}T${nextAppointment.time}`),
+                  "dd 'de' MMMM, yyyy 'às' HH:mm",
+                  { locale: ptBR },
+                )}
               </p>
               <p>
-                <strong>Profissional:</strong> {mockAppointment.professional}
+                <strong>Profissional:</strong> {nextAppointment.professional}
               </p>
               <p>
-                <strong>Serviço:</strong> {mockAppointment.service}
+                <strong>Serviço:</strong> {nextAppointment.service}
               </p>
               <div className="flex gap-2 pt-2">
                 <Button
-                  variant="secondary"
-                  className="bg-white/20 hover:bg-white/30"
+                  onClick={() => handleViewDetails(nextAppointment)}
+                  className="bg-white/20 hover:bg-white/30 text-white"
                 >
                   Ver Detalhes
                 </Button>
-                <Button variant="destructive">Cancelar</Button>
+                <Button
+                  onClick={() => handleCancelClick(nextAppointment)}
+                  className="bg-white/20 hover:bg-white/30 text-white"
+                >
+                  Cancelar
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -162,6 +206,16 @@ export default function PatientHome() {
           <CarouselNext className="right-2" />
         </Carousel>
       </section>
+      <AppointmentDetailsModal
+        appointment={selectedAppointment}
+        open={isDetailsModalOpen}
+        onOpenChange={setDetailsModalOpen}
+      />
+      <CancelConfirmationDialog
+        open={isCancelDialogOpen}
+        onOpenChange={setCancelDialogOpen}
+        onConfirm={handleConfirmCancel}
+      />
     </div>
   )
 }
