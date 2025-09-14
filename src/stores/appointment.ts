@@ -10,6 +10,13 @@ interface RescheduleHistoryEntry {
   changedAt: string
 }
 
+export type AppointmentStatus =
+  | 'Confirmado'
+  | 'Pendente'
+  | 'Cancelado'
+  | 'Realizado'
+  | 'Remarcada'
+
 export interface Appointment {
   id: string
   date: string // YYYY-MM-DD
@@ -17,14 +24,14 @@ export interface Appointment {
   patient: string
   service: string
   professional: string
-  status: 'Confirmado' | 'Pendente' | 'Cancelado' | 'Realizado'
+  status: AppointmentStatus
   rescheduleHistory?: RescheduleHistoryEntry[]
 }
 
 interface AppointmentState {
   appointments: Appointment[]
   addAppointment: (appointment: Omit<Appointment, 'id'>) => void
-  updateAppointmentStatus: (id: string, status: Appointment['status']) => void
+  updateAppointmentStatus: (id: string, status: AppointmentStatus) => void
   rescheduleAppointment: (id: string, newDate: Date, newTime: string) => void
 }
 
@@ -37,15 +44,7 @@ const initialAppointments: Appointment[] = [
     service: 'Limpeza de Rotina',
     professional: 'Dr. Ricardo Alves',
     status: 'Confirmado',
-    rescheduleHistory: [
-      {
-        previousDate: '2025-10-24',
-        previousTime: '09:00',
-        newDate: '2025-10-25',
-        newTime: '10:30',
-        changedAt: new Date('2025-10-20T10:00:00Z').toISOString(),
-      },
-    ],
+    rescheduleHistory: [],
   },
   {
     id: '2',
@@ -64,8 +63,16 @@ const initialAppointments: Appointment[] = [
     patient: 'Carlos Souza',
     service: 'Restauração',
     professional: 'Dr. Ricardo Alves',
-    status: 'Confirmado',
-    rescheduleHistory: [],
+    status: 'Remarcada',
+    rescheduleHistory: [
+      {
+        previousDate: '2025-10-26',
+        previousTime: '09:00',
+        newDate: '2025-10-27',
+        newTime: '09:00',
+        changedAt: new Date('2025-10-22T10:00:00Z').toISOString(),
+      },
+    ],
   },
   {
     id: '4',
@@ -133,7 +140,7 @@ export const useAppointmentStore = create<AppointmentState>()(
                 ...appt,
                 date: format(newDate, 'yyyy-MM-dd'),
                 time: newTime,
-                status: appt.status, // Explicitly keep the status the same
+                status: 'Remarcada',
                 rescheduleHistory: [
                   ...(appt.rescheduleHistory || []),
                   historyEntry,

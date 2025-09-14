@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -11,36 +11,75 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useAppointmentStore, Appointment } from '@/stores/appointment'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import {
+  useAppointmentStore,
+  Appointment,
+  AppointmentStatus,
+} from '@/stores/appointment'
 import { RescheduleModal } from '@/components/RescheduleModal'
 import { toast } from '@/components/ui/use-toast'
 import { cn } from '@/lib/utils'
 import { DateRange } from 'react-day-picker'
-import { addDays, format } from 'date-fns'
+import {
+  format,
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+} from 'date-fns'
+import { MoreHorizontal } from 'lucide-react'
 
-type StatusFilter =
-  | 'all'
-  | 'Pendente'
-  | 'Confirmado'
-  | 'Cancelado'
-  | 'Realizado'
+type StatusFilter = 'all' | AppointmentStatus
+type Period = 'day' | 'week' | 'month' | 'custom'
+
+const statusOptions: AppointmentStatus[] = [
+  'Pendente',
+  'Confirmado',
+  'Realizado',
+  'Remarcada',
+  'Cancelado',
+]
 
 export default function AdminAgenda() {
-  const { appointments, rescheduleAppointment } = useAppointmentStore()
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(),
-    to: addDays(new Date(), 30),
-  })
+  const { appointments, rescheduleAppointment, updateAppointmentStatus } =
+    useAppointmentStore()
+  const [dateRange, setDateRange] = useState<DateRange | undefined>()
+  const [period, setPeriod] = useState<Period>('week')
   const [patientNameFilter, setPatientNameFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [isRescheduleModalOpen, setRescheduleModalOpen] = useState(false)
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null)
 
+  useEffect(() => {
+    const now = new Date()
+    if (period === 'day')
+      setDateRange({ from: startOfDay(now), to: endOfDay(now) })
+    if (period === 'week')
+      setDateRange({ from: startOfWeek(now), to: endOfWeek(now) })
+    if (period === 'month')
+      setDateRange({ from: startOfMonth(now), to: endOfMonth(now) })
+    if (period === 'custom' && !dateRange) setDateRange({ from: now, to: now })
+  }, [period])
+
   const filteredAppointments = useMemo(() => {
     return appointments
       .filter((appt) => {
-        const apptDate = new Date(`${appt.date}T00:00:00`) // Ensure date is parsed correctly without timezone issues
+        const apptDate = new Date(`${appt.date}T00:00:00`)
         const isDateInRange =
           dateRange?.from &&
           dateRange?.to &&
@@ -51,7 +90,6 @@ export default function AdminAgenda() {
           .includes(patientNameFilter.toLowerCase())
         const isStatusMatch =
           statusFilter === 'all' || appt.status === statusFilter
-
         return isDateInRange && isPatientMatch && isStatusMatch
       })
       .sort(
@@ -77,17 +115,35 @@ export default function AdminAgenda() {
     setSelectedAppointment(null)
   }
 
+  const handleStatusChange = (id: string, status: AppointmentStatus) => {
+    updateAppointmentStatus(id, status)
+    toast({ title: `Status alterado para ${status}!` })
+  }
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Agenda da Clínica</h1>
       <div className="grid md:grid-cols-3 gap-6">
         <div className="md:col-span-1 flex flex-col gap-4">
-          <Calendar
-            mode="range"
-            selected={dateRange}
-            onSelect={setDateRange}
-            className="rounded-md border"
-          />
+          <ToggleGroup
+            type="single"
+            value={period}
+            onValueChange={(v) => v && setPeriod(v as Period)}
+            className="w-full grid grid-cols-4"
+          >
+            <ToggleGroupItem value="day">Dia</ToggleGroupItem>
+            <ToggleGroupItem value="week">Semana</ToggleGroupItem>
+            <ToggleGroupItem value="month">Mês</ToggleGroupItem>
+            <ToggleGroupItem value="custom">Período</ToggleGroupItem>
+          </ToggleGroup>
+          {period === 'custom' && (
+            <Calendar
+              mode="range"
+              selected={dateRange}
+              onSelect={setDateRange}
+              className="rounded-md border"
+            />
+          )}
           <Input
             placeholder="Filtrar por nome do paciente..."
             value={patientNameFilter}
@@ -102,21 +158,18 @@ export default function AdminAgenda() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os Status</SelectItem>
-              <SelectItem value="Pendente">Pendente</SelectItem>
-              <SelectItem value="Confirmado">Confirmado</SelectItem>
-              <SelectItem value="Cancelado">Cancelado</SelectItem>
-              <SelectItem value="Realizado">Realizado</SelectItem>
+              {statusOptions.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
         <div className="md:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>
-                Agendamentos de{' '}
-                {dateRange?.from ? format(dateRange.from, 'dd/MM/yy') : ''} a{' '}
-                {dateRange?.to ? format(dateRange.to, 'dd/MM/yy') : ''}
-              </CardTitle>
+              <CardTitle>Agendamentos</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {filteredAppointments.length > 0 ? (
@@ -133,26 +186,54 @@ export default function AdminAgenda() {
                       <p className="text-sm text-muted-foreground">
                         {appt.service} com {appt.professional}
                       </p>
-                      <Button
-                        variant="link"
-                        className="p-0 h-auto text-accent"
-                        onClick={() => handleRescheduleClick(appt)}
+                      <Badge
+                        className={cn('mt-2', {
+                          'bg-green-100 text-green-800':
+                            appt.status === 'Confirmado' ||
+                            appt.status === 'Realizado',
+                          'bg-yellow-100 text-yellow-800':
+                            appt.status === 'Pendente',
+                          'bg-red-100 text-red-800':
+                            appt.status === 'Cancelado',
+                          'bg-blue-100 text-blue-800':
+                            appt.status === 'Remarcada',
+                        })}
                       >
-                        Reagendar
-                      </Button>
+                        {appt.status}
+                      </Badge>
                     </div>
-                    <Badge
-                      className={cn({
-                        'bg-green-100 text-green-800':
-                          appt.status === 'Confirmado' ||
-                          appt.status === 'Realizado',
-                        'bg-yellow-100 text-yellow-800':
-                          appt.status === 'Pendente',
-                        'bg-red-100 text-red-800': appt.status === 'Cancelado',
-                      })}
-                    >
-                      {appt.status}
-                    </Badge>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                        <DropdownMenuItem
+                          onClick={() => handleRescheduleClick(appt)}
+                        >
+                          Reagendar
+                        </DropdownMenuItem>
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger>
+                            Alterar Status
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent>
+                            {statusOptions.map((status) => (
+                              <DropdownMenuItem
+                                key={status}
+                                onClick={() =>
+                                  handleStatusChange(appt.id, status)
+                                }
+                              >
+                                {status}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 ))
               ) : (
