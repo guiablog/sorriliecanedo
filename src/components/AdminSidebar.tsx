@@ -4,7 +4,6 @@ import {
   Users,
   Calendar,
   Stethoscope,
-  ClipboardList,
   BookOpen,
   Bell,
   Settings,

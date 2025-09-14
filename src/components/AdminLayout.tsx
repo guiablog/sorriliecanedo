@@ -22,7 +22,7 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-neutral-light">
+    <div className="flex min-h-screen w-full bg-background">
       <AdminSidebar />
       <div className="flex flex-col flex-1">
         <header className="sticky top-0 z-10 flex h-14 items-center justify-end gap-4 border-b bg-white px-6 shadow-sm">

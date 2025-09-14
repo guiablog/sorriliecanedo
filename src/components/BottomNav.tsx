@@ -3,7 +3,7 @@ import { Home, Calendar, BookOpen, User, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
-  { to: '/', label: 'Início', icon: Home },
+  { to: '/home', label: 'Início', icon: Home },
   { to: '/schedule', label: 'Agendar', icon: Calendar },
   { to: '/loyalty', label: 'Fidelidade', icon: Trophy },
   { to: '/content', label: 'Conteúdo', icon: BookOpen },
@@ -18,7 +18,7 @@ export const BottomNav = () => {
           <NavLink
             key={item.label}
             to={item.to}
-            end={item.to === '/'}
+            end={item.to === '/home'}
             className={({ isActive }) =>
               cn(
                 'flex flex-col items-center justify-center w-full text-neutral-dark/70 transition-all duration-200 pt-1',

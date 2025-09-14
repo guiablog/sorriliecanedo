@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -66,7 +65,8 @@ export default function AdminAgenda() {
             <CardHeader>
               <CardTitle>
                 Agendamentos para{' '}
-                {date?.toLocaleDateString() || 'Nenhuma data selecionada'}
+                {date?.toLocaleDateString('pt-BR') ||
+                  'Nenhuma data selecionada'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">

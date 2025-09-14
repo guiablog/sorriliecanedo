@@ -35,7 +35,7 @@ const App = () => (
       <Routes>
         <Route element={<Layout />}>
           {/* Standalone Pages */}
-          <Route path="/splash" element={<SplashScreen />} />
+          <Route path="/" element={<SplashScreen />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/register" element={<Register />} />
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -50,7 +50,7 @@ const App = () => (
             }
           >
             <Route element={<MobileLayout />}>
-              <Route path="/" element={<PatientHome />} />
+              <Route path="/home" element={<PatientHome />} />
               <Route path="/schedule" element={<PatientSchedule />} />
               <Route path="/content" element={<PatientContent />} />
               <Route path="/profile" element={<PatientProfile />} />

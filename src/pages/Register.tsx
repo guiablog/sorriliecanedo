@@ -56,7 +56,7 @@ export default function Register() {
       title: 'Cadastro realizado com sucesso!',
       description: 'Você será redirecionado para a tela inicial.',
     })
-    setTimeout(() => navigate('/'), 1500)
+    setTimeout(() => navigate('/home'), 1500)
   }
 
   return (
@@ -144,7 +144,10 @@ export default function Register() {
         </Form>
         <p className="mt-6 text-center text-sm text-neutral-dark/70">
           Já tem uma conta?{' '}
-          <Link to="/" className="font-semibold text-accent hover:underline">
+          <Link
+            to="/home"
+            className="font-semibold text-accent hover:underline"
+          >
             Faça login.
           </Link>
         </p>

@@ -1,31 +1,13 @@
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { BarChart, LineChart, PieChart } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart'
+import { ChartContainer } from '@/components/ui/chart'
 import { Users, Calendar, Bell, CheckCircle } from 'lucide-react'
 
 const lineChartData = Array.from({ length: 7 }, (_, i) => ({
   day: `Dia ${i + 1}`,
   signups: Math.floor(Math.random() * 10) + 5,
 }))
-const barChartData = [
-  { day: 'Seg', count: 12 },
-  { day: 'Ter', count: 19 },
-  { day: 'Qua', count: 3 },
-  { day: 'Qui', count: 5 },
-  { day: 'Sex', count: 2 },
-]
+
 const pieChartData = [
   { name: 'Pendente', value: 8, fill: 'hsl(var(--warning))' },
   { name: 'Confirmado', value: 25, fill: 'hsl(var(--success))' },
@@ -81,12 +63,35 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <ChartContainer config={{}} className="h-64 w-full">
-              <LineChart data={lineChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day" />
-                <YAxis />
-                <Tooltip content={<ChartTooltipContent />} />
-                <Line
+              <LineChart
+                data={lineChartData}
+                margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+              >
+                <LineChart.CartesianGrid strokeDasharray="3 3" />
+                <LineChart.XAxis dataKey="day" />
+                <LineChart.YAxis />
+                <LineChart.Tooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="rounded-lg border bg-background p-2 shadow-sm">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="flex flex-col">
+                              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                Cadastros
+                              </span>
+                              <span className="font-bold text-muted-foreground">
+                                {payload[0].value}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    }
+                    return null
+                  }}
+                />
+                <LineChart.Line
                   type="monotone"
                   dataKey="signups"
                   stroke="hsl(var(--primary))"
@@ -102,8 +107,28 @@ export default function AdminDashboard() {
           <CardContent className="flex justify-center">
             <ChartContainer config={{}} className="h-64 w-full">
               <PieChart>
-                <Tooltip content={<ChartTooltipContent />} />
-                <Pie
+                <PieChart.Tooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="rounded-lg border bg-background p-2 shadow-sm">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="flex flex-col">
+                              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                {payload[0].name}
+                              </span>
+                              <span className="font-bold text-muted-foreground">
+                                {payload[0].value}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    }
+                    return null
+                  }}
+                />
+                <PieChart.Pie
                   data={pieChartData}
                   dataKey="value"
                   nameKey="name"

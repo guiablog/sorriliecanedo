@@ -4,7 +4,7 @@ import { BottomNav } from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 
 const routeTitles: { [key: string]: string } = {
-  '/': 'Início',
+  '/home': 'Início',
   '/schedule': 'Agendar Consulta',
   '/content': 'Conteúdo Educativo',
   '/profile': 'Meu Perfil',
@@ -14,13 +14,13 @@ const routeTitles: { [key: string]: string } = {
 export default function MobileLayout() {
   const location = useLocation()
   const title = routeTitles[location.pathname] || 'Sorriliê Odontologia'
-  const showBackButton = location.pathname !== '/'
+  const showBackButton = location.pathname !== '/home'
 
   return (
     <div className="min-h-screen bg-neutral-light">
       <header className="fixed top-0 left-0 right-0 z-10 flex items-center justify-center h-14 bg-white shadow-sm">
         {showBackButton && (
-          <Link to="/" className="absolute left-4">
+          <Link to="/home" className="absolute left-4">
             <ArrowLeft className="h-6 w-6 text-neutral-dark" />
           </Link>
         )}

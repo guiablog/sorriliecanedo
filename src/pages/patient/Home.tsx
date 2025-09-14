@@ -14,7 +14,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel'
-import { Calendar, Stethoscope, Lightbulb, Newspaper } from 'lucide-react'
+import { Calendar, Stethoscope, Lightbulb } from 'lucide-react'
 
 const mockAppointment = {
   date: '25 de Outubro, 2025',
