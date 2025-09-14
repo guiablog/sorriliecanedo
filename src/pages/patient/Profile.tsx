@@ -67,7 +67,10 @@ const getStatusVariant = (status: string) => {
 
 export default function Profile() {
   const navigate = useNavigate()
-  const logout = useAuthStore((state) => state.logout)
+  const { fullName, logout } = useAuthStore((state) => ({
+    fullName: state.fullName,
+    logout: state.logout,
+  }))
   const [isReviewDrawerOpen, setReviewDrawerOpen] = useState(false)
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null)
@@ -75,7 +78,7 @@ export default function Profile() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: 'Maria da Silva',
+      name: fullName || '',
       whatsapp: '(11) 98765-4321',
       email: 'maria.silva@email.com',
     },

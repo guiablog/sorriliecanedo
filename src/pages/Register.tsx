@@ -51,7 +51,7 @@ export default function Register() {
 
   function onSubmit(data: RegisterFormValues) {
     console.log(data)
-    login('patient')
+    login('patient', data.fullName)
     toast({
       title: 'Cadastro realizado com sucesso!',
       description: 'Você será redirecionado para a tela inicial.',

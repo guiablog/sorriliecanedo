@@ -15,6 +15,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel'
 import { Calendar, Stethoscope, Lightbulb } from 'lucide-react'
+import { useAuthStore } from '@/stores/auth'
 
 const mockAppointment = {
   date: '25 de Outubro, 2025',
@@ -42,7 +43,8 @@ const mockPromotions = [
 ]
 
 export default function PatientHome() {
-  const patientName = 'Maria' // Mock data
+  const fullName = useAuthStore((state) => state.fullName)
+  const patientName = fullName ? fullName.split(' ')[0] : 'Paciente'
   const hasAppointment = true // Mock data
 
   return (
