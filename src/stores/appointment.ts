@@ -2,6 +2,14 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { format } from 'date-fns'
 
+interface RescheduleHistoryEntry {
+  previousDate: string
+  previousTime: string
+  newDate: string
+  newTime: string
+  changedAt: string
+}
+
 export interface Appointment {
   id: string
   date: string // YYYY-MM-DD
@@ -10,6 +18,7 @@ export interface Appointment {
   service: string
   professional: string
   status: 'Confirmado' | 'Pendente' | 'Cancelado' | 'Realizado'
+  rescheduleHistory?: RescheduleHistoryEntry[]
 }
 
 interface AppointmentState {
@@ -28,6 +37,15 @@ const initialAppointments: Appointment[] = [
     service: 'Limpeza de Rotina',
     professional: 'Dr. Ricardo Alves',
     status: 'Confirmado',
+    rescheduleHistory: [
+      {
+        previousDate: '2025-10-24',
+        previousTime: '09:00',
+        newDate: '2025-10-25',
+        newTime: '10:30',
+        changedAt: new Date('2025-10-20T10:00:00Z').toISOString(),
+      },
+    ],
   },
   {
     id: '2',
@@ -37,6 +55,7 @@ const initialAppointments: Appointment[] = [
     service: 'Avaliação',
     professional: 'Dra. Ana Costa',
     status: 'Pendente',
+    rescheduleHistory: [],
   },
   {
     id: '3',
@@ -46,6 +65,7 @@ const initialAppointments: Appointment[] = [
     service: 'Restauração',
     professional: 'Dr. Ricardo Alves',
     status: 'Confirmado',
+    rescheduleHistory: [],
   },
   {
     id: '4',
@@ -55,6 +75,7 @@ const initialAppointments: Appointment[] = [
     service: 'Clareamento',
     professional: 'Dra. Ana Costa',
     status: 'Realizado',
+    rescheduleHistory: [],
   },
   {
     id: '5',
@@ -64,6 +85,7 @@ const initialAppointments: Appointment[] = [
     service: 'Restauração',
     professional: 'Dr. Ricardo Alves',
     status: 'Cancelado',
+    rescheduleHistory: [],
   },
   {
     id: '6',
@@ -75,6 +97,7 @@ const initialAppointments: Appointment[] = [
     service: 'Check-up',
     professional: 'Dra. Ana Costa',
     status: 'Confirmado',
+    rescheduleHistory: [],
   },
 ]
 
@@ -86,7 +109,7 @@ export const useAppointmentStore = create<AppointmentState>()(
         set((state) => ({
           appointments: [
             ...state.appointments,
-            { ...appointment, id: crypto.randomUUID() },
+            { ...appointment, id: crypto.randomUUID(), rescheduleHistory: [] },
           ],
         })),
       updateAppointmentStatus: (id, status) =>
@@ -97,11 +120,27 @@ export const useAppointmentStore = create<AppointmentState>()(
         })),
       rescheduleAppointment: (id, newDate, newTime) =>
         set((state) => ({
-          appointments: state.appointments.map((appt) =>
-            appt.id === id
-              ? { ...appt, date: format(newDate, 'yyyy-MM-dd'), time: newTime }
-              : appt,
-          ),
+          appointments: state.appointments.map((appt) => {
+            if (appt.id === id) {
+              const historyEntry: RescheduleHistoryEntry = {
+                previousDate: appt.date,
+                previousTime: appt.time,
+                newDate: format(newDate, 'yyyy-MM-dd'),
+                newTime: newTime,
+                changedAt: new Date().toISOString(),
+              }
+              return {
+                ...appt,
+                date: format(newDate, 'yyyy-MM-dd'),
+                time: newTime,
+                rescheduleHistory: [
+                  ...(appt.rescheduleHistory || []),
+                  historyEntry,
+                ],
+              }
+            }
+            return appt
+          }),
         })),
     }),
     {

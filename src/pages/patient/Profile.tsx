@@ -5,15 +5,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
-import { Badge } from '@/components/ui/badge'
 import { toast } from '@/components/ui/use-toast'
-import { ReviewDrawer } from '@/components/ReviewDrawer'
 import {
   Form,
   FormControl,
@@ -40,34 +32,10 @@ const profileSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileSchema>
 
-const mockHistory = [
-  { date: '15/09/2025', service: 'Clareamento', status: 'Realizado' },
-  { date: '25/10/2025', service: 'Limpeza de Rotina', status: 'Confirmado' },
-  { date: '05/08/2025', service: 'Restauração', status: 'Cancelado' },
-]
-
-type Appointment = (typeof mockHistory)[0]
-
-const getStatusVariant = (status: string) => {
-  switch (status) {
-    case 'Realizado':
-      return 'default'
-    case 'Confirmado':
-      return 'secondary'
-    case 'Cancelado':
-      return 'destructive'
-    default:
-      return 'outline'
-  }
-}
-
 export default function Profile() {
   const navigate = useNavigate()
   const { fullName, logout } = useAuthStore()
   const { patients, updatePatient } = usePatientStore()
-  const [isReviewDrawerOpen, setReviewDrawerOpen] = useState(false)
-  const [selectedAppointment, setSelectedAppointment] =
-    useState<Appointment | null>(null)
 
   const currentUser = patients.find((p) => p.name === fullName)
 
@@ -101,11 +69,6 @@ export default function Profile() {
   const handleLogout = () => {
     logout()
     navigate('/onboarding')
-  }
-
-  const handleOpenReview = (appointment: Appointment) => {
-    setSelectedAppointment(appointment)
-    setReviewDrawerOpen(true)
   }
 
   return (
@@ -186,44 +149,9 @@ export default function Profile() {
         </Form>
       </section>
 
-      <section>
-        <h2 className="text-xl font-semibold text-neutral-dark mb-4">
-          Histórico de Consultas
-        </h2>
-        <Accordion type="single" collapsible className="w-full">
-          {mockHistory.map((item, index) => (
-            <AccordionItem value={`item-${index}`} key={index}>
-              <AccordionTrigger>
-                {item.date} - {item.service}
-              </AccordionTrigger>
-              <AccordionContent className="flex justify-between items-center">
-                <Badge variant={getStatusVariant(item.status)}>
-                  {item.status}
-                </Badge>
-                {item.status === 'Realizado' && (
-                  <Button
-                    variant="link"
-                    className="text-accent"
-                    onClick={() => handleOpenReview(item)}
-                  >
-                    Avaliar
-                  </Button>
-                )}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </section>
-
       <Button variant="destructive" className="w-full" onClick={handleLogout}>
         Sair
       </Button>
-
-      <ReviewDrawer
-        appointment={selectedAppointment}
-        open={isReviewDrawerOpen}
-        onOpenChange={setReviewDrawerOpen}
-      />
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -32,7 +32,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { MoreHorizontal, FileDown } from 'lucide-react'
+import { MoreHorizontal, FileDown, Search } from 'lucide-react'
 import { usePatientStore, Patient } from '@/stores/patient'
 import { toast } from '@/components/ui/use-toast'
 import { PatientDetailsModal } from '@/components/PatientDetailsModal'
@@ -44,6 +44,18 @@ export default function AdminPatients() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
   const [isDetailsModalOpen, setDetailsModalOpen] = useState(false)
   const [isFormModalOpen, setFormModalOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const filteredPatients = useMemo(() => {
+    if (!searchTerm) return patients
+    const lowercasedFilter = searchTerm.toLowerCase()
+    return patients.filter(
+      (p) =>
+        p.name.toLowerCase().includes(lowercasedFilter) ||
+        p.cpf.replace(/\D/g, '').includes(lowercasedFilter) ||
+        p.whatsapp.replace(/\D/g, '').includes(lowercasedFilter),
+    )
+  }, [patients, searchTerm])
 
   const handleViewDetails = (patient: Patient) => {
     setSelectedPatient(patient)
@@ -96,7 +108,16 @@ export default function AdminPatients() {
           </Button>
         </div>
       </div>
-      <Input placeholder="Buscar por nome, CPF, e-mail..." />
+      <div className="relative">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder="Buscar por nome, CPF ou WhatsApp..."
+          className="pl-8"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
@@ -110,7 +131,7 @@ export default function AdminPatients() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {patients.map((p) => (
+            {filteredPatients.map((p) => (
               <TableRow key={p.cpf}>
                 <TableCell className="font-medium">{p.name}</TableCell>
                 <TableCell>{p.cpf}</TableCell>

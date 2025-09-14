@@ -7,9 +7,17 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Appointment } from '@/stores/appointment'
-import { Calendar, Clock, Stethoscope, User, BadgeCheck } from 'lucide-react'
+import {
+  Calendar,
+  Clock,
+  Stethoscope,
+  User,
+  BadgeCheck,
+  History,
+} from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { Separator } from '@/components/ui/separator'
 
 interface AppointmentDetailsModalProps {
   appointment: Appointment | null
@@ -28,7 +36,7 @@ export const AppointmentDetailsModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Detalhes da Consulta</DialogTitle>
           <DialogDescription>
@@ -75,6 +83,29 @@ export const AppointmentDetailsModal = ({
               <p className="font-medium">{appointment.status}</p>
             </div>
           </div>
+          {appointment.rescheduleHistory &&
+            appointment.rescheduleHistory.length > 0 && (
+              <>
+                <Separator />
+                <div className="space-y-2">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <History className="h-5 w-5 text-accent" />
+                    Histórico de Reagendamentos
+                  </h4>
+                  <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+                    {appointment.rescheduleHistory.map((item, index) => (
+                      <li key={index}>
+                        De {format(new Date(item.previousDate), 'dd/MM/yy')} às{' '}
+                        {item.previousTime} para{' '}
+                        {format(new Date(item.newDate), 'dd/MM/yy')} às{' '}
+                        {item.newTime} (em{' '}
+                        {format(new Date(item.changedAt), 'dd/MM/yy HH:mm')})
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
         </div>
         <Button variant="outline" onClick={() => onOpenChange(false)}>
           Fechar
