@@ -1,4 +1,4 @@
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -9,17 +9,16 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useAuthStore } from '@/stores/auth'
+import { toast } from '@/components/ui/use-toast'
 
-export default function AdminLogin() {
-  const navigate = useNavigate()
-  const login = useAuthStore((state) => state.login)
-
-  const handleLogin = (e: React.FormEvent) => {
+export default function ForgotPassword() {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Mock login logic
-    login('admin')
-    navigate('/admin/dashboard')
+    toast({
+      title: 'Instruções Enviadas',
+      description:
+        'Se o e-mail estiver cadastrado, você receberá um link para redefinir sua senha.',
+    })
   }
 
   return (
@@ -31,13 +30,13 @@ export default function AdminLogin() {
             alt="Logo Sorriliê"
             className="h-12 mx-auto mb-4"
           />
-          <CardTitle className="text-2xl">Login Administrativo</CardTitle>
+          <CardTitle className="text-2xl">Recuperar Senha</CardTitle>
           <CardDescription>
-            Acesse o painel para gerenciar a clínica.
+            Digite seu e-mail para receber as instruções.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="grid gap-4">
+          <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">E-mail</Label>
               <Input
@@ -47,24 +46,18 @@ export default function AdminLogin() {
                 required
               />
             </div>
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Senha</Label>
-                <Link
-                  to="/admin/forgot-password"
-                  className="ml-auto inline-block text-sm underline"
-                >
-                  Esqueceu sua senha?
-                </Link>
-              </div>
-              <Input id="password" type="password" required />
-            </div>
             <Button
               type="submit"
               className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
             >
-              Entrar
+              Enviar
             </Button>
+            <div className="mt-4 text-center text-sm">
+              Lembrou a senha?{' '}
+              <Link to="/admin/login" className="underline">
+                Voltar para o login
+              </Link>
+            </div>
           </form>
         </CardContent>
       </Card>

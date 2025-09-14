@@ -1,4 +1,3 @@
-/* General utility functions (exposes cn) */
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -11,4 +10,25 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Add any other utility functions here
+/**
+ * Validates a Brazilian CPF number.
+ * @param cpf - The CPF string to validate. Can contain masks.
+ * @returns True if the CPF is valid, false otherwise.
+ */
+export function isValidCPF(cpf: string): boolean {
+  if (typeof cpf !== 'string') return false
+  cpf = cpf.replace(/[^\d]+/g, '')
+  if (cpf.length !== 11 || !!cpf.match(/(\d)\1{10}/)) return false
+  const cpfDigits = cpf.split('').map((el) => +el)
+  const rest = (count: number): number => {
+    return (
+      ((cpfDigits
+        .slice(0, count - 12)
+        .reduce((soma, el, index) => soma + el * (count - index), 0) *
+        10) %
+        11) %
+      10
+    )
+  }
+  return rest(10) === cpfDigits[9] && rest(11) === cpfDigits[10]
+}

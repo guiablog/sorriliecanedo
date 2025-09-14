@@ -18,6 +18,11 @@ interface PatientState {
     whatsapp: string
     email: string
   }) => void
+  updatePatient: (
+    originalCpf: string,
+    data: { name: string; cpf: string; whatsapp: string; email: string },
+  ) => void
+  deletePatient: (cpf: string) => void
 }
 
 const initialPatients: Patient[] = [
@@ -71,10 +76,20 @@ export const usePatientStore = create<PatientState>()(
           }
           return { patients: [...state.patients, newPatient] }
         }),
+      updatePatient: (originalCpf, data) =>
+        set((state) => ({
+          patients: state.patients.map((p) =>
+            p.cpf === originalCpf ? { ...p, ...data } : p,
+          ),
+        })),
+      deletePatient: (cpf) =>
+        set((state) => ({
+          patients: state.patients.filter((p) => p.cpf !== cpf),
+        })),
     }),
     {
       name: 'patient-storage',
-      storage: createJSONStorage(() => localStorage), // Use localStorage for cross-session persistence
+      storage: createJSONStorage(() => localStorage),
     },
   ),
 )

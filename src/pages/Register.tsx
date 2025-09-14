@@ -16,13 +16,14 @@ import { toast } from '@/components/ui/use-toast'
 import { useAuthStore } from '@/stores/auth'
 import { usePatientStore } from '@/stores/patient'
 import { cpfMask, whatsappMask } from '@/lib/masks'
+import { isValidCPF } from '@/lib/utils'
 
 const registerSchema = z.object({
   fullName: z
     .string()
     .min(3, { message: 'Nome deve ter pelo menos 3 caracteres.' }),
-  cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, {
-    message: 'CPF inválido. Use o formato 000.000.000-00.',
+  cpf: z.string().refine(isValidCPF, {
+    message: 'Por favor, insira um CPF válido.',
   }),
   whatsapp: z.string().regex(/^\(\d{2}\) \d{5}-\d{4}$/, {
     message: 'WhatsApp inválido. Use o formato (00) 00000-0000.',
@@ -64,7 +65,7 @@ export default function Register() {
       return
     }
 
-    addPatient(data)
+    addPatient({ ...data, fullName: data.fullName })
     login('patient', data.fullName)
     toast({
       title: 'Cadastro realizado com sucesso!',

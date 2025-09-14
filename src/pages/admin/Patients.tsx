@@ -14,11 +14,31 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { MoreHorizontal, FileDown } from 'lucide-react'
 import { usePatientStore } from '@/stores/patient'
+import { toast } from '@/components/ui/use-toast'
 
 export default function AdminPatients() {
-  const patients = usePatientStore((state) => state.patients)
+  const { patients, deletePatient } = usePatientStore()
+
+  const handleDelete = (cpf: string) => {
+    deletePatient(cpf)
+    toast({
+      title: 'Sucesso',
+      description: 'Paciente excluído com sucesso.',
+    })
+  }
 
   return (
     <div className="space-y-6">
@@ -66,9 +86,35 @@ export default function AdminPatients() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>Ver Detalhes</DropdownMenuItem>
                       <DropdownMenuItem>Editar</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        Desativar
-                      </DropdownMenuItem>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()}
+                            className="text-destructive"
+                          >
+                            Excluir
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Você tem certeza?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Esta ação não pode ser desfeita. Isso excluirá
+                              permanentemente o paciente.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(p.cpf)}
+                            >
+                              Sim, excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

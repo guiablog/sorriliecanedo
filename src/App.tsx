@@ -18,6 +18,8 @@ import PatientProfile from './pages/patient/Profile'
 import PatientLoyalty from './pages/patient/Loyalty'
 
 import AdminLogin from './pages/admin/Login'
+import AdminForgotPassword from './pages/admin/ForgotPassword'
+import AdminResetPassword from './pages/admin/ResetPassword'
 import AdminDashboard from './pages/admin/Dashboard'
 import AdminPatients from './pages/admin/Patients'
 import AdminAgenda from './pages/admin/Agenda'
@@ -39,6 +41,14 @@ const App = () => (
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/register" element={<Register />} />
           <Route path="/admin/login" element={<AdminLogin />} />
+          <Route
+            path="/admin/forgot-password"
+            element={<AdminForgotPassword />}
+          />
+          <Route
+            path="/admin/reset-password"
+            element={<AdminResetPassword />}
+          />
 
           {/* Patient App Routes */}
           <Route

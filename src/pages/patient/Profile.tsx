@@ -1,11 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Accordion,
   AccordionContent,
@@ -24,20 +23,18 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { useAuthStore } from '@/stores/auth'
+import { usePatientStore } from '@/stores/patient'
+import { isValidCPF } from '@/lib/utils'
+import { whatsappMask, cpfMask } from '@/lib/masks'
 
 const profileSchema = z.object({
   name: z
     .string()
     .min(3, { message: 'Nome deve ter pelo menos 3 caracteres.' }),
-  whatsapp: z
-    .string()
-    .transform((val) => val.replace(/\D/g, ''))
-    .pipe(
-      z
-        .string()
-        .min(10, { message: 'WhatsApp deve ter pelo menos 10 dígitos.' })
-        .max(11, { message: 'WhatsApp deve ter no máximo 11 dígitos.' }),
-    ),
+  cpf: z.string().refine(isValidCPF, {
+    message: 'Por favor, insira um CPF válido.',
+  }),
+  whatsapp: z.string().min(14, { message: 'WhatsApp inválido.' }),
   email: z.string().email({ message: 'E-mail inválido.' }),
 })
 
@@ -66,25 +63,38 @@ const getStatusVariant = (status: string) => {
 
 export default function Profile() {
   const navigate = useNavigate()
-  const { fullName, logout } = useAuthStore((state) => ({
-    fullName: state.fullName,
-    logout: state.logout,
-  }))
+  const { fullName, logout } = useAuthStore()
+  const { patients, updatePatient } = usePatientStore()
   const [isReviewDrawerOpen, setReviewDrawerOpen] = useState(false)
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null)
 
+  const currentUser = patients.find((p) => p.name === fullName)
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: fullName || '',
-      whatsapp: '(11) 98765-4321',
-      email: 'maria.silva@email.com',
+      name: '',
+      cpf: '',
+      whatsapp: '',
+      email: '',
     },
   })
 
+  useEffect(() => {
+    if (currentUser) {
+      form.reset({
+        name: currentUser.name,
+        cpf: currentUser.cpf,
+        whatsapp: currentUser.whatsapp,
+        email: currentUser.email,
+      })
+    }
+  }, [currentUser, form])
+
   function onSubmit(data: ProfileFormValues) {
-    console.log(data)
+    if (!currentUser) return
+    updatePatient(currentUser.cpf, data)
     toast({ title: 'Alterações salvas com sucesso!' })
   }
 
@@ -121,12 +131,33 @@ export default function Profile() {
             />
             <FormField
               control={form.control}
+              name="cpf"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CPF</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={(e) => field.onChange(cpfMask(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="whatsapp"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>WhatsApp</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(whatsappMask(e.target.value))
+                      }
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -145,10 +176,6 @@ export default function Profile() {
                 </FormItem>
               )}
             />
-            <div>
-              <Label htmlFor="cpf">CPF</Label>
-              <Input id="cpf" value="123.456.789-00" disabled />
-            </div>
             <Button
               type="submit"
               className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
