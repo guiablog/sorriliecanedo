@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
 import { useAuthStore } from '@/stores/auth'
 import { usePatientStore } from '@/stores/patient'
+import { cpfMask, whatsappMask } from '@/lib/masks'
 
 const registerSchema = z.object({
   fullName: z
@@ -23,15 +24,9 @@ const registerSchema = z.object({
   cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, {
     message: 'CPF inválido. Use o formato 000.000.000-00.',
   }),
-  whatsapp: z
-    .string()
-    .transform((val) => val.replace(/\D/g, ''))
-    .pipe(
-      z
-        .string()
-        .min(10, { message: 'WhatsApp deve ter pelo menos 10 dígitos.' })
-        .max(11, { message: 'WhatsApp deve ter no máximo 11 dígitos.' }),
-    ),
+  whatsapp: z.string().regex(/^\(\d{2}\) \d{5}-\d{4}$/, {
+    message: 'WhatsApp inválido. Use o formato (00) 00000-0000.',
+  }),
   email: z.string().email({ message: 'E-mail inválido.' }),
 })
 
@@ -40,7 +35,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 export default function Register() {
   const navigate = useNavigate()
   const login = useAuthStore((state) => state.login)
-  const addPatient = usePatientStore((state) => state.addPatient)
+  const { patients, addPatient } = usePatientStore()
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -52,6 +47,23 @@ export default function Register() {
   })
 
   function onSubmit(data: RegisterFormValues) {
+    const isCpfDuplicate = patients.some((p) => p.cpf === data.cpf)
+    if (isCpfDuplicate) {
+      form.setError('cpf', { message: 'Este CPF já está cadastrado.' })
+      return
+    }
+
+    const newWhatsappRaw = data.whatsapp.replace(/\D/g, '')
+    const isWhatsappDuplicate = patients.some(
+      (p) => p.whatsapp.replace(/\D/g, '') === newWhatsappRaw,
+    )
+    if (isWhatsappDuplicate) {
+      form.setError('whatsapp', {
+        message: 'Este WhatsApp já está cadastrado.',
+      })
+      return
+    }
+
     addPatient(data)
     login('patient', data.fullName)
     toast({
@@ -99,7 +111,11 @@ export default function Register() {
                 <FormItem>
                   <FormLabel>CPF</FormLabel>
                   <FormControl>
-                    <Input placeholder="000.000.000-00" {...field} />
+                    <Input
+                      placeholder="000.000.000-00"
+                      {...field}
+                      onChange={(e) => field.onChange(cpfMask(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -112,7 +128,13 @@ export default function Register() {
                 <FormItem>
                   <FormLabel>WhatsApp</FormLabel>
                   <FormControl>
-                    <Input placeholder="(00) 00000-0000" {...field} />
+                    <Input
+                      placeholder="(00) 00000-0000"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(whatsappMask(e.target.value))
+                      }
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
