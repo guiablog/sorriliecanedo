@@ -14,6 +14,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
 import { useAuthStore } from '@/stores/auth'
+import { usePatientStore } from '@/stores/patient'
 
 const registerSchema = z.object({
   fullName: z
@@ -39,6 +40,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 export default function Register() {
   const navigate = useNavigate()
   const login = useAuthStore((state) => state.login)
+  const addPatient = usePatientStore((state) => state.addPatient)
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -50,7 +52,7 @@ export default function Register() {
   })
 
   function onSubmit(data: RegisterFormValues) {
-    console.log(data)
+    addPatient(data)
     login('patient', data.fullName)
     toast({
       title: 'Cadastro realizado com sucesso!',

@@ -15,35 +15,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, FileDown } from 'lucide-react'
-
-const patients = [
-  {
-    name: 'Maria da Silva',
-    cpf: '123.456.789-00',
-    whatsapp: '(11) 98765-4321',
-    email: 'maria@email.com',
-    registered: '10/09/2025',
-    status: 'Ativo',
-  },
-  {
-    name: 'João Pereira',
-    cpf: '987.654.321-00',
-    whatsapp: '(21) 91234-5678',
-    email: 'joao@email.com',
-    registered: '05/09/2025',
-    status: 'Ativo',
-  },
-  {
-    name: 'Ana Costa',
-    cpf: '111.222.333-44',
-    whatsapp: '(31) 95555-4444',
-    email: 'ana@email.com',
-    registered: '01/09/2025',
-    status: 'Inativo',
-  },
-]
+import { usePatientStore } from '@/stores/patient'
 
 export default function AdminPatients() {
+  const patients = usePatientStore((state) => state.patients)
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
