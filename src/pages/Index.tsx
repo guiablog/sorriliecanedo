@@ -15,10 +15,10 @@ export default function SplashScreen() {
           navigate('/admin')
         } else {
           // Fallback for an unlikely state
-          navigate('/onboarding')
+          navigate('/login')
         }
       } else {
-        navigate('/onboarding')
+        navigate('/login')
       }
     }, 2500)
 

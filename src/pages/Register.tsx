@@ -1,7 +1,8 @@
+import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -18,60 +19,84 @@ import { usePatientStore } from '@/stores/patient'
 import { cpfMask, whatsappMask } from '@/lib/masks'
 import { isValidCPF } from '@/lib/utils'
 
-const registerSchema = z.object({
-  fullName: z
-    .string()
-    .min(3, { message: 'Nome deve ter pelo menos 3 caracteres.' }),
+const baseSchema = {
   cpf: z.string().refine(isValidCPF, {
     message: 'Por favor, insira um CPF válido.',
   }),
-  whatsapp: z.string().regex(/^\(\d{2}\) \d{5}-\d{4}$/, {
-    message: 'WhatsApp inválido. Use o formato (00) 00000-0000.',
-  }),
-  email: z.string().email({ message: 'E-mail inválido.' }),
-})
+  password: z
+    .string()
+    .min(6, { message: 'Senha deve ter no mínimo 6 caracteres.' }),
+}
 
-type RegisterFormValues = z.infer<typeof registerSchema>
+const registerSchema = z
+  .object({
+    ...baseSchema,
+    fullName: z
+      .string()
+      .min(3, { message: 'Nome deve ter pelo menos 3 caracteres.' }),
+    whatsapp: z.string().regex(/^\(\d{2}\) \d{5}-\d{4}$/, {
+      message: 'WhatsApp inválido. Use o formato (00) 00000-0000.',
+    }),
+    email: z.string().email({ message: 'E-mail inválido.' }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'As senhas não coincidem.',
+    path: ['confirmPassword'],
+  })
+
+const loginSchema = z.object(baseSchema)
 
 export default function Register() {
   const navigate = useNavigate()
-  const login = useAuthStore((state) => state.login)
+  const location = useLocation()
+  const { cpf, isLogin } = location.state || {}
+
+  const loginAction = useAuthStore((state) => state.login)
   const { patients, addPatient } = usePatientStore()
-  const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
+
+  const form = useForm({
+    resolver: zodResolver(isLogin ? loginSchema : registerSchema),
     defaultValues: {
       fullName: '',
-      cpf: '',
+      cpf: cpf || '',
       whatsapp: '',
       email: '',
+      password: '',
+      confirmPassword: '',
     },
   })
 
-  function onSubmit(data: RegisterFormValues) {
-    const isCpfDuplicate = patients.some((p) => p.cpf === data.cpf)
-    if (isCpfDuplicate) {
-      form.setError('cpf', { message: 'Este CPF já está cadastrado.' })
-      return
+  useEffect(() => {
+    if (cpf) {
+      form.setValue('cpf', cpf)
     }
+  }, [cpf, form])
 
-    const newWhatsappRaw = data.whatsapp.replace(/\D/g, '')
-    const isWhatsappDuplicate = patients.some(
-      (p) => p.whatsapp.replace(/\D/g, '') === newWhatsappRaw,
-    )
-    if (isWhatsappDuplicate) {
-      form.setError('whatsapp', {
-        message: 'Este WhatsApp já está cadastrado.',
+  function onSubmit(data: any) {
+    if (isLogin) {
+      const patient = patients.find((p) => p.cpf === data.cpf)
+      if (patient && patient.password === data.password) {
+        loginAction('patient', patient.name)
+        toast({ title: 'Login bem-sucedido!' })
+        navigate('/home')
+      } else {
+        form.setError('password', { message: 'CPF ou senha incorretos.' })
+      }
+    } else {
+      const isCpfDuplicate = patients.some((p) => p.cpf === data.cpf)
+      if (isCpfDuplicate) {
+        form.setError('cpf', { message: 'Este CPF já está cadastrado.' })
+        return
+      }
+      addPatient({ ...data, fullName: data.fullName })
+      loginAction('patient', data.fullName)
+      toast({
+        title: 'Cadastro realizado com sucesso!',
+        description: 'Você será redirecionado para a tela inicial.',
       })
-      return
+      setTimeout(() => navigate('/home'), 1500)
     }
-
-    addPatient({ ...data, fullName: data.fullName })
-    login('patient', data.fullName)
-    toast({
-      title: 'Cadastro realizado com sucesso!',
-      description: 'Você será redirecionado para a tela inicial.',
-    })
-    setTimeout(() => navigate('/home'), 1500)
   }
 
   return (
@@ -84,27 +109,16 @@ export default function Register() {
             className="h-12 mx-auto mb-4"
           />
           <h1 className="text-2xl font-bold text-neutral-dark">
-            Crie sua Conta
+            {isLogin ? 'Bem-vindo(a) de volta!' : 'Crie sua Conta'}
           </h1>
           <p className="text-neutral-dark/70">
-            Preencha seus dados para começar a usar o aplicativo.
+            {isLogin
+              ? 'Insira sua senha para continuar.'
+              : 'Preencha seus dados para começar.'}
           </p>
         </div>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="fullName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome Completo</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Seu nome completo" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="cpf"
@@ -116,64 +130,110 @@ export default function Register() {
                       placeholder="000.000.000-00"
                       {...field}
                       onChange={(e) => field.onChange(cpfMask(e.target.value))}
+                      disabled={!!cpf}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            {!isLogin && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome Completo</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Seu nome completo" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="whatsapp"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>WhatsApp</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="(00) 00000-0000"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(whatsappMask(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>E-mail</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="seu@email.com"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
             <FormField
               control={form.control}
-              name="whatsapp"
+              name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>WhatsApp</FormLabel>
+                  <FormLabel>Senha</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="(00) 00000-0000"
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(whatsappMask(e.target.value))
-                      }
-                    />
+                    <Input type="password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>E-mail</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="seu@email.com"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!isLogin && (
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar Senha</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <Button
               type="submit"
               className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
               size="lg"
             >
-              Cadastrar
+              {isLogin ? 'Entrar' : 'Cadastrar'}
             </Button>
           </form>
         </Form>
         <p className="mt-6 text-center text-sm text-neutral-dark/70">
-          Já tem uma conta?{' '}
+          {isLogin ? 'Não é você?' : 'Já tem uma conta?'}
           <Link
-            to="/home"
-            className="font-semibold text-accent hover:underline"
+            to="/login"
+            className="font-semibold text-accent hover:underline ml-1"
           >
-            Faça login.
+            {isLogin ? 'Voltar' : 'Faça login.'}
           </Link>
         </p>
       </div>

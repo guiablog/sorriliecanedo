@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({
   allowedRoles,
-  redirectPath = '/onboarding',
+  redirectPath = '/login',
 }: ProtectedRouteProps) => {
   const { isAuthenticated, userType } = useAuthStore()
 

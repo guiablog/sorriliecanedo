@@ -9,7 +9,7 @@ import AdminLayout from './components/AdminLayout'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
 import SplashScreen from './pages/Index'
-import Onboarding from './pages/Onboarding'
+import Login from './pages/Login'
 import Register from './pages/Register'
 import PatientHome from './pages/patient/Home'
 import PatientSchedule from './pages/patient/Schedule'
@@ -38,7 +38,7 @@ const App = () => (
         <Route element={<Layout />}>
           {/* Standalone Pages */}
           <Route path="/" element={<SplashScreen />} />
-          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route
@@ -55,7 +55,7 @@ const App = () => (
             element={
               <ProtectedRoute
                 allowedRoles={['patient']}
-                redirectPath="/onboarding"
+                redirectPath="/login"
               />
             }
           >

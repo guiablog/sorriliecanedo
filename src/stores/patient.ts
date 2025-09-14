@@ -8,6 +8,7 @@ export interface Patient {
   email: string
   registered: string
   status: 'Ativo' | 'Inativo' | 'Pendente de Verificação'
+  password?: string
 }
 
 interface PatientState {
@@ -17,6 +18,7 @@ interface PatientState {
     cpf: string
     whatsapp: string
     email: string
+    password?: string
   }) => void
   updatePatient: (
     originalCpf: string,
@@ -33,6 +35,7 @@ const initialPatients: Patient[] = [
     email: 'maria@email.com',
     registered: '10/09/2025',
     status: 'Ativo',
+    password: 'password123',
   },
   {
     name: 'João Pereira',
@@ -41,6 +44,7 @@ const initialPatients: Patient[] = [
     email: 'joao@email.com',
     registered: '05/09/2025',
     status: 'Ativo',
+    password: 'password123',
   },
   {
     name: 'Ana Costa',
@@ -49,6 +53,7 @@ const initialPatients: Patient[] = [
     email: 'ana@email.com',
     registered: '01/09/2025',
     status: 'Inativo',
+    password: 'password123',
   },
   {
     name: 'Carlos Souza',
@@ -57,6 +62,7 @@ const initialPatients: Patient[] = [
     email: 'carlos@email.com',
     registered: new Date().toLocaleDateString('pt-BR'),
     status: 'Ativo',
+    password: 'password123',
   },
 ]
 
@@ -71,6 +77,7 @@ export const usePatientStore = create<PatientState>()(
             cpf: patientData.cpf,
             whatsapp: patientData.whatsapp,
             email: patientData.email,
+            password: patientData.password,
             registered: new Date().toLocaleDateString('pt-BR'),
             status: 'Ativo',
           }
