@@ -14,12 +14,10 @@ import {
 
 export default function Onboarding() {
   const [termsAccepted, setTermsAccepted] = useState(false)
-  const [notificationsAccepted, setNotificationsAccepted] = useState(false)
   const navigate = useNavigate()
 
   const handleContinue = () => {
     if (termsAccepted) {
-      // Here you would save the notification consent `notificationsAccepted`
       navigate('/register')
     }
   }
@@ -89,19 +87,6 @@ export default function Onboarding() {
               className="text-sm font-medium text-neutral-dark leading-none"
             >
               Li e concordo com os Termos e a Política de Privacidade.
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2 justify-center">
-            <Checkbox
-              id="notifications"
-              checked={notificationsAccepted}
-              onCheckedChange={(checked) => setNotificationsAccepted(!!checked)}
-            />
-            <Label
-              htmlFor="notifications"
-              className="text-sm font-medium text-neutral-dark leading-none"
-            >
-              Sim, desejo receber notificações.
             </Label>
           </div>
         </div>

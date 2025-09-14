@@ -6,7 +6,6 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
 import {
   Accordion,
   AccordionContent,
@@ -187,21 +186,6 @@ export default function Profile() {
             </AccordionItem>
           ))}
         </Accordion>
-      </section>
-
-      <section>
-        <h2 className="text-xl font-semibold text-neutral-dark mb-4">
-          Configurações
-        </h2>
-        <div className="flex items-center justify-between rounded-lg border p-4">
-          <Label htmlFor="notifications" className="flex flex-col space-y-1">
-            <span>Receber Notificações</span>
-            <span className="font-normal leading-snug text-muted-foreground">
-              Lembretes de consultas, promoções e novidades.
-            </span>
-          </Label>
-          <Switch id="notifications" defaultChecked />
-        </div>
       </section>
 
       <Button variant="destructive" className="w-full" onClick={handleLogout}>

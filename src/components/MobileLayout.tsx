@@ -1,5 +1,5 @@
 import { Outlet, useLocation, Link } from 'react-router-dom'
-import { ArrowLeft, MessageCircle } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { BottomNav } from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 
@@ -39,9 +39,13 @@ export default function MobileLayout() {
       >
         <Button
           size="icon"
-          className="rounded-full h-14 w-14 bg-accent hover:bg-accent/90 shadow-lg animate-pulse"
+          className="rounded-full h-14 w-14 bg-success hover:bg-success/90 shadow-lg animate-pulse"
         >
-          <MessageCircle className="h-7 w-7 text-white" />
+          <img
+            src="https://img.usecurling.com/i?q=whatsapp&color=white"
+            alt="WhatsApp"
+            className="h-8 w-8"
+          />
         </Button>
       </a>
 
