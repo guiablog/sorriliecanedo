@@ -1,7 +1,17 @@
 import { BarChart, LineChart, PieChart } from 'recharts'
+import {
+  subDays,
+  isAfter,
+  startOfWeek,
+  endOfWeek,
+  isWithinInterval,
+} from 'date-fns'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartContainer } from '@/components/ui/chart'
 import { Users, Calendar, Bell, CheckCircle } from 'lucide-react'
+import { usePatientStore } from '@/stores/patient'
+import { useAppointmentStore } from '@/stores/appointment'
+import { useNotificationStore } from '@/stores/notification'
 
 const lineChartData = Array.from({ length: 7 }, (_, i) => ({
   day: `Dia ${i + 1}`,
@@ -14,7 +24,37 @@ const pieChartData = [
   { name: 'Cancelado', value: 4, fill: 'hsl(var(--destructive))' },
 ]
 
+const parsePtBrDate = (dateString: string) => {
+  const [day, month, year] = dateString.split('/')
+  return new Date(+year, +month - 1, +day)
+}
+
 export default function AdminDashboard() {
+  const patients = usePatientStore((state) => state.patients)
+  const appointments = useAppointmentStore((state) => state.appointments)
+  const notifications = useNotificationStore((state) => state.notifications)
+
+  const thirtyDaysAgo = subDays(new Date(), 30)
+  const newRegistrationsCount = patients.filter((p) =>
+    isAfter(parsePtBrDate(p.registered), thirtyDaysAgo),
+  ).length
+
+  const today = new Date()
+  const startOfThisWeek = startOfWeek(today, { weekStartsOn: 1 })
+  const endOfThisWeek = endOfWeek(today, { weekStartsOn: 1 })
+  const appointmentsThisWeekCount = appointments.filter((a) =>
+    isWithinInterval(new Date(a.date), {
+      start: startOfThisWeek,
+      end: endOfThisWeek,
+    }),
+  ).length
+
+  const notificationsSentCount = notifications.length
+
+  const completedAppointmentsCount = appointments.filter(
+    (a) => a.status === 'Realizado',
+  ).length
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Dashboard</h1>
@@ -25,7 +65,7 @@ export default function AdminDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">125</div>
+            <div className="text-2xl font-bold">{newRegistrationsCount}</div>
           </CardContent>
         </Card>
         <Card>
@@ -34,7 +74,9 @@ export default function AdminDashboard() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">41</div>
+            <div className="text-2xl font-bold">
+              {appointmentsThisWeekCount}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -43,7 +85,7 @@ export default function AdminDashboard() {
             <Bell className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">350</div>
+            <div className="text-2xl font-bold">{notificationsSentCount}</div>
           </CardContent>
         </Card>
         <Card>
@@ -52,7 +94,9 @@ export default function AdminDashboard() {
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">18</div>
+            <div className="text-2xl font-bold">
+              {completedAppointmentsCount}
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -12,7 +12,12 @@ export interface Patient {
 
 interface PatientState {
   patients: Patient[]
-  addPatient: (patient: Omit<Patient, 'registered' | 'status'>) => void
+  addPatient: (patient: {
+    fullName: string
+    cpf: string
+    whatsapp: string
+    email: string
+  }) => void
 }
 
 const initialPatients: Patient[] = [
@@ -39,6 +44,14 @@ const initialPatients: Patient[] = [
     email: 'ana@email.com',
     registered: '01/09/2025',
     status: 'Inativo',
+  },
+  {
+    name: 'Carlos Souza',
+    cpf: '444.555.666-77',
+    whatsapp: '(41) 97777-8888',
+    email: 'carlos@email.com',
+    registered: new Date().toLocaleDateString('pt-BR'),
+    status: 'Ativo',
   },
 ]
 

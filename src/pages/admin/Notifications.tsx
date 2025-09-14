@@ -18,21 +18,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-
-const history = [
-  {
-    title: 'Promoção de Clareamento',
-    segment: 'Todos os Pacientes',
-    date: '12/10/2025',
-  },
-  {
-    title: 'Lembrete de Agendamento',
-    segment: 'Pacientes com consulta',
-    date: '11/10/2025',
-  },
-]
+import { useNotificationStore } from '@/stores/notification'
 
 export default function AdminNotifications() {
+  const history = useNotificationStore((state) => state.notifications)
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Enviar Notificações</h1>

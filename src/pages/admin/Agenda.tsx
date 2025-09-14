@@ -2,50 +2,17 @@ import { useState } from 'react'
 import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-
-const appointments = {
-  '2025-10-25': [
-    {
-      time: '10:30',
-      patient: 'Maria da Silva',
-      service: 'Limpeza',
-      professional: 'Dr. Ricardo',
-      status: 'Confirmado',
-    },
-    {
-      time: '14:00',
-      patient: 'João Pereira',
-      service: 'Avaliação',
-      professional: 'Dra. Ana',
-      status: 'Pendente',
-    },
-  ],
-  '2025-10-27': [
-    {
-      time: '09:00',
-      patient: 'Carlos Souza',
-      service: 'Restauração',
-      professional: 'Dr. Ricardo',
-      status: 'Confirmado',
-    },
-  ],
-}
-
-type Appointment = {
-  time: string
-  patient: string
-  service: string
-  professional: string
-  status: string
-}
+import { useAppointmentStore, Appointment } from '@/stores/appointment'
 
 export default function AdminAgenda() {
   const [date, setDate] = useState<Date | undefined>(
     new Date('2025-10-25T12:00:00Z'),
   )
+  const appointments = useAppointmentStore((state) => state.appointments)
+
   const selectedDateString = date?.toISOString().split('T')[0]
   const todaysAppointments: Appointment[] = selectedDateString
-    ? (appointments as any)[selectedDateString] || []
+    ? appointments.filter((appt) => appt.date === selectedDateString)
     : []
 
   return (
@@ -86,7 +53,12 @@ export default function AdminAgenda() {
                     </div>
                     <Badge
                       variant={
-                        appt.status === 'Confirmado' ? 'secondary' : 'default'
+                        appt.status === 'Confirmado' ||
+                        appt.status === 'Realizado'
+                          ? 'secondary'
+                          : appt.status === 'Cancelado'
+                            ? 'destructive'
+                            : 'default'
                       }
                     >
                       {appt.status}
