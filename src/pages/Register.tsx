@@ -13,17 +13,24 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
+import { useAuthStore } from '@/stores/auth'
 
 const registerSchema = z.object({
   fullName: z
     .string()
     .min(3, { message: 'Nome deve ter pelo menos 3 caracteres.' }),
-  cpf: z
-    .string()
-    .regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, { message: 'CPF inválido.' }),
+  cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, {
+    message: 'CPF inválido. Use o formato 000.000.000-00.',
+  }),
   whatsapp: z
     .string()
-    .regex(/^\(\d{2}\) \d{5}-\d{4}$/, { message: 'WhatsApp inválido.' }),
+    .transform((val) => val.replace(/\D/g, ''))
+    .pipe(
+      z
+        .string()
+        .min(10, { message: 'WhatsApp deve ter pelo menos 10 dígitos.' })
+        .max(11, { message: 'WhatsApp deve ter no máximo 11 dígitos.' }),
+    ),
   email: z.string().email({ message: 'E-mail inválido.' }),
 })
 
@@ -31,6 +38,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 
 export default function Register() {
   const navigate = useNavigate()
+  const login = useAuthStore((state) => state.login)
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -43,6 +51,7 @@ export default function Register() {
 
   function onSubmit(data: RegisterFormValues) {
     console.log(data)
+    login('patient')
     toast({
       title: 'Cadastro realizado com sucesso!',
       description: 'Você será redirecionado para a tela inicial.',

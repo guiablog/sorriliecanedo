@@ -9,13 +9,16 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useAuthStore } from '@/stores/auth'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
+  const login = useAuthStore((state) => state.login)
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
     // Mock login logic
+    login('admin')
     navigate('/admin/dashboard')
   }
 

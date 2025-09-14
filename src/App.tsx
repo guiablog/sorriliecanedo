@@ -6,6 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import Layout from './components/Layout'
 import MobileLayout from './components/MobileLayout'
 import AdminLayout from './components/AdminLayout'
+import { ProtectedRoute } from './components/ProtectedRoute'
 
 import SplashScreen from './pages/Index'
 import Onboarding from './pages/Onboarding'
@@ -40,26 +41,47 @@ const App = () => (
           <Route path="/admin/login" element={<AdminLogin />} />
 
           {/* Patient App Routes */}
-          <Route element={<MobileLayout />}>
-            <Route path="/" element={<PatientHome />} />
-            <Route path="/schedule" element={<PatientSchedule />} />
-            <Route path="/content" element={<PatientContent />} />
-            <Route path="/profile" element={<PatientProfile />} />
-            <Route path="/loyalty" element={<PatientLoyalty />} />
+          <Route
+            element={
+              <ProtectedRoute
+                allowedRoles={['patient']}
+                redirectPath="/onboarding"
+              />
+            }
+          >
+            <Route element={<MobileLayout />}>
+              <Route path="/" element={<PatientHome />} />
+              <Route path="/schedule" element={<PatientSchedule />} />
+              <Route path="/content" element={<PatientContent />} />
+              <Route path="/profile" element={<PatientProfile />} />
+              <Route path="/loyalty" element={<PatientLoyalty />} />
+            </Route>
           </Route>
 
           {/* Admin Panel Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="patients" element={<AdminPatients />} />
-            <Route path="agenda" element={<AdminAgenda />} />
-            <Route
-              path="professionals-services"
-              element={<AdminProfessionalsAndServices />}
-            />
-            <Route path="content" element={<AdminContentManagement />} />
-            <Route path="notifications" element={<AdminNotifications />} />
+          <Route
+            element={
+              <ProtectedRoute
+                allowedRoles={['admin']}
+                redirectPath="/admin/login"
+              />
+            }
+          >
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route
+                index
+                element={<Navigate to="/admin/dashboard" replace />}
+              />
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="patients" element={<AdminPatients />} />
+              <Route path="agenda" element={<AdminAgenda />} />
+              <Route
+                path="professionals-services"
+                element={<AdminProfessionalsAndServices />}
+              />
+              <Route path="content" element={<AdminContentManagement />} />
+              <Route path="notifications" element={<AdminNotifications />} />
+            </Route>
           </Route>
         </Route>
         <Route path="*" element={<NotFound />} />
