@@ -162,12 +162,6 @@ export default function Login() {
 
         {step === 'password' && currentUser && (
           <>
-            <h1 className="text-2xl font-bold text-neutral-dark mb-2">
-              Olá, {currentUser.name.split(' ')[0]}!
-            </h1>
-            <p className="text-neutral-dark/70 mb-6">
-              Digite sua senha para continuar.
-            </p>
             <Form {...passwordForm}>
               <form
                 onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}
@@ -178,7 +172,15 @@ export default function Login() {
                   name="password"
                   render={({ field }) => (
                     <FormItem className="text-left">
-                      <FormLabel>Senha</FormLabel>
+                      <div className="flex justify-between items-center">
+                        <FormLabel>Senha</FormLabel>
+                        <Link
+                          to="/forgot-password"
+                          className="text-sm font-semibold text-accent hover:underline"
+                        >
+                          Esqueci minha senha?
+                        </Link>
+                      </div>
                       <FormControl>
                         <Input
                           type="password"
@@ -199,13 +201,13 @@ export default function Login() {
                 </Button>
               </form>
             </Form>
-            <div className="mt-10 text-center text-sm">
-              <Link
-                to="/forgot-password"
-                className="font-semibold text-accent hover:underline"
-              >
-                Esqueci minha senha?
-              </Link>
+            <div className="mt-8 text-center">
+              <h1 className="text-2xl font-bold text-neutral-dark mb-2">
+                Olá, {currentUser.name.split(' ')[0]}!
+              </h1>
+              <p className="text-neutral-dark/70">
+                Digite sua senha para continuar.
+              </p>
             </div>
           </>
         )}
