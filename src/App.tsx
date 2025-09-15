@@ -11,6 +11,8 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import SplashScreen from './pages/Index'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import PatientForgotPassword from './pages/patient/ForgotPassword'
+import PatientResetPassword from './pages/patient/ResetPassword'
 import PatientHome from './pages/patient/Home'
 import PatientSchedule from './pages/patient/Schedule'
 import PatientContent from './pages/patient/Content'
@@ -40,6 +42,8 @@ const App = () => (
           <Route path="/" element={<SplashScreen />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<PatientForgotPassword />} />
+          <Route path="/reset-password" element={<PatientResetPassword />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route
             path="/admin/forgot-password"
