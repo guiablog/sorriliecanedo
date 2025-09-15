@@ -68,7 +68,7 @@ export default function Profile() {
 
   const handleLogout = () => {
     logout()
-    navigate('/onboarding')
+    navigate('/login')
   }
 
   return (
