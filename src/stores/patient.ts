@@ -13,6 +13,8 @@ export interface Patient {
 
 interface PatientState {
   patients: Patient[]
+  emailForPasswordReset: string | null
+  setEmailForPasswordReset: (email: string | null) => void
   addPatient: (patient: {
     fullName: string
     cpf: string
@@ -70,6 +72,9 @@ export const usePatientStore = create<PatientState>()(
   persist(
     (set) => ({
       patients: initialPatients,
+      emailForPasswordReset: null,
+      setEmailForPasswordReset: (email) =>
+        set({ emailForPasswordReset: email }),
       addPatient: (patientData) =>
         set((state) => {
           const newPatient: Patient = {

@@ -18,7 +18,6 @@ import { useAuthStore } from '@/stores/auth'
 import { isValidCPF } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { cpfMask } from '@/lib/masks'
-import { ArrowLeft } from 'lucide-react'
 
 const cpfSchema = z.object({
   cpf: z.string().refine(isValidCPF, {
@@ -174,7 +173,15 @@ export default function Login() {
                   name="password"
                   render={({ field }) => (
                     <FormItem className="text-left">
-                      <FormLabel>Senha</FormLabel>
+                      <div className="flex justify-between items-center">
+                        <FormLabel>Senha</FormLabel>
+                        <Link
+                          to="/forgot-password"
+                          className="text-sm font-semibold text-accent hover:underline"
+                        >
+                          Esqueci minha senha?
+                        </Link>
+                      </div>
                       <FormControl>
                         <Input
                           type="password"
