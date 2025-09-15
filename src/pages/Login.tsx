@@ -89,13 +89,6 @@ export default function Login() {
     }
   }
 
-  const resetFlow = () => {
-    setStep('cpf')
-    setCurrentUser(null)
-    cpfForm.reset()
-    passwordForm.reset()
-  }
-
   return (
     <div className="flex flex-col min-h-screen bg-neutral-light p-6 md:p-8 justify-center items-center animate-fade-in">
       <div className="w-full max-w-sm text-center">
@@ -143,6 +136,14 @@ export default function Login() {
                 </Button>
               </form>
             </Form>
+            <p className="mt-4 text-center text-sm">
+              <Link
+                to="/forgot-password"
+                className="font-semibold text-accent hover:underline"
+              >
+                Esqueci minha senha?
+              </Link>
+            </p>
             <p className="mt-6 text-center text-sm text-neutral-dark/70">
               Novo usuário?{' '}
               <Link
@@ -173,15 +174,7 @@ export default function Login() {
                   name="password"
                   render={({ field }) => (
                     <FormItem className="text-left">
-                      <div className="flex justify-between items-center">
-                        <FormLabel>Senha</FormLabel>
-                        <Link
-                          to="/forgot-password"
-                          className="text-sm font-semibold text-accent hover:underline"
-                        >
-                          Esqueci minha senha?
-                        </Link>
-                      </div>
+                      <FormLabel>Senha</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
@@ -202,14 +195,6 @@ export default function Login() {
                 </Button>
               </form>
             </Form>
-            <p className="mt-6 text-center text-sm text-neutral-dark/70">
-              <button
-                onClick={resetFlow}
-                className="font-semibold text-accent hover:underline"
-              >
-                Não é você? Voltar
-              </button>
-            </p>
           </>
         )}
       </div>
