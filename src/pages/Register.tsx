@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -17,6 +17,7 @@ import { useAuthStore } from '@/stores/auth'
 import { usePatientStore } from '@/stores/patient'
 import { cpfMask, whatsappMask } from '@/lib/masks'
 import { isValidCPF } from '@/lib/utils'
+import { useEffect } from 'react'
 
 const registerSchema = z
   .object({
@@ -44,6 +45,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 
 export default function Register() {
   const navigate = useNavigate()
+  const location = useLocation()
   const loginAction = useAuthStore((state) => state.login)
   const { patients, addPatient } = usePatientStore()
 
@@ -59,8 +61,16 @@ export default function Register() {
     },
   })
 
+  useEffect(() => {
+    if (location.state?.cpf) {
+      form.setValue('cpf', cpfMask(location.state.cpf))
+    }
+  }, [location.state, form])
+
   function onSubmit(data: RegisterFormValues) {
-    const isCpfDuplicate = patients.some((p) => p.cpf === data.cpf)
+    const isCpfDuplicate = patients.some(
+      (p) => p.cpf.replace(/\D/g, '') === data.cpf.replace(/\D/g, ''),
+    )
     if (isCpfDuplicate) {
       form.setError('cpf', { message: 'Este CPF já está cadastrado.' })
       return
