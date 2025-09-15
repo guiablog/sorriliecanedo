@@ -16,19 +16,12 @@ import { usePatientStore } from '@/stores/patient'
 import { useAuthStore } from '@/stores/auth'
 import { isValidCPF } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
+import { cpfMask } from '@/lib/masks'
 
 const loginSchema = z.object({
-  credential: z
-    .string()
-    .min(1, 'Campo obrigatório')
-    .refine(
-      (val) => {
-        const isEmail = z.string().email().safeParse(val).success
-        const isCpf = isValidCPF(val.replace(/\D/g, ''))
-        return isEmail || isCpf
-      },
-      { message: 'Por favor, insira um CPF ou e-mail válido.' },
-    ),
+  cpf: z.string().refine(isValidCPF, {
+    message: 'Por favor, insira um CPF válido.',
+  }),
   password: z.string().min(1, 'Senha é obrigatória.'),
 })
 
@@ -41,19 +34,14 @@ export default function Login() {
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { credential: '', password: '' },
+    defaultValues: { cpf: '', password: '' },
     mode: 'onChange',
   })
 
   function onSubmit(data: LoginFormValues) {
-    const isEmail = z.string().email().safeParse(data.credential).success
-
     const patient = patients.find((p) => {
-      if (isEmail) {
-        return p.email === data.credential && p.password === data.password
-      }
       const storedCpf = p.cpf.replace(/\D/g, '')
-      const inputCpf = data.credential.replace(/\D/g, '')
+      const inputCpf = data.cpf.replace(/\D/g, '')
       return storedCpf === inputCpf && p.password === data.password
     })
 
@@ -89,12 +77,16 @@ export default function Login() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="credential"
+              name="cpf"
               render={({ field }) => (
                 <FormItem className="text-left">
-                  <FormLabel>CPF ou E-mail</FormLabel>
+                  <FormLabel>CPF</FormLabel>
                   <FormControl>
-                    <Input placeholder="Digite seu CPF ou e-mail" {...field} />
+                    <Input
+                      placeholder="Digite seu CPF"
+                      {...field}
+                      onChange={(e) => field.onChange(cpfMask(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -113,14 +105,6 @@ export default function Login() {
                 </FormItem>
               )}
             />
-            <div className="text-right text-sm">
-              <Link
-                to="/forgot-password"
-                className="font-semibold text-accent hover:underline"
-              >
-                Esqueci minha senha
-              </Link>
-            </div>
             <Button
               type="submit"
               className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
