@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/form'
 import { toast } from '@/components/ui/use-toast'
 import { usePatientStore } from '@/stores/patient'
+import { ArrowLeft } from 'lucide-react'
 
 const resetPasswordSchema = z
   .object({
@@ -93,7 +94,13 @@ export default function PatientResetPassword() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-neutral-light">
-      <Card className="mx-auto max-w-sm w-full">
+      <Card className="mx-auto max-w-sm w-full relative">
+        <Link to="/login" className="absolute top-4 left-4 z-10">
+          <Button variant="ghost" size="icon">
+            <ArrowLeft className="h-6 w-6" />
+            <span className="sr-only">Voltar</span>
+          </Button>
+        </Link>
         <CardHeader className="text-center">
           <img
             src="https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black"

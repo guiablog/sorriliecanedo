@@ -18,6 +18,7 @@ import { usePatientStore } from '@/stores/patient'
 import { cpfMask, whatsappMask } from '@/lib/masks'
 import { isValidCPF } from '@/lib/utils'
 import { useEffect } from 'react'
+import { ArrowLeft } from 'lucide-react'
 
 const registerSchema = z
   .object({
@@ -92,7 +93,13 @@ export default function Register() {
 
   return (
     <div className="flex flex-col min-h-screen bg-neutral-light p-6 md:p-8 justify-center animate-fade-in">
-      <div className="w-full max-w-md mx-auto">
+      <div className="w-full max-w-md mx-auto relative">
+        <Link to="/login" className="absolute top-0 left-0 z-10">
+          <Button variant="ghost" size="icon">
+            <ArrowLeft className="h-6 w-6" />
+            <span className="sr-only">Voltar</span>
+          </Button>
+        </Link>
         <div className="text-center mb-8">
           <img
             src="https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black"

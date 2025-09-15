@@ -18,6 +18,7 @@ import { useAuthStore } from '@/stores/auth'
 import { isValidCPF } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { cpfMask } from '@/lib/masks'
+import { ArrowLeft } from 'lucide-react'
 
 const cpfSchema = z.object({
   cpf: z.string().refine(isValidCPF, {
@@ -91,7 +92,18 @@ export default function Login() {
 
   return (
     <div className="flex flex-col min-h-screen bg-neutral-light p-6 md:p-8 justify-center items-center animate-fade-in">
-      <div className="w-full max-w-sm text-center">
+      <div className="w-full max-w-sm text-center relative">
+        {step === 'password' && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setStep('cpf')}
+            className="absolute top-0 left-0"
+          >
+            <ArrowLeft className="h-6 w-6" />
+            <span className="sr-only">Voltar</span>
+          </Button>
+        )}
         <img
           src="https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black"
           alt="Logo Sorriliê"

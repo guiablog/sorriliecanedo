@@ -10,6 +10,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/use-toast'
+import { ArrowLeft } from 'lucide-react'
 
 export default function ResetPassword() {
   const navigate = useNavigate()
@@ -26,7 +27,13 @@ export default function ResetPassword() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-neutral-light">
-      <Card className="mx-auto max-w-sm w-full">
+      <Card className="mx-auto max-w-sm w-full relative">
+        <Link to="/admin/login" className="absolute top-4 left-4 z-10">
+          <Button variant="ghost" size="icon">
+            <ArrowLeft className="h-6 w-6" />
+            <span className="sr-only">Voltar</span>
+          </Button>
+        </Link>
         <CardHeader className="text-center">
           <img
             src="https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black"
