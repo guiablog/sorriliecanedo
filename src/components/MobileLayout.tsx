@@ -1,4 +1,4 @@
-import { Outlet, useLocation, Link } from 'react--router-dom'
+import { Outlet, useLocation, Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { BottomNav } from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
