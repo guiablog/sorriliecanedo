@@ -150,6 +150,14 @@ export default function Login() {
 
         {step === 'password' && currentUser && (
           <>
+            <div className="text-center mb-6">
+              <h1 className="text-2xl font-bold text-neutral-dark mb-2">
+                Olá, {currentUser.name.split(' ')[0]}!
+              </h1>
+              <p className="text-neutral-dark/70">
+                Digite sua senha para continuar.
+              </p>
+            </div>
             <Form {...passwordForm}>
               <form
                 onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}
@@ -189,14 +197,6 @@ export default function Login() {
                 </Button>
               </form>
             </Form>
-            <div className="mt-8 text-center">
-              <h1 className="text-2xl font-bold text-neutral-dark mb-2">
-                Olá, {currentUser.name.split(' ')[0]}!
-              </h1>
-              <p className="text-neutral-dark/70">
-                Digite sua senha para continuar.
-              </p>
-            </div>
           </>
         )}
       </div>
