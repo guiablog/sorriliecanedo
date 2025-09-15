@@ -166,15 +166,7 @@ export default function Login() {
                   name="password"
                   render={({ field }) => (
                     <FormItem className="text-left">
-                      <div className="flex items-center justify-between">
-                        <FormLabel>Senha</FormLabel>
-                        <Link
-                          to="/forgot-password"
-                          className="text-sm font-semibold text-accent hover:underline"
-                        >
-                          Esqueci minha senha?
-                        </Link>
-                      </div>
+                      <FormLabel>Senha</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
@@ -195,6 +187,14 @@ export default function Login() {
                 </Button>
               </form>
             </Form>
+            <div className="mt-4 text-center text-sm">
+              <Link
+                to="/forgot-password"
+                className="font-semibold text-accent hover:underline"
+              >
+                Esqueci minha senha?
+              </Link>
+            </div>
           </>
         )}
       </div>
