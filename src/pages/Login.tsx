@@ -163,33 +163,23 @@ export default function Login() {
                 onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}
                 className="space-y-4"
               >
-                <div className="space-y-1">
-                  <FormField
-                    control={passwordForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem className="text-left">
-                        <FormLabel>Senha</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="Sua senha"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="text-right">
-                    <Link
-                      to="/forgot-password"
-                      className="text-sm font-semibold text-accent hover:underline"
-                    >
-                      Esqueci minha senha?
-                    </Link>
-                  </div>
-                </div>
+                <FormField
+                  control={passwordForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem className="text-left">
+                      <FormLabel>Senha</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="Sua senha"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <Button
                   type="submit"
                   className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
@@ -199,6 +189,14 @@ export default function Login() {
                 </Button>
               </form>
             </Form>
+            <div className="text-center mt-[2cm]">
+              <Link
+                to="/forgot-password"
+                className="text-sm font-semibold text-accent hover:underline"
+              >
+                Esqueci minha senha?
+              </Link>
+            </div>
           </>
         )}
       </div>
