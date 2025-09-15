@@ -18,6 +18,7 @@ import { useAuthStore } from '@/stores/auth'
 import { isValidCPF } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { cpfMask } from '@/lib/masks'
+import { Eye, EyeOff } from 'lucide-react'
 
 const cpfSchema = z.object({
   cpf: z.string().refine(isValidCPF, {
@@ -42,6 +43,7 @@ export default function Login() {
     name: string
     cpf: string
   } | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
 
   const cpfForm = useForm<CpfFormValues>({
     resolver: zodResolver(cpfSchema),
@@ -77,7 +79,6 @@ export default function Login() {
 
     if (patient && patient.password === data.password) {
       loginAction('patient', patient.name)
-      toast({ title: 'Login bem-sucedido!' })
       navigate('/home')
     } else {
       toast({
@@ -169,13 +170,32 @@ export default function Login() {
                   render={({ field }) => (
                     <FormItem className="text-left">
                       <FormLabel>Senha</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="Sua senha"
-                          {...field}
-                        />
-                      </FormControl>
+                      <div className="relative">
+                        <FormControl>
+                          <Input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Sua senha"
+                            {...field}
+                            className="pr-10"
+                          />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          className="absolute inset-y-0 right-0 flex items-center justify-center h-full w-10 text-muted-foreground"
+                          aria-label={
+                            showPassword ? 'Esconder senha' : 'Mostrar senha'
+                          }
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-5 w-5" />
+                          ) : (
+                            <Eye className="h-5 w-5" />
+                          )}
+                        </Button>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
