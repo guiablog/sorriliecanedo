@@ -95,7 +95,7 @@ export default function Login() {
         <img
           src="https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black"
           alt="Logo Sorriliê"
-          className="h-12 mx-auto mb-6"
+          className="h-12 mx-auto mb-10"
         />
 
         {step === 'cpf' && (
@@ -163,31 +163,33 @@ export default function Login() {
                 onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}
                 className="space-y-4"
               >
-                <FormField
-                  control={passwordForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem className="text-left">
-                      <div className="flex justify-between items-center">
+                <div className="space-y-1">
+                  <FormField
+                    control={passwordForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem className="text-left">
                         <FormLabel>Senha</FormLabel>
-                        <Link
-                          to="/forgot-password"
-                          className="text-sm font-semibold text-accent hover:underline"
-                        >
-                          Esqueci minha senha?
-                        </Link>
-                      </div>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="Sua senha"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="Sua senha"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="text-right">
+                    <Link
+                      to="/forgot-password"
+                      className="text-sm font-semibold text-accent hover:underline"
+                    >
+                      Esqueci minha senha?
+                    </Link>
+                  </div>
+                </div>
                 <Button
                   type="submit"
                   className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
