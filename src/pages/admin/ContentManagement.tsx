@@ -19,9 +19,10 @@ import { useContentStore, ContentItem, ContentType } from '@/stores/content'
 import { ContentForm, ContentFormValues } from '@/components/ContentForm'
 import { toast } from '@/components/ui/use-toast'
 import { format } from 'date-fns'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function AdminContentManagement() {
-  const { content, addContent, updateContent } = useContentStore()
+  const { content, addContent, updateContent, loading } = useContentStore()
   const [isModalOpen, setModalOpen] = useState(false)
   const [editingContent, setEditingContent] = useState<ContentItem | null>(null)
   const [contentType, setContentType] = useState<ContentType>('tip')
@@ -38,21 +39,54 @@ export default function AdminContentManagement() {
     setModalOpen(true)
   }
 
-  const handleFormSubmit = (data: ContentFormValues) => {
-    if (editingContent) {
-      updateContent({ ...editingContent, ...data })
-      toast({ title: 'Conteúdo atualizado com sucesso!' })
-    } else {
-      addContent({
-        ...data,
-        type: contentType,
-        content: data.content,
-        publishedDate: format(new Date(), 'yyyy-MM-dd'),
+  const handleFormSubmit = async (data: ContentFormValues) => {
+    try {
+      if (editingContent) {
+        await updateContent({ ...editingContent, ...data })
+        toast({ title: 'Conteúdo atualizado com sucesso!' })
+      } else {
+        await addContent({
+          ...data,
+          type: contentType,
+          content: data.content,
+          publishedDate: format(new Date(), 'yyyy-MM-dd'),
+        })
+        toast({ title: 'Conteúdo adicionado com sucesso!' })
+      }
+      setEditingContent(null)
+      setModalOpen(false)
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível salvar o conteúdo.',
+        variant: 'destructive',
       })
-      toast({ title: 'Conteúdo adicionado com sucesso!' })
     }
-    setEditingContent(null)
-    setModalOpen(false)
+  }
+
+  const renderTableRows = (items: ContentItem[]) => {
+    if (loading) {
+      return Array.from({ length: 3 }).map((_, i) => (
+        <TableRow key={i}>
+          <TableCell colSpan={3}>
+            <Skeleton className="h-8 w-full" />
+          </TableCell>
+        </TableRow>
+      ))
+    }
+    return items.map((item) => (
+      <TableRow
+        key={item.id}
+        onClick={() => openModal(item.type, item)}
+        className="cursor-pointer"
+      >
+        <TableCell>{item.title}</TableCell>
+        <TableCell>
+          {format(new Date(item.publishedDate), 'dd/MM/yyyy')}
+        </TableCell>
+        <TableCell>{item.status}</TableCell>
+      </TableRow>
+    ))
   }
 
   return (
@@ -81,19 +115,7 @@ export default function AdminContentManagement() {
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                {tips.map((item) => (
-                  <TableRow
-                    key={item.id}
-                    onClick={() => openModal('tip', item)}
-                    className="cursor-pointer"
-                  >
-                    <TableCell>{item.title}</TableCell>
-                    <TableCell>{item.publishedDate}</TableCell>
-                    <TableCell>{item.status}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
+              <TableBody>{renderTableRows(tips)}</TableBody>
             </Table>
           </div>
         </TabsContent>
@@ -115,19 +137,7 @@ export default function AdminContentManagement() {
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                {news.map((item) => (
-                  <TableRow
-                    key={item.id}
-                    onClick={() => openModal('news', item)}
-                    className="cursor-pointer"
-                  >
-                    <TableCell>{item.title}</TableCell>
-                    <TableCell>{item.publishedDate}</TableCell>
-                    <TableCell>{item.status}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
+              <TableBody>{renderTableRows(news)}</TableBody>
             </Table>
           </div>
         </TabsContent>

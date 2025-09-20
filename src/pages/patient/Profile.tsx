@@ -60,10 +60,18 @@ export default function Profile() {
     }
   }, [currentUser, form])
 
-  function onSubmit(data: ProfileFormValues) {
+  async function onSubmit(data: ProfileFormValues) {
     if (!currentUser) return
-    updatePatient(currentUser.cpf, data)
-    toast({ title: 'Alterações salvas com sucesso!' })
+    try {
+      await updatePatient(currentUser.cpf, data)
+      toast({ title: 'Alterações salvas com sucesso!' })
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível salvar as alterações.',
+        variant: 'destructive',
+      })
+    }
   }
 
   const handleLogout = () => {
@@ -102,6 +110,7 @@ export default function Profile() {
                     <Input
                       {...field}
                       onChange={(e) => field.onChange(cpfMask(e.target.value))}
+                      disabled
                     />
                   </FormControl>
                   <FormMessage />

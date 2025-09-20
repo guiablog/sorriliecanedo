@@ -70,13 +70,21 @@ export default function PatientHome() {
     setCancelDialogOpen(true)
   }
 
-  const handleConfirmCancel = () => {
+  const handleConfirmCancel = async () => {
     if (selectedAppointment) {
-      updateAppointmentStatus(selectedAppointment.id, 'Cancelado')
-      toast({
-        title: 'Consulta Cancelada',
-        description: 'Sua consulta foi cancelada com sucesso.',
-      })
+      try {
+        await updateAppointmentStatus(selectedAppointment.id, 'Cancelado')
+        toast({
+          title: 'Consulta Cancelada',
+          description: 'Sua consulta foi cancelada com sucesso.',
+        })
+      } catch (error) {
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível cancelar a consulta.',
+          variant: 'destructive',
+        })
+      }
     }
     setCancelDialogOpen(false)
     setSelectedAppointment(null)

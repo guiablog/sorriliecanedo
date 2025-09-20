@@ -5,6 +5,7 @@ import {
   startOfWeek,
   endOfWeek,
   isWithinInterval,
+  parse,
 } from 'date-fns'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartContainer } from '@/components/ui/chart'
@@ -18,15 +19,8 @@ const lineChartData = Array.from({ length: 7 }, (_, i) => ({
   signups: Math.floor(Math.random() * 10) + 5,
 }))
 
-const pieChartData = [
-  { name: 'Pendente', value: 8, fill: 'hsl(var(--warning))' },
-  { name: 'Confirmado', value: 25, fill: 'hsl(var(--success))' },
-  { name: 'Cancelado', value: 4, fill: 'hsl(var(--destructive))' },
-]
-
 const parsePtBrDate = (dateString: string) => {
-  const [day, month, year] = dateString.split('/')
-  return new Date(+year, +month - 1, +day)
+  return parse(dateString, 'dd/MM/yyyy', new Date())
 }
 
 export default function AdminDashboard() {
@@ -43,7 +37,7 @@ export default function AdminDashboard() {
   const startOfThisWeek = startOfWeek(today, { weekStartsOn: 1 })
   const endOfThisWeek = endOfWeek(today, { weekStartsOn: 1 })
   const appointmentsThisWeekCount = appointments.filter((a) =>
-    isWithinInterval(new Date(a.date), {
+    isWithinInterval(new Date(`${a.date}T00:00:00`), {
       start: startOfThisWeek,
       end: endOfThisWeek,
     }),
@@ -54,6 +48,24 @@ export default function AdminDashboard() {
   const completedAppointmentsCount = appointments.filter(
     (a) => a.status === 'Realizado',
   ).length
+
+  const pieChartData = [
+    {
+      name: 'Pendente',
+      value: appointments.filter((a) => a.status === 'Pendente').length,
+      fill: 'hsl(var(--warning))',
+    },
+    {
+      name: 'Confirmado',
+      value: appointments.filter((a) => a.status === 'Confirmado').length,
+      fill: 'hsl(var(--success))',
+    },
+    {
+      name: 'Cancelado',
+      value: appointments.filter((a) => a.status === 'Cancelado').length,
+      fill: 'hsl(var(--destructive))',
+    },
+  ]
 
   return (
     <div className="space-y-6">

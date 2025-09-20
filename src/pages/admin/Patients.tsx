@@ -37,9 +37,10 @@ import { usePatientStore, Patient } from '@/stores/patient'
 import { toast } from '@/components/ui/use-toast'
 import { PatientDetailsModal } from '@/components/PatientDetailsModal'
 import { PatientForm, PatientFormValues } from '@/components/PatientForm'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function AdminPatients() {
-  const { patients, addPatient, updatePatient, deletePatient } =
+  const { patients, addPatient, updatePatient, deletePatient, loading } =
     usePatientStore()
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
   const [isDetailsModalOpen, setDetailsModalOpen] = useState(false)
@@ -72,24 +73,40 @@ export default function AdminPatients() {
     setFormModalOpen(true)
   }
 
-  const handleDelete = (cpf: string) => {
-    deletePatient(cpf)
-    toast({
-      title: 'Sucesso',
-      description: 'Paciente excluído com sucesso.',
-    })
+  const handleDelete = async (cpf: string) => {
+    try {
+      await deletePatient(cpf)
+      toast({
+        title: 'Sucesso',
+        description: 'Paciente excluído com sucesso.',
+      })
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível excluir o paciente.',
+        variant: 'destructive',
+      })
+    }
   }
 
-  const handleFormSubmit = (data: PatientFormValues) => {
-    if (selectedPatient) {
-      updatePatient(selectedPatient.cpf, data)
-      toast({ title: 'Paciente atualizado com sucesso!' })
-    } else {
-      addPatient({ ...data, fullName: data.name })
-      toast({ title: 'Paciente adicionado com sucesso!' })
+  const handleFormSubmit = async (data: PatientFormValues) => {
+    try {
+      if (selectedPatient) {
+        await updatePatient(selectedPatient.cpf, data)
+        toast({ title: 'Paciente atualizado com sucesso!' })
+      } else {
+        await addPatient({ ...data, fullName: data.name })
+        toast({ title: 'Paciente adicionado com sucesso!' })
+      }
+      setFormModalOpen(false)
+      setSelectedPatient(null)
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível salvar o paciente.',
+        variant: 'destructive',
+      })
     }
-    setFormModalOpen(false)
-    setSelectedPatient(null)
   }
 
   return (
@@ -131,61 +148,71 @@ export default function AdminPatients() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredPatients.map((p) => (
-              <TableRow key={p.cpf}>
-                <TableCell className="font-medium">{p.name}</TableCell>
-                <TableCell>{p.cpf}</TableCell>
-                <TableCell>{p.whatsapp}</TableCell>
-                <TableCell>{p.registered}</TableCell>
-                <TableCell>{p.status}</TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleViewDetails(p)}>
-                        Ver Detalhes
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleEdit(p)}>
-                        Editar
-                      </DropdownMenuItem>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
+            {loading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell colSpan={6}>
+                      <Skeleton className="h-8 w-full" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              : filteredPatients.map((p) => (
+                  <TableRow key={p.cpf}>
+                    <TableCell className="font-medium">{p.name}</TableCell>
+                    <TableCell>{p.cpf}</TableCell>
+                    <TableCell>{p.whatsapp}</TableCell>
+                    <TableCell>{p.registered}</TableCell>
+                    <TableCell>{p.status}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onSelect={(e) => e.preventDefault()}
-                            className="text-destructive"
+                            onClick={() => handleViewDetails(p)}
                           >
-                            Excluir
+                            Ver Detalhes
                           </DropdownMenuItem>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Você tem certeza?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Esta ação não pode ser desfeita. Isso excluirá
-                              permanentemente o paciente.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDelete(p.cpf)}
-                            >
-                              Sim, excluir
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+                          <DropdownMenuItem onClick={() => handleEdit(p)}>
+                            Editar
+                          </DropdownMenuItem>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem
+                                onSelect={(e) => e.preventDefault()}
+                                className="text-destructive"
+                              >
+                                Excluir
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Você tem certeza?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta ação não pode ser desfeita. Isso excluirá
+                                  permanentemente o paciente.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(p.cpf)}
+                                >
+                                  Sim, excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
           </TableBody>
         </Table>
       </div>

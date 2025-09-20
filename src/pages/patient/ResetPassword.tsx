@@ -66,7 +66,7 @@ export default function PatientResetPassword() {
     }
   }, [emailForPasswordReset, navigate])
 
-  function onSubmit(data: ResetPasswordFormValues) {
+  async function onSubmit(data: ResetPasswordFormValues) {
     if (!emailForPasswordReset) return
 
     const patientToUpdate = patients.find(
@@ -74,14 +74,22 @@ export default function PatientResetPassword() {
     )
 
     if (patientToUpdate) {
-      updatePatient(patientToUpdate.cpf, { password: data.password })
-      toast({
-        title: 'Senha Redefinida',
-        description:
-          'Sua senha foi alterada com sucesso. Você já pode fazer login.',
-      })
-      setEmailForPasswordReset(null)
-      navigate('/login')
+      try {
+        await updatePatient(patientToUpdate.cpf, { password: data.password })
+        toast({
+          title: 'Senha Redefinida',
+          description:
+            'Sua senha foi alterada com sucesso. Você já pode fazer login.',
+        })
+        setEmailForPasswordReset(null)
+        navigate('/login')
+      } catch (error) {
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível redefinir a senha.',
+          variant: 'destructive',
+        })
+      }
     } else {
       toast({
         title: 'Erro',

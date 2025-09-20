@@ -68,7 +68,7 @@ export default function Register() {
     }
   }, [location.state, form])
 
-  function onSubmit(data: RegisterFormValues) {
+  async function onSubmit(data: RegisterFormValues) {
     const isCpfDuplicate = patients.some(
       (p) => p.cpf.replace(/\D/g, '') === data.cpf.replace(/\D/g, ''),
     )
@@ -82,13 +82,21 @@ export default function Register() {
       return
     }
 
-    addPatient(data)
-    loginAction('patient', data.fullName)
-    toast({
-      title: 'Cadastro realizado com sucesso!',
-      description: 'Você será redirecionado para a tela inicial.',
-    })
-    setTimeout(() => navigate('/home'), 1500)
+    try {
+      await addPatient(data)
+      loginAction('patient', data.fullName)
+      toast({
+        title: 'Cadastro realizado com sucesso!',
+        description: 'Você será redirecionado para a tela inicial.',
+      })
+      setTimeout(() => navigate('/home'), 1500)
+    } catch (error) {
+      toast({
+        title: 'Erro no Cadastro',
+        description: 'Não foi possível criar sua conta. Tente novamente.',
+        variant: 'destructive',
+      })
+    }
   }
 
   return (

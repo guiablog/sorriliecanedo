@@ -33,6 +33,7 @@ import { useServiceStore } from '@/stores/service'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { ReviewDrawer } from '@/components/ReviewDrawer'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const availableTimes = ['09:00', '10:30', '11:00', '14:00', '15:30']
 
@@ -64,14 +65,14 @@ export default function Schedule() {
 
   const { professionals } = useProfessionalStore()
   const { services } = useServiceStore()
-  const { appointments, addAppointment } = useAppointmentStore()
+  const { appointments, addAppointment, loading } = useAppointmentStore()
   const { fullName } = useAuthStore()
 
   const activeProfessionals = professionals.filter((p) => p.status === 'Ativo')
   const activeServices = services.filter((s) => s.status === 'Ativo')
   const userAppointments = appointments.filter((a) => a.patient === fullName)
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 1 && !selectedService) {
       toast({
         title: 'Campo obrigatório',
@@ -99,19 +100,27 @@ export default function Schedule() {
 
     if (step === 3 && selectedDate && selectedTime) {
       if (selectedService && selectedProfessional && fullName) {
-        addAppointment({
-          date: format(selectedDate, 'yyyy-MM-dd'),
-          time: selectedTime,
-          patient: fullName,
-          service: selectedService,
-          professional: selectedProfessional,
-          status: 'Pendente',
-        })
-        setStep(4)
-        toast({
-          title: 'Agendamento realizado com sucesso!',
-          description: 'Sua consulta está pendente de confirmação.',
-        })
+        try {
+          await addAppointment({
+            date: format(selectedDate, 'yyyy-MM-dd'),
+            time: selectedTime,
+            patient: fullName,
+            service: selectedService,
+            professional: selectedProfessional,
+            status: 'Pendente',
+          })
+          setStep(4)
+          toast({
+            title: 'Agendamento realizado com sucesso!',
+            description: 'Sua consulta está pendente de confirmação.',
+          })
+        } catch (error) {
+          toast({
+            title: 'Erro',
+            description: 'Não foi possível realizar o agendamento.',
+            variant: 'destructive',
+          })
+        }
       }
     } else {
       setStep(step + 1)
@@ -273,29 +282,37 @@ export default function Schedule() {
         <h2 className="text-xl font-semibold text-neutral-dark mb-4">
           Histórico de Consultas
         </h2>
-        <Accordion type="single" collapsible className="w-full">
-          {userAppointments.map((item, index) => (
-            <AccordionItem value={`item-${index}`} key={index}>
-              <AccordionTrigger>
-                {format(new Date(item.date), 'dd/MM/yyyy')} - {item.service}
-              </AccordionTrigger>
-              <AccordionContent className="flex justify-between items-center">
-                <Badge variant={getStatusVariant(item.status)}>
-                  {item.status}
-                </Badge>
-                {item.status === 'Realizado' && (
-                  <Button
-                    variant="link"
-                    className="text-accent"
-                    onClick={() => handleOpenReview(item)}
-                  >
-                    Avaliar
-                  </Button>
-                )}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        {loading ? (
+          <div className="space-y-2">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ) : (
+          <Accordion type="single" collapsible className="w-full">
+            {userAppointments.map((item) => (
+              <AccordionItem value={item.id} key={item.id}>
+                <AccordionTrigger>
+                  {format(new Date(`${item.date}T00:00:00`), 'dd/MM/yyyy')} -{' '}
+                  {item.service}
+                </AccordionTrigger>
+                <AccordionContent className="flex justify-between items-center">
+                  <Badge variant={getStatusVariant(item.status)}>
+                    {item.status}
+                  </Badge>
+                  {item.status === 'Realizado' && (
+                    <Button
+                      variant="link"
+                      className="text-accent"
+                      onClick={() => handleOpenReview(item)}
+                    >
+                      Avaliar
+                    </Button>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        )}
       </section>
 
       <ReviewDrawer

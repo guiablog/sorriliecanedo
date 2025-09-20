@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { createJSONStorage, persist } from 'zustand/middleware'
+import { professionalService } from '@/services/professionalService'
 
 export interface Professional {
   id: string
@@ -11,53 +11,46 @@ export interface Professional {
 
 interface ProfessionalState {
   professionals: Professional[]
-  addProfessional: (professional: Omit<Professional, 'id'>) => void
-  updateProfessional: (professional: Professional) => void
-  deleteProfessional: (id: string) => void
+  loading: boolean
+  fetchProfessionals: () => Promise<void>
+  addProfessional: (professional: Omit<Professional, 'id'>) => Promise<void>
+  updateProfessional: (professional: Professional) => Promise<void>
+  deleteProfessional: (id: string) => Promise<void>
 }
 
-const initialProfessionals: Professional[] = [
-  {
-    id: '1',
-    name: 'Dr. Ricardo Alves',
-    specialty: 'Clínico Geral',
-    cro: 'SP-12345',
-    status: 'Ativo',
+export const useProfessionalStore = create<ProfessionalState>()((set) => ({
+  professionals: [],
+  loading: true,
+  fetchProfessionals: async () => {
+    set({ loading: true })
+    try {
+      const professionals = await professionalService.getAllProfessionals()
+      set({ professionals, loading: false })
+    } catch (error) {
+      console.error('Failed to fetch professionals', error)
+      set({ loading: false })
+    }
   },
-  {
-    id: '2',
-    name: 'Dra. Ana Costa',
-    specialty: 'Ortodontista',
-    cro: 'RJ-54321',
-    status: 'Ativo',
+  addProfessional: async (professional) => {
+    const newProfessional =
+      await professionalService.addProfessional(professional)
+    set((state) => ({
+      professionals: [...state.professionals, newProfessional],
+    }))
   },
-]
-
-export const useProfessionalStore = create<ProfessionalState>()(
-  persist(
-    (set) => ({
-      professionals: initialProfessionals,
-      addProfessional: (professional) =>
-        set((state) => ({
-          professionals: [
-            ...state.professionals,
-            { ...professional, id: crypto.randomUUID() },
-          ],
-        })),
-      updateProfessional: (updatedProfessional) =>
-        set((state) => ({
-          professionals: state.professionals.map((p) =>
-            p.id === updatedProfessional.id ? updatedProfessional : p,
-          ),
-        })),
-      deleteProfessional: (id) =>
-        set((state) => ({
-          professionals: state.professionals.filter((p) => p.id !== id),
-        })),
-    }),
-    {
-      name: 'professional-storage',
-      storage: createJSONStorage(() => localStorage),
-    },
-  ),
-)
+  updateProfessional: async (updatedProfessional) => {
+    const newProfessional =
+      await professionalService.updateProfessional(updatedProfessional)
+    set((state) => ({
+      professionals: state.professionals.map((p) =>
+        p.id === newProfessional.id ? newProfessional : p,
+      ),
+    }))
+  },
+  deleteProfessional: async (id) => {
+    await professionalService.deleteProfessional(id)
+    set((state) => ({
+      professionals: state.professionals.filter((p) => p.id !== id),
+    }))
+  },
+}))

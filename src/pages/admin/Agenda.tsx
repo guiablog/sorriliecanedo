@@ -16,7 +16,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -42,6 +41,7 @@ import {
   endOfMonth,
 } from 'date-fns'
 import { MoreHorizontal } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 type StatusFilter = 'all' | AppointmentStatus
 type Period = 'day' | 'week' | 'month' | 'custom'
@@ -55,8 +55,12 @@ const statusOptions: AppointmentStatus[] = [
 ]
 
 export default function AdminAgenda() {
-  const { appointments, rescheduleAppointment, updateAppointmentStatus } =
-    useAppointmentStore()
+  const {
+    appointments,
+    rescheduleAppointment,
+    updateAppointmentStatus,
+    loading,
+  } = useAppointmentStore()
   const [dateRange, setDateRange] = useState<DateRange | undefined>()
   const [period, setPeriod] = useState<Period>('week')
   const [patientNameFilter, setPatientNameFilter] = useState('')
@@ -83,8 +87,8 @@ export default function AdminAgenda() {
         const isDateInRange =
           dateRange?.from &&
           dateRange?.to &&
-          apptDate >= dateRange.from &&
-          apptDate <= dateRange.to
+          apptDate >= startOfDay(dateRange.from) &&
+          apptDate <= endOfDay(dateRange.to)
         const isPatientMatch = appt.patient
           .toLowerCase()
           .includes(patientNameFilter.toLowerCase())
@@ -104,20 +108,36 @@ export default function AdminAgenda() {
     setRescheduleModalOpen(true)
   }
 
-  const handleConfirmReschedule = (
+  const handleConfirmReschedule = async (
     id: string,
     newDate: Date,
     newTime: string,
   ) => {
-    rescheduleAppointment(id, newDate, newTime)
-    toast({ title: 'Consulta reagendada com sucesso!' })
-    setRescheduleModalOpen(false)
-    setSelectedAppointment(null)
+    try {
+      await rescheduleAppointment(id, newDate, newTime)
+      toast({ title: 'Consulta reagendada com sucesso!' })
+      setRescheduleModalOpen(false)
+      setSelectedAppointment(null)
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível reagendar a consulta.',
+        variant: 'destructive',
+      })
+    }
   }
 
-  const handleStatusChange = (id: string, status: AppointmentStatus) => {
-    updateAppointmentStatus(id, status)
-    toast({ title: `Status alterado para ${status}!` })
+  const handleStatusChange = async (id: string, status: AppointmentStatus) => {
+    try {
+      await updateAppointmentStatus(id, status)
+      toast({ title: `Status alterado para ${status}!` })
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível alterar o status.',
+        variant: 'destructive',
+      })
+    }
   }
 
   return (
@@ -172,7 +192,11 @@ export default function AdminAgenda() {
               <CardTitle>Agendamentos</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {filteredAppointments.length > 0 ? (
+              {loading ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-20 w-full" />
+                ))
+              ) : filteredAppointments.length > 0 ? (
                 filteredAppointments.map((appt) => (
                   <div
                     key={appt.id}

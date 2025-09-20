@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { createJSONStorage, persist } from 'zustand/middleware'
+import { serviceService } from '@/services/serviceService'
 
 export interface Service {
   id: string
@@ -10,51 +10,44 @@ export interface Service {
 
 interface ServiceState {
   services: Service[]
-  addService: (service: Omit<Service, 'id'>) => void
-  updateService: (service: Service) => void
-  deleteService: (id: string) => void
+  loading: boolean
+  fetchServices: () => Promise<void>
+  addService: (service: Omit<Service, 'id'>) => Promise<void>
+  updateService: (service: Service) => Promise<void>
+  deleteService: (id: string) => Promise<void>
 }
 
-const initialServices: Service[] = [
-  {
-    id: '1',
-    name: 'Limpeza',
-    duration: '45 min',
-    status: 'Ativo',
+export const useServiceStore = create<ServiceState>()((set) => ({
+  services: [],
+  loading: true,
+  fetchServices: async () => {
+    set({ loading: true })
+    try {
+      const services = await serviceService.getAllServices()
+      set({ services, loading: false })
+    } catch (error) {
+      console.error('Failed to fetch services', error)
+      set({ loading: false })
+    }
   },
-  {
-    id: '2',
-    name: 'Clareamento',
-    duration: '90 min',
-    status: 'Ativo',
+  addService: async (service) => {
+    const newService = await serviceService.addService(service)
+    set((state) => ({
+      services: [...state.services, newService],
+    }))
   },
-]
-
-export const useServiceStore = create<ServiceState>()(
-  persist(
-    (set) => ({
-      services: initialServices,
-      addService: (service) =>
-        set((state) => ({
-          services: [
-            ...state.services,
-            { ...service, id: crypto.randomUUID() },
-          ],
-        })),
-      updateService: (updatedService) =>
-        set((state) => ({
-          services: state.services.map((s) =>
-            s.id === updatedService.id ? updatedService : s,
-          ),
-        })),
-      deleteService: (id) =>
-        set((state) => ({
-          services: state.services.filter((s) => s.id !== id),
-        })),
-    }),
-    {
-      name: 'service-storage',
-      storage: createJSONStorage(() => localStorage),
-    },
-  ),
-)
+  updateService: async (updatedService) => {
+    const newService = await serviceService.updateService(updatedService)
+    set((state) => ({
+      services: state.services.map((s) =>
+        s.id === newService.id ? newService : s,
+      ),
+    }))
+  },
+  deleteService: async (id) => {
+    await serviceService.deleteService(id)
+    set((state) => ({
+      services: state.services.filter((s) => s.id !== id),
+    }))
+  },
+}))

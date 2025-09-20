@@ -38,6 +38,7 @@ import { useServiceStore, Service } from '@/stores/service'
 import { ProfessionalForm } from '@/components/ProfessionalForm'
 import { ServiceForm } from '@/components/ServiceForm'
 import { toast } from '@/components/ui/use-toast'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function AdminProfessionalsAndServices() {
   const {
@@ -45,9 +46,15 @@ export default function AdminProfessionalsAndServices() {
     addProfessional,
     updateProfessional,
     deleteProfessional,
+    loading: professionalsLoading,
   } = useProfessionalStore()
-  const { services, addService, updateService, deleteService } =
-    useServiceStore()
+  const {
+    services,
+    addService,
+    updateService,
+    deleteService,
+    loading: servicesLoading,
+  } = useServiceStore()
 
   const [isProfessionalModalOpen, setProfessionalModalOpen] = useState(false)
   const [isServiceModalOpen, setServiceModalOpen] = useState(false)
@@ -55,28 +62,44 @@ export default function AdminProfessionalsAndServices() {
     useState<Professional | null>(null)
   const [editingService, setEditingService] = useState<Service | null>(null)
 
-  const handleProfessionalSubmit = (data: any) => {
-    if (editingProfessional) {
-      updateProfessional({ ...editingProfessional, ...data })
-      toast({ title: 'Profissional atualizado com sucesso!' })
-    } else {
-      addProfessional(data)
-      toast({ title: 'Profissional adicionado com sucesso!' })
+  const handleProfessionalSubmit = async (data: any) => {
+    try {
+      if (editingProfessional) {
+        await updateProfessional({ ...editingProfessional, ...data })
+        toast({ title: 'Profissional atualizado com sucesso!' })
+      } else {
+        await addProfessional(data)
+        toast({ title: 'Profissional adicionado com sucesso!' })
+      }
+      setEditingProfessional(null)
+      setProfessionalModalOpen(false)
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível salvar o profissional.',
+        variant: 'destructive',
+      })
     }
-    setEditingProfessional(null)
-    setProfessionalModalOpen(false)
   }
 
-  const handleServiceSubmit = (data: any) => {
-    if (editingService) {
-      updateService({ ...editingService, ...data })
-      toast({ title: 'Serviço atualizado com sucesso!' })
-    } else {
-      addService(data)
-      toast({ title: 'Serviço adicionado com sucesso!' })
+  const handleServiceSubmit = async (data: any) => {
+    try {
+      if (editingService) {
+        await updateService({ ...editingService, ...data })
+        toast({ title: 'Serviço atualizado com sucesso!' })
+      } else {
+        await addService(data)
+        toast({ title: 'Serviço adicionado com sucesso!' })
+      }
+      setEditingService(null)
+      setServiceModalOpen(false)
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível salvar o serviço.',
+        variant: 'destructive',
+      })
     }
-    setEditingService(null)
-    setServiceModalOpen(false)
   }
 
   const openProfessionalModal = (professional: Professional | null = null) => {
@@ -119,58 +142,68 @@ export default function AdminProfessionalsAndServices() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {professionals.map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell>{p.name}</TableCell>
-                    <TableCell>{p.specialty}</TableCell>
-                    <TableCell>{p.cro}</TableCell>
-                    <TableCell>{p.status}</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => openProfessionalModal(p)}
-                          >
-                            Editar
-                          </DropdownMenuItem>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
+                {professionalsLoading
+                  ? Array.from({ length: 2 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell colSpan={5}>
+                          <Skeleton className="h-8 w-full" />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  : professionals.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell>{p.name}</TableCell>
+                        <TableCell>{p.specialty}</TableCell>
+                        <TableCell>{p.cro}</TableCell>
+                        <TableCell>{p.status}</TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                onSelect={(e) => e.preventDefault()}
-                                className="text-destructive"
+                                onClick={() => openProfessionalModal(p)}
                               >
-                                Excluir
+                                Editar
                               </DropdownMenuItem>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Tem certeza?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Essa ação não pode ser desfeita.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => deleteProfessional(p.id)}
-                                >
-                                  Excluir
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <DropdownMenuItem
+                                    onSelect={(e) => e.preventDefault()}
+                                    className="text-destructive"
+                                  >
+                                    Excluir
+                                  </DropdownMenuItem>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Tem certeza?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Essa ação não pode ser desfeita.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                      Cancelar
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => deleteProfessional(p.id)}
+                                    >
+                                      Excluir
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
               </TableBody>
             </Table>
           </div>
@@ -196,55 +229,67 @@ export default function AdminProfessionalsAndServices() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {services.map((s) => (
-                  <TableRow key={s.id}>
-                    <TableCell>{s.name}</TableCell>
-                    <TableCell>{s.duration}</TableCell>
-                    <TableCell>{s.status}</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openServiceModal(s)}>
-                            Editar
-                          </DropdownMenuItem>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
+                {servicesLoading
+                  ? Array.from({ length: 2 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell colSpan={4}>
+                          <Skeleton className="h-8 w-full" />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  : services.map((s) => (
+                      <TableRow key={s.id}>
+                        <TableCell>{s.name}</TableCell>
+                        <TableCell>{s.duration}</TableCell>
+                        <TableCell>{s.status}</TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                onSelect={(e) => e.preventDefault()}
-                                className="text-destructive"
+                                onClick={() => openServiceModal(s)}
                               >
-                                Excluir
+                                Editar
                               </DropdownMenuItem>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Tem certeza?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Essa ação não pode ser desfeita.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => deleteService(s.id)}
-                                >
-                                  Excluir
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <DropdownMenuItem
+                                    onSelect={(e) => e.preventDefault()}
+                                    className="text-destructive"
+                                  >
+                                    Excluir
+                                  </DropdownMenuItem>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Tem certeza?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Essa ação não pode ser desfeita.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                      Cancelar
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => deleteService(s.id)}
+                                    >
+                                      Excluir
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
               </TableBody>
             </Table>
           </div>

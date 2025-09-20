@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { createJSONStorage, persist } from 'zustand/middleware'
+import { notificationService } from '@/services/notificationService'
 
 export interface Notification {
   title: string
@@ -9,44 +9,29 @@ export interface Notification {
 
 interface NotificationState {
   notifications: Notification[]
-  addNotification: (notification: Notification) => void
+  loading: boolean
+  fetchNotifications: () => Promise<void>
+  addNotification: (notification: Omit<Notification, 'date'>) => Promise<void>
 }
 
-const initialNotifications: Notification[] = [
-  {
-    title: 'Promoção de Clareamento',
-    segment: 'Todos os Pacientes',
-    date: '12/10/2025',
+export const useNotificationStore = create<NotificationState>()((set) => ({
+  notifications: [],
+  loading: true,
+  fetchNotifications: async () => {
+    set({ loading: true })
+    try {
+      const notifications = await notificationService.getAllNotifications()
+      set({ notifications, loading: false })
+    } catch (error) {
+      console.error('Failed to fetch notifications', error)
+      set({ loading: false })
+    }
   },
-  {
-    title: 'Lembrete de Agendamento',
-    segment: 'Pacientes com consulta',
-    date: '11/10/2025',
+  addNotification: async (notification) => {
+    const newNotification =
+      await notificationService.addNotification(notification)
+    set((state) => ({
+      notifications: [...state.notifications, newNotification],
+    }))
   },
-  {
-    title: 'Dicas de Saúde Bucal',
-    segment: 'Todos os Pacientes',
-    date: '10/10/2025',
-  },
-  {
-    title: 'Horários de Fim de Ano',
-    segment: 'Todos os Pacientes',
-    date: '01/10/2025',
-  },
-]
-
-export const useNotificationStore = create<NotificationState>()(
-  persist(
-    (set) => ({
-      notifications: initialNotifications,
-      addNotification: (notification) =>
-        set((state) => ({
-          notifications: [...state.notifications, notification],
-        })),
-    }),
-    {
-      name: 'notification-storage',
-      storage: createJSONStorage(() => localStorage),
-    },
-  ),
-)
+}))
