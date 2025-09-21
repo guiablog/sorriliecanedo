@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/form'
 import { useAuthStore } from '@/stores/auth'
 import { toast } from '@/components/ui/use-toast'
+import { adminUserService } from '@/services/adminUserService'
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'E-mail inválido.' }),
@@ -34,6 +35,15 @@ export default function AdminLogin() {
   const navigate = useNavigate()
   const adminLogin = useAuthStore((state) => state.adminLogin)
   const [isLoading, setIsLoading] = useState(false)
+  const [showRegisterLink, setShowRegisterLink] = useState(false)
+
+  useEffect(() => {
+    const checkAdminCount = async () => {
+      const count = await adminUserService.getAdminUsersCount()
+      setShowRegisterLink(count === 0)
+    }
+    checkAdminCount()
+  }, [])
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -124,6 +134,13 @@ export default function AdminLogin() {
               </Button>
             </form>
           </Form>
+          {showRegisterLink && (
+            <div className="mt-4 text-center text-sm">
+              <Link to="/admin/register" className="underline">
+                Cadastrar usuário
+              </Link>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -21,6 +21,7 @@ import PatientProfile from './pages/patient/Profile'
 import PatientLoyalty from './pages/patient/Loyalty'
 
 import AdminLogin from './pages/admin/Login'
+import AdminRegister from './pages/admin/Register'
 import AdminForgotPassword from './pages/admin/ForgotPassword'
 import AdminResetPassword from './pages/admin/ResetPassword'
 import AdminDashboard from './pages/admin/Dashboard'
@@ -51,6 +52,7 @@ const App = () => (
             />
             <Route path="/reset-password" element={<PatientResetPassword />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/register" element={<AdminRegister />} />
             <Route
               path="/admin/forgot-password"
               element={<AdminForgotPassword />}

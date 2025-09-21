@@ -23,6 +23,18 @@ export const adminUserService = {
     }))
   },
 
+  async getAdminUsersCount(): Promise<number> {
+    const { count, error } = await supabase
+      .from('admin_users')
+      .select('*', { count: 'exact', head: true })
+
+    if (error) {
+      console.error('Error fetching admin users count:', error)
+      throw error
+    }
+    return count || 0
+  },
+
   async getAdminUserByEmail(email: string) {
     const { data, error } = await supabase
       .from('admin_users')
