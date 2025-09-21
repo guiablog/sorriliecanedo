@@ -139,23 +139,23 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          message: string | null
           segment: string
           title: string
+          message: string | null
         }
         Insert: {
           created_at?: string
           id?: string
-          message?: string | null
           segment: string
           title: string
+          message?: string | null
         }
         Update: {
           created_at?: string
           id?: string
-          message?: string | null
           segment?: string
           title?: string
+          message?: string | null
         }
         Relationships: []
       }

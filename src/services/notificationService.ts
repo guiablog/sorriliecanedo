@@ -26,7 +26,11 @@ export const notificationService = {
   ): Promise<Notification> {
     const { data, error } = await supabase
       .from('notifications')
-      .insert(notificationData)
+      .insert({
+        title: notificationData.title,
+        message: notificationData.message,
+        segment: notificationData.segment,
+      })
       .select()
       .single()
 
