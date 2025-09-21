@@ -198,6 +198,7 @@ export type Database = {
           cro: string
           id: string
           name: string
+          photo_url: string | null
           specialty: string
           status: string
         }
@@ -206,6 +207,7 @@ export type Database = {
           cro: string
           id?: string
           name: string
+          photo_url?: string | null
           specialty: string
           status?: string
         }
@@ -214,6 +216,7 @@ export type Database = {
           cro?: string
           id?: string
           name?: string
+          photo_url?: string | null
           specialty?: string
           status?: string
         }

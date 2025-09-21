@@ -204,6 +204,7 @@ export default function Schedule() {
                 onSelect={setSelectedDate}
                 disabled={(date) => date < new Date()}
                 className="rounded-md border"
+                locale={ptBR}
               />
               <RadioGroup
                 onValueChange={setSelectedTime}
