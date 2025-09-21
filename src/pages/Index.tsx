@@ -7,13 +7,13 @@ export default function SplashScreen() {
   const navigate = useNavigate()
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const userType = useAuthStore((state) => state.userType)
-  const { settings, fetchAppSettings } = useAppSettingsStore()
+  const { settings, loading } = useAppSettingsStore()
 
   useEffect(() => {
-    fetchAppSettings()
-  }, [fetchAppSettings])
+    if (loading) {
+      return
+    }
 
-  useEffect(() => {
     const timer = setTimeout(() => {
       if (isAuthenticated) {
         if (userType === 'patient') {
@@ -30,19 +30,19 @@ export default function SplashScreen() {
     }, 2500)
 
     return () => clearTimeout(timer)
-  }, [navigate, isAuthenticated, userType])
+  }, [navigate, isAuthenticated, userType, loading])
 
-  const defaultSplash =
-    'https://img.usecurling.com/i?q=sorrilie-odontologia&color=white'
-  const splashImage = settings?.splash_screen_image_url || defaultSplash
+  const splashImage = settings?.splash_screen_image_url
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-primary animate-fade-in">
-      <img
-        src={splashImage}
-        alt="Sorriliê Odontologia Logo"
-        className="w-48 h-auto"
-      />
+      {!loading && splashImage ? (
+        <img
+          src={splashImage}
+          alt="Sorriliê Odontologia Logo"
+          className="w-48 h-auto animate-fade-in"
+        />
+      ) : null}
     </div>
   )
 }

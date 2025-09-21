@@ -56,13 +56,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-primary">
-        <img
-          src="https://img.usecurling.com/i?q=sorrilie-odontologia&color=white"
-          alt="Sorriliê Odontologia Logo"
-          className="w-48 h-auto animate-pulse"
-        />
-      </div>
+      <div className="flex items-center justify-center min-h-screen bg-primary" />
     )
   }
 
