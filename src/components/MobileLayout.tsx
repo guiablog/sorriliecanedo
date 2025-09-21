@@ -20,14 +20,14 @@ export default function MobileLayout() {
   const whatsappNumber = settings?.whatsapp_contact || '5511999999999'
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-10 flex items-center justify-center h-14 bg-white shadow-sm">
         {showBackButton && (
           <Link to="/home" className="absolute left-4">
-            <ArrowLeft className="h-6 w-6 text-neutral-dark" />
+            <ArrowLeft className="h-6 w-6 text-foreground" />
           </Link>
         )}
-        <h1 className="text-lg font-semibold text-neutral-dark">{title}</h1>
+        <h1 className="text-lg font-semibold text-foreground">{title}</h1>
       </header>
 
       <main className="pt-14 pb-20">

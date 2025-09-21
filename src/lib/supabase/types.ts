@@ -48,21 +48,18 @@ export type Database = {
           logo_url: string | null
           splash_screen_image_url: string | null
           updated_at: string | null
-          whatsapp_contact: string | null
         }
         Insert: {
           id: number
           logo_url?: string | null
           splash_screen_image_url?: string | null
           updated_at?: string | null
-          whatsapp_contact?: string | null
         }
         Update: {
           id?: number
           logo_url?: string | null
           splash_screen_image_url?: string | null
           updated_at?: string | null
-          whatsapp_contact?: string | null
         }
         Relationships: []
       }
@@ -141,21 +138,18 @@ export type Database = {
           id: string
           segment: string
           title: string
-          message: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           segment: string
           title: string
-          message?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           segment?: string
           title?: string
-          message?: string | null
         }
         Relationships: []
       }

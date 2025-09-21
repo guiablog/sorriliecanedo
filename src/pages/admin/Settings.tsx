@@ -48,7 +48,9 @@ import { whatsappMask } from '@/lib/masks'
 const settingsSchema = z.object({
   whatsapp_contact: z
     .string()
-    .min(10, { message: 'Número de WhatsApp inválido.' }),
+    .refine((value) => value.replace(/\D/g, '').length >= 10, {
+      message: 'Número de WhatsApp inválido. Deve ter pelo menos 10 dígitos.',
+    }),
 })
 
 type SettingsFormValues = z.infer<typeof settingsSchema>
