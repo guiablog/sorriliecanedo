@@ -26,6 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function AdminNotifications() {
   const { notifications, addNotification, loading } = useNotificationStore()
   const [title, setTitle] = useState('')
+  const [message, setMessage] = useState('')
   const [segment, setSegment] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,9 +40,10 @@ export default function AdminNotifications() {
       return
     }
     try {
-      await addNotification({ title, segment })
+      await addNotification({ title, message, segment })
       toast({ title: 'Notificação enviada com sucesso!' })
       setTitle('')
+      setMessage('')
       setSegment('')
     } catch (error) {
       toast({
@@ -72,7 +74,11 @@ export default function AdminNotifications() {
               </div>
               <div>
                 <Label htmlFor="message">Mensagem</Label>
-                <Textarea id="message" />
+                <Textarea
+                  id="message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                />
               </div>
               <div>
                 <Label htmlFor="segment">Segmento</Label>

@@ -22,7 +22,7 @@ export const patientService = {
       whatsapp: p.whatsapp,
       email: p.email,
       password: p.password || undefined,
-      registered: new Date(p.created_at).toLocaleDateString('pt-BR'),
+      registered: p.created_at, // Return ISO string
       status: p.status as Patient['status'],
     }))
   },
@@ -52,7 +52,7 @@ export const patientService = {
       whatsapp: data.whatsapp,
       email: data.email,
       password: data.password || undefined,
-      registered: new Date(data.created_at).toLocaleDateString('pt-BR'),
+      registered: data.created_at,
       status: data.status as Patient['status'],
     }
   },
@@ -79,7 +79,7 @@ export const patientService = {
       whatsapp: data.whatsapp,
       email: data.email,
       password: data.password || undefined,
-      registered: new Date(data.created_at).toLocaleDateString('pt-BR'),
+      registered: data.created_at,
       status: data.status as Patient['status'],
     }
   },

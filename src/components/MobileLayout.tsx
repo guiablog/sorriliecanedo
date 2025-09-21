@@ -2,6 +2,7 @@ import { Outlet, useLocation, Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { BottomNav } from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
+import { useAppSettingsStore } from '@/stores/appSettings'
 
 const routeTitles: { [key: string]: string } = {
   '/home': 'Início',
@@ -13,8 +14,10 @@ const routeTitles: { [key: string]: string } = {
 
 export default function MobileLayout() {
   const location = useLocation()
+  const { settings } = useAppSettingsStore()
   const title = routeTitles[location.pathname] || 'Sorriliê Odontologia'
   const showBackButton = location.pathname !== '/home'
+  const whatsappNumber = settings?.whatsapp_contact || '5511999999999'
 
   return (
     <div className="min-h-screen bg-neutral-light">
@@ -32,7 +35,7 @@ export default function MobileLayout() {
       </main>
 
       <a
-        href="https://wa.me/5511999999999" // Replace with actual WhatsApp number
+        href={`https://wa.me/${whatsappNumber.replace(/\D/g, '')}`}
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-20 right-4 z-10"

@@ -38,6 +38,7 @@ import { toast } from '@/components/ui/use-toast'
 import { PatientDetailsModal } from '@/components/PatientDetailsModal'
 import { PatientForm, PatientFormValues } from '@/components/PatientForm'
 import { Skeleton } from '@/components/ui/skeleton'
+import { format } from 'date-fns'
 
 export default function AdminPatients() {
   const { patients, addPatient, updatePatient, deletePatient, loading } =
@@ -161,7 +162,9 @@ export default function AdminPatients() {
                     <TableCell className="font-medium">{p.name}</TableCell>
                     <TableCell>{p.cpf}</TableCell>
                     <TableCell>{p.whatsapp}</TableCell>
-                    <TableCell>{p.registered}</TableCell>
+                    <TableCell>
+                      {format(new Date(p.registered), 'dd/MM/yyyy')}
+                    </TableCell>
                     <TableCell>{p.status}</TableCell>
                     <TableCell>
                       <DropdownMenu>

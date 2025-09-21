@@ -8,6 +8,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Patient } from '@/stores/patient'
 import { User, Hash, Phone, Mail, Calendar, BadgeCheck } from 'lucide-react'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
 interface PatientDetailsModalProps {
   patient: Patient | null
@@ -64,7 +66,11 @@ export const PatientDetailsModal = ({
             <Calendar className="h-5 w-5 text-accent" />
             <div>
               <p className="text-sm text-muted-foreground">Data de Cadastro</p>
-              <p className="font-medium">{patient.registered}</p>
+              <p className="font-medium">
+                {format(new Date(patient.registered), "dd 'de' MMMM, yyyy", {
+                  locale: ptBR,
+                })}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-4">

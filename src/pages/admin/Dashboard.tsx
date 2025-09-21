@@ -5,7 +5,9 @@ import {
   startOfWeek,
   endOfWeek,
   isWithinInterval,
-  parse,
+  eachDayOfInterval,
+  format,
+  isSameDay,
 } from 'date-fns'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartContainer } from '@/components/ui/chart'
@@ -14,15 +16,6 @@ import { usePatientStore } from '@/stores/patient'
 import { useAppointmentStore } from '@/stores/appointment'
 import { useNotificationStore } from '@/stores/notification'
 
-const lineChartData = Array.from({ length: 7 }, (_, i) => ({
-  day: `Dia ${i + 1}`,
-  signups: Math.floor(Math.random() * 10) + 5,
-}))
-
-const parsePtBrDate = (dateString: string) => {
-  return parse(dateString, 'dd/MM/yyyy', new Date())
-}
-
 export default function AdminDashboard() {
   const patients = usePatientStore((state) => state.patients)
   const appointments = useAppointmentStore((state) => state.appointments)
@@ -30,7 +23,7 @@ export default function AdminDashboard() {
 
   const thirtyDaysAgo = subDays(new Date(), 30)
   const newRegistrationsCount = patients.filter((p) =>
-    isAfter(parsePtBrDate(p.registered), thirtyDaysAgo),
+    isAfter(new Date(p.registered), thirtyDaysAgo),
   ).length
 
   const today = new Date()
@@ -49,21 +42,41 @@ export default function AdminDashboard() {
     (a) => a.status === 'Realizado',
   ).length
 
+  const last7Days = eachDayOfInterval({
+    start: subDays(today, 6),
+    end: today,
+  })
+
+  const lineChartData = last7Days.map((day) => {
+    const signups = patients.filter((p) =>
+      isSameDay(new Date(p.registered), day),
+    ).length
+    return {
+      day: format(day, 'dd/MM'),
+      signups: signups,
+    }
+  })
+
   const pieChartData = [
     {
       name: 'Pendente',
       value: appointments.filter((a) => a.status === 'Pendente').length,
-      fill: 'hsl(var(--warning))',
+      fill: 'hsl(var(--chart-5))',
     },
     {
       name: 'Confirmado',
       value: appointments.filter((a) => a.status === 'Confirmado').length,
-      fill: 'hsl(var(--success))',
+      fill: 'hsl(var(--chart-4))',
     },
     {
       name: 'Cancelado',
       value: appointments.filter((a) => a.status === 'Cancelado').length,
       fill: 'hsl(var(--destructive))',
+    },
+    {
+      name: 'Realizado',
+      value: appointments.filter((a) => a.status === 'Realizado').length,
+      fill: 'hsl(var(--chart-1))',
     },
   ]
 
@@ -115,7 +128,7 @@ export default function AdminDashboard() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Evolução de Cadastros</CardTitle>
+            <CardTitle>Evolução de Cadastros (7d)</CardTitle>
           </CardHeader>
           <CardContent>
             <ChartContainer config={{}} className="h-64 w-full">

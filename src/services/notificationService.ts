@@ -4,13 +4,18 @@ import { format } from 'date-fns'
 
 export const notificationService = {
   async getAllNotifications(): Promise<Notification[]> {
-    const { data, error } = await supabase.from('notifications').select('*')
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .order('created_at', { ascending: false })
+
     if (error) {
       console.error('Error fetching notifications:', error)
       throw error
     }
     return data.map((n) => ({
       title: n.title,
+      message: n.message,
       segment: n.segment,
       date: format(new Date(n.created_at), 'dd/MM/yyyy'),
     }))
@@ -31,6 +36,7 @@ export const notificationService = {
     }
     return {
       title: data.title,
+      message: data.message,
       segment: data.segment,
       date: format(new Date(data.created_at), 'dd/MM/yyyy'),
     }

@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase/client'
 export interface AppSettings {
   id: number
   logo_url: string | null
+  whatsapp_contact: string | null
 }
 
 export const appSettingsService = {
@@ -21,15 +22,17 @@ export const appSettingsService = {
     return data
   },
 
-  async updateLogoUrl(logoUrl: string): Promise<AppSettings> {
+  async updateAppSettings(
+    settings: Partial<Omit<AppSettings, 'id'>>,
+  ): Promise<AppSettings> {
     const { data, error } = await supabase
       .from('app_settings')
-      .upsert({ id: 1, logo_url: logoUrl }, { onConflict: 'id' })
+      .upsert({ id: 1, ...settings }, { onConflict: 'id' })
       .select()
       .single()
 
     if (error) {
-      console.error('Error updating logo URL:', error)
+      console.error('Error updating app settings:', error)
       throw error
     }
     return data

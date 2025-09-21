@@ -3,6 +3,7 @@ import { notificationService } from '@/services/notificationService'
 
 export interface Notification {
   title: string
+  message?: string | null
   segment: string
   date: string // DD/MM/YYYY
 }
@@ -31,7 +32,7 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
     const newNotification =
       await notificationService.addNotification(notification)
     set((state) => ({
-      notifications: [...state.notifications, newNotification],
+      notifications: [newNotification, ...state.notifications],
     }))
   },
 }))

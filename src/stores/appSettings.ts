@@ -5,7 +5,9 @@ interface AppSettingsState {
   settings: AppSettings | null
   loading: boolean
   fetchAppSettings: () => Promise<void>
-  updateLogoUrl: (logoUrl: string) => Promise<void>
+  updateAppSettings: (
+    settings: Partial<Omit<AppSettings, 'id'>>,
+  ) => Promise<void>
 }
 
 export const useAppSettingsStore = create<AppSettingsState>()((set) => ({
@@ -21,8 +23,8 @@ export const useAppSettingsStore = create<AppSettingsState>()((set) => ({
       set({ loading: false })
     }
   },
-  updateLogoUrl: async (logoUrl: string) => {
-    const updatedSettings = await appSettingsService.updateLogoUrl(logoUrl)
+  updateAppSettings: async (settings) => {
+    const updatedSettings = await appSettingsService.updateAppSettings(settings)
     set({ settings: updatedSettings })
   },
 }))
