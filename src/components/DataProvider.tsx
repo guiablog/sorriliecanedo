@@ -5,6 +5,7 @@ import { useServiceStore } from '@/stores/service'
 import { useAppointmentStore } from '@/stores/appointment'
 import { useContentStore } from '@/stores/content'
 import { useNotificationStore } from '@/stores/notification'
+import { useAppSettingsStore } from '@/stores/appSettings'
 
 interface DataProviderProps {
   children: React.ReactNode
@@ -24,6 +25,9 @@ export const DataProvider = ({ children }: DataProviderProps) => {
   const fetchNotifications = useNotificationStore(
     (state) => state.fetchNotifications,
   )
+  const fetchAppSettings = useAppSettingsStore(
+    (state) => state.fetchAppSettings,
+  )
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -35,6 +39,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
         fetchAppointments(),
         fetchContent(),
         fetchNotifications(),
+        fetchAppSettings(),
       ])
       setIsLoading(false)
     }
@@ -46,6 +51,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
     fetchAppointments,
     fetchContent,
     fetchNotifications,
+    fetchAppSettings,
   ])
 
   if (isLoading) {

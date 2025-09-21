@@ -9,6 +9,7 @@ import {
   Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useAppSettingsStore } from '@/stores/appSettings'
 
 const menuItems = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -24,11 +25,15 @@ const menuItems = [
 ]
 
 export const AdminSidebar = () => {
+  const { settings } = useAppSettingsStore()
+  const defaultLogo =
+    'https://img.usecurling.com/i?q=sorrilie-odontologia&color=white'
+
   return (
     <aside className="hidden md:flex flex-col w-64 bg-primary text-primary-foreground">
       <div className="p-4 border-b border-primary-foreground/10">
         <img
-          src="https://img.usecurling.com/i?q=sorrilie-odontologia&color=white"
+          src={settings?.logo_url || defaultLogo}
           alt="Logo Sorriliê"
           className="h-10"
         />

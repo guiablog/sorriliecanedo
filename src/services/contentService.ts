@@ -15,6 +15,7 @@ export const contentService = {
       content: c.content,
       publishedDate: c.published_date,
       status: c.status as ContentItem['status'],
+      image_url: c.image_url,
     }))
   },
 
@@ -27,6 +28,7 @@ export const contentService = {
         content: contentData.content,
         published_date: contentData.publishedDate,
         status: contentData.status,
+        image_url: contentData.image_url,
       })
       .select()
       .single()
@@ -42,6 +44,7 @@ export const contentService = {
       content: data.content,
       publishedDate: data.published_date,
       status: data.status as ContentItem['status'],
+      image_url: data.image_url,
     }
   },
 
@@ -55,6 +58,7 @@ export const contentService = {
         content: updateData.content,
         published_date: updateData.publishedDate,
         status: updateData.status,
+        image_url: updateData.image_url,
       })
       .eq('id', id)
       .select()
@@ -71,6 +75,7 @@ export const contentService = {
       content: data.content,
       publishedDate: data.published_date,
       status: data.status as ContentItem['status'],
+      image_url: data.image_url,
     }
   },
 

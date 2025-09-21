@@ -10,6 +10,7 @@ export interface ContentItem {
   content: string
   publishedDate: string // YYYY-MM-DD
   status: 'Publicado' | 'Rascunho'
+  image_url?: string | null
 }
 
 interface ContentState {

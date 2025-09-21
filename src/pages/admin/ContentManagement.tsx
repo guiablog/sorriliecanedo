@@ -42,7 +42,11 @@ export default function AdminContentManagement() {
   const handleFormSubmit = async (data: ContentFormValues) => {
     try {
       if (editingContent) {
-        await updateContent({ ...editingContent, ...data })
+        await updateContent({
+          ...editingContent,
+          ...data,
+          image_url: data.image_url,
+        })
         toast({ title: 'Conteúdo atualizado com sucesso!' })
       } else {
         await addContent({
@@ -50,6 +54,7 @@ export default function AdminContentManagement() {
           type: contentType,
           content: data.content,
           publishedDate: format(new Date(), 'yyyy-MM-dd'),
+          image_url: data.image_url,
         })
         toast({ title: 'Conteúdo adicionado com sucesso!' })
       }
