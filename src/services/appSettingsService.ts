@@ -4,6 +4,7 @@ export interface AppSettings {
   id: number
   logo_url: string | null
   whatsapp_contact: string | null
+  splash_screen_image_url: string | null
 }
 
 export const appSettingsService = {

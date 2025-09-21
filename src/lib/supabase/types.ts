@@ -46,17 +46,23 @@ export type Database = {
         Row: {
           id: number
           logo_url: string | null
+          splash_screen_image_url: string | null
           updated_at: string | null
+          whatsapp_contact: string | null
         }
         Insert: {
           id: number
           logo_url?: string | null
+          splash_screen_image_url?: string | null
           updated_at?: string | null
+          whatsapp_contact?: string | null
         }
         Update: {
           id?: number
           logo_url?: string | null
+          splash_screen_image_url?: string | null
           updated_at?: string | null
+          whatsapp_contact?: string | null
         }
         Relationships: []
       }
@@ -133,18 +139,21 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          message: string | null
           segment: string
           title: string
         }
         Insert: {
           created_at?: string
           id?: string
+          message?: string | null
           segment: string
           title: string
         }
         Update: {
           created_at?: string
           id?: string
+          message?: string | null
           segment?: string
           title?: string
         }

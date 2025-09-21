@@ -63,6 +63,7 @@ export default function AdminSettings() {
     loading: settingsLoading,
   } = useAppSettingsStore()
   const [isUploadingLogo, setIsUploadingLogo] = useState(false)
+  const [isUploadingSplash, setIsUploadingSplash] = useState(false)
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
@@ -138,6 +139,29 @@ export default function AdminSettings() {
     }
   }
 
+  const handleSplashUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setIsUploadingSplash(true)
+    try {
+      const publicUrl = await storageService.uploadImage(file, 'imagens')
+      await updateAppSettings({ splash_screen_image_url: publicUrl })
+      toast({ title: 'Imagem da Splash Screen atualizada com sucesso!' })
+    } catch (error) {
+      console.error(error)
+      toast({
+        title: 'Erro no Upload',
+        description: 'Não foi possível enviar a nova imagem.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsUploadingSplash(false)
+    }
+  }
+
   const handleSettingsSubmit = async (data: SettingsFormValues) => {
     try {
       await updateAppSettings(data)
@@ -163,9 +187,9 @@ export default function AdminSettings() {
                 Personalize a aparência e informações de contato do aplicativo.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label>Logo da Clínica</Label>
+                <Label>Logo da Clínica (Mudar Logo)</Label>
                 {settingsLoading ? (
                   <Skeleton className="h-16 w-32 rounded-md" />
                 ) : (
@@ -186,6 +210,34 @@ export default function AdminSettings() {
                   className="max-w-sm"
                 />
                 {isUploadingLogo && (
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Enviando...
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>Imagem da Splash Screen (Mudar Splash)</Label>
+                {settingsLoading ? (
+                  <Skeleton className="h-16 w-32 rounded-md" />
+                ) : (
+                  settings?.splash_screen_image_url && (
+                    <img
+                      src={settings.splash_screen_image_url}
+                      alt="Splash Screen atual"
+                      className="h-16 w-auto rounded-md bg-muted p-2"
+                    />
+                  )
+                )}
+                <Input
+                  id="splash-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleSplashUpload}
+                  disabled={isUploadingSplash}
+                  className="max-w-sm"
+                />
+                {isUploadingSplash && (
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Enviando...
