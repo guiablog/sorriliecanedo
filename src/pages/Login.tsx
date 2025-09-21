@@ -36,7 +36,7 @@ type PasswordFormValues = z.infer<typeof passwordSchema>
 export default function Login() {
   const navigate = useNavigate()
   const { patients } = usePatientStore()
-  const loginAction = useAuthStore((state) => state.login)
+  const patientLogin = useAuthStore((state) => state.patientLogin)
 
   const [step, setStep] = useState<'cpf' | 'password'>('cpf')
   const [currentUser, setCurrentUser] = useState<{
@@ -78,7 +78,7 @@ export default function Login() {
     const patient = patients.find((p) => p.cpf === currentUser.cpf)
 
     if (patient && patient.password === data.password) {
-      loginAction('patient', patient.name)
+      patientLogin(patient.name)
       navigate('/home')
     } else {
       toast({

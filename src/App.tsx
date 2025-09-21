@@ -29,6 +29,7 @@ import AdminAgenda from './pages/admin/Agenda'
 import AdminProfessionalsAndServices from './pages/admin/ProfessionalsAndServices'
 import AdminContentManagement from './pages/admin/ContentManagement'
 import AdminNotifications from './pages/admin/Notifications'
+import AdminSettings from './pages/admin/Settings'
 
 import NotFound from './pages/NotFound'
 
@@ -100,6 +101,7 @@ const App = () => (
                 />
                 <Route path="content" element={<AdminContentManagement />} />
                 <Route path="notifications" element={<AdminNotifications />} />
+                <Route path="settings" element={<AdminSettings />} />
               </Route>
             </Route>
           </Route>

@@ -14,11 +14,20 @@ import { useAuthStore } from '@/stores/auth'
 
 export default function AdminLayout() {
   const navigate = useNavigate()
-  const logout = useAuthStore((state) => state.logout)
+  const { logout, adminUser } = useAuthStore()
 
   const handleLogout = () => {
     logout()
     navigate('/admin/login')
+  }
+
+  const getInitials = (name: string | undefined | null) => {
+    if (!name) return 'A'
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join('')
   }
 
   return (
@@ -31,14 +40,20 @@ export default function AdminLayout() {
               <Button variant="ghost" size="icon" className="rounded-full">
                 <Avatar>
                   <AvatarImage src="https://img.usecurling.com/ppl/thumbnail?gender=female" />
-                  <AvatarFallback>A</AvatarFallback>
+                  <AvatarFallback>
+                    {getInitials(adminUser?.name)}
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+              <DropdownMenuLabel>
+                {adminUser?.name || 'Minha Conta'}
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Meu Perfil</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => navigate('/admin/settings')}>
+                Configurações
+              </DropdownMenuItem>
               <DropdownMenuItem onSelect={handleLogout}>Sair</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
