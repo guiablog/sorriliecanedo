@@ -19,6 +19,8 @@ import { isValidCPF } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { cpfMask } from '@/lib/masks'
 import { Eye, EyeOff } from 'lucide-react'
+import { useAppSettingsStore } from '@/stores/appSettings'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const cpfSchema = z.object({
   cpf: z.string().refine(isValidCPF, {
@@ -37,6 +39,7 @@ export default function Login() {
   const navigate = useNavigate()
   const { patients } = usePatientStore()
   const patientLogin = useAuthStore((state) => state.patientLogin)
+  const { settings, loading: settingsLoading } = useAppSettingsStore()
 
   const [step, setStep] = useState<'cpf' | 'password'>('cpf')
   const [currentUser, setCurrentUser] = useState<{
@@ -90,14 +93,21 @@ export default function Login() {
     }
   }
 
+  const defaultLogo =
+    'https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black'
+
   return (
     <div className="flex flex-col min-h-screen bg-neutral-light p-6 md:p-8 justify-center items-center animate-fade-in">
       <div className="w-full max-w-sm text-center relative">
-        <img
-          src="https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black"
-          alt="Logo Sorriliê"
-          className="h-12 mx-auto mb-10"
-        />
+        {settingsLoading ? (
+          <Skeleton className="h-12 w-48 mx-auto mb-10" />
+        ) : (
+          <img
+            src={settings?.logo_url || defaultLogo}
+            alt="Logo Sorriliê"
+            className="h-12 mx-auto mb-10"
+          />
+        )}
 
         {step === 'cpf' && (
           <>
