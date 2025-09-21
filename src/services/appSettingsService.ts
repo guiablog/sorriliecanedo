@@ -5,6 +5,8 @@ export interface AppSettings {
   logo_url: string | null
   whatsapp_contact: string | null
   splash_screen_image_url: string | null
+  whatsapp_button_enabled: boolean | null
+  whatsapp_icon_url: string | null
 }
 
 const formatWhatsappNumber = (

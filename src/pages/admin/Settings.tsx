@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { toast } from '@/components/ui/use-toast'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AdminUserForm, AdminUserFormValues } from '@/components/AdminUserForm'
@@ -49,8 +50,10 @@ const settingsSchema = z.object({
   whatsapp_contact: z
     .string()
     .refine((value) => value.replace(/\D/g, '').length >= 10, {
-      message: 'Número de WhatsApp inválido. Deve ter pelo menos 10 dígitos.',
+      message: 'Número de WhatsApp inválido.',
     }),
+  whatsapp_button_enabled: z.boolean(),
+  whatsapp_icon_url: z.string().url().optional().nullable(),
 })
 
 type SettingsFormValues = z.infer<typeof settingsSchema>
@@ -66,11 +69,14 @@ export default function AdminSettings() {
   } = useAppSettingsStore()
   const [isUploadingLogo, setIsUploadingLogo] = useState(false)
   const [isUploadingSplash, setIsUploadingSplash] = useState(false)
+  const [isUploadingWpp, setIsUploadingWpp] = useState(false)
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
       whatsapp_contact: '',
+      whatsapp_button_enabled: true,
+      whatsapp_icon_url: null,
     },
   })
 
@@ -80,6 +86,8 @@ export default function AdminSettings() {
         whatsapp_contact: settings.whatsapp_contact
           ? whatsappMask(settings.whatsapp_contact)
           : '',
+        whatsapp_button_enabled: settings.whatsapp_button_enabled ?? true,
+        whatsapp_icon_url: settings.whatsapp_icon_url,
       })
     }
   }, [settings, form])
@@ -122,40 +130,32 @@ export default function AdminSettings() {
     }
   }
 
-  const handleLogoUpload = async (
+  const handleImageUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
+    type: 'logo' | 'splash' | 'wpp',
   ) => {
     const file = event.target.files?.[0]
     if (!file) return
 
-    setIsUploadingLogo(true)
+    const setUploading = {
+      logo: setIsUploadingLogo,
+      splash: setIsUploadingSplash,
+      wpp: setIsUploadingWpp,
+    }[type]
+    setUploading(true)
+
     try {
       const publicUrl = await storageService.uploadImage(file, 'imagens')
-      await updateAppSettings({ logo_url: publicUrl })
-      toast({ title: 'Logo atualizado com sucesso!' })
-    } catch (error) {
-      console.error(error)
-      toast({
-        title: 'Erro no Upload',
-        description: 'Não foi possível enviar o novo logo.',
-        variant: 'destructive',
-      })
-    } finally {
-      setIsUploadingLogo(false)
-    }
-  }
-
-  const handleSplashUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    setIsUploadingSplash(true)
-    try {
-      const publicUrl = await storageService.uploadImage(file, 'imagens')
-      await updateAppSettings({ splash_screen_image_url: publicUrl })
-      toast({ title: 'Imagem da Splash Screen atualizada com sucesso!' })
+      const settingKey = {
+        logo: 'logo_url',
+        splash: 'splash_screen_image_url',
+        wpp: 'whatsapp_icon_url',
+      }[type]
+      await updateAppSettings({ [settingKey]: publicUrl })
+      if (type === 'wpp') {
+        form.setValue('whatsapp_icon_url', publicUrl)
+      }
+      toast({ title: 'Imagem atualizada com sucesso!' })
     } catch (error) {
       console.error(error)
       toast({
@@ -164,7 +164,7 @@ export default function AdminSettings() {
         variant: 'destructive',
       })
     } finally {
-      setIsUploadingSplash(false)
+      setUploading(false)
     }
   }
 
@@ -195,7 +195,7 @@ export default function AdminSettings() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label>Logo da Clínica (Mudar Logo)</Label>
+                <Label>Logo da Clínica</Label>
                 {settingsLoading ? (
                   <Skeleton className="h-16 w-32 rounded-md" />
                 ) : (
@@ -211,7 +211,7 @@ export default function AdminSettings() {
                   id="logo-upload"
                   type="file"
                   accept="image/*"
-                  onChange={handleLogoUpload}
+                  onChange={(e) => handleImageUpload(e, 'logo')}
                   disabled={isUploadingLogo}
                   className="max-w-sm"
                 />
@@ -223,7 +223,7 @@ export default function AdminSettings() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>Imagem da Splash Screen (Mudar Splash)</Label>
+                <Label>Imagem da Splash Screen</Label>
                 {settingsLoading ? (
                   <Skeleton className="h-16 w-32 rounded-md" />
                 ) : (
@@ -239,7 +239,7 @@ export default function AdminSettings() {
                   id="splash-upload"
                   type="file"
                   accept="image/*"
-                  onChange={handleSplashUpload}
+                  onChange={(e) => handleImageUpload(e, 'splash')}
                   disabled={isUploadingSplash}
                   className="max-w-sm"
                 />
@@ -269,6 +269,51 @@ export default function AdminSettings() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="whatsapp_button_enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm max-w-sm">
+                    <div className="space-y-0.5">
+                      <Label>Habilitar Botão do WhatsApp</Label>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <div className="space-y-2">
+                <Label>Ícone do WhatsApp</Label>
+                {settingsLoading ? (
+                  <Skeleton className="h-16 w-16 rounded-full" />
+                ) : (
+                  form.watch('whatsapp_icon_url') && (
+                    <img
+                      src={form.watch('whatsapp_icon_url')!}
+                      alt="Ícone do WhatsApp"
+                      className="h-16 w-16 rounded-full bg-muted p-2"
+                    />
+                  )
+                )}
+                <Input
+                  id="wpp-icon-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e, 'wpp')}
+                  disabled={isUploadingWpp}
+                  className="max-w-sm"
+                />
+                {isUploadingWpp && (
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Enviando...
+                  </div>
+                )}
+              </div>
             </CardContent>
             <CardFooter>
               <Button

@@ -17,7 +17,12 @@ export default function MobileLayout() {
   const { settings } = useAppSettingsStore()
   const title = routeTitles[location.pathname] || 'Sorriliê Odontologia'
   const showBackButton = location.pathname !== '/home'
+
   const whatsappNumber = settings?.whatsapp_contact || '5511999999999'
+  const showWhatsappButton = settings?.whatsapp_button_enabled ?? true
+  const whatsappIconUrl =
+    settings?.whatsapp_icon_url ||
+    'https://img.usecurling.com/i?q=whatsapp&color=white&shape=hand-drawn'
 
   return (
     <div className="min-h-screen bg-background">
@@ -34,23 +39,21 @@ export default function MobileLayout() {
         <Outlet />
       </main>
 
-      <a
-        href={`https://wa.me/${whatsappNumber.replace(/\D/g, '')}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-20 right-4 z-10"
-      >
-        <Button
-          size="icon"
-          className="rounded-full h-14 w-14 bg-success hover:bg-success/90 shadow-lg animate-pulse"
+      {showWhatsappButton && (
+        <a
+          href={`https://wa.me/${whatsappNumber.replace(/\D/g, '')}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-20 right-4 z-10"
         >
-          <img
-            src="https://img.usecurling.com/i?q=whatsapp&color=white&shape=hand-drawn"
-            alt="WhatsApp"
-            className="h-8 w-8"
-          />
-        </Button>
-      </a>
+          <Button
+            size="icon"
+            className="rounded-full h-14 w-14 bg-success hover:bg-success/90 shadow-lg animate-pulse"
+          >
+            <img src={whatsappIconUrl} alt="WhatsApp" className="h-8 w-8" />
+          </Button>
+        </a>
+      )}
 
       <BottomNav />
     </div>
