@@ -34,6 +34,8 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { ReviewDrawer } from '@/components/ReviewDrawer'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { cn } from '@/lib/utils'
 
 const availableTimes = ['09:00', '10:30', '11:00', '14:00', '15:30']
 
@@ -164,13 +166,26 @@ export default function Schedule() {
               {activeProfessionals.map((p) => (
                 <Button
                   key={p.id}
-                  variant={
-                    selectedProfessional === p.name ? 'secondary' : 'outline'
-                  }
-                  className="w-full justify-start h-12"
+                  variant="outline"
+                  className={cn(
+                    'w-full justify-start h-16 text-left',
+                    selectedProfessional === p.name &&
+                      'border-secondary border-2',
+                  )}
                   onClick={() => setSelectedProfessional(p.name)}
                 >
-                  <User className="mr-2 h-4 w-4" /> {p.name}
+                  <Avatar className="mr-4">
+                    <AvatarImage src={p.photo_url || undefined} />
+                    <AvatarFallback>
+                      <User className="h-5 w-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="font-semibold">{p.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {p.specialty}
+                    </span>
+                  </div>
                 </Button>
               ))}
             </CardContent>

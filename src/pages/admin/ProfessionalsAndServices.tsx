@@ -32,13 +32,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal } from 'lucide-react'
+import { MoreHorizontal, User } from 'lucide-react'
 import { useProfessionalStore, Professional } from '@/stores/professional'
 import { useServiceStore, Service } from '@/stores/service'
 import { ProfessionalForm } from '@/components/ProfessionalForm'
 import { ServiceForm } from '@/components/ServiceForm'
 import { toast } from '@/components/ui/use-toast'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export default function AdminProfessionalsAndServices() {
   const {
@@ -152,7 +153,15 @@ export default function AdminProfessionalsAndServices() {
                     ))
                   : professionals.map((p) => (
                       <TableRow key={p.id}>
-                        <TableCell>{p.name}</TableCell>
+                        <TableCell className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={p.photo_url || undefined} />
+                            <AvatarFallback>
+                              <User className="h-4 w-4" />
+                            </AvatarFallback>
+                          </Avatar>
+                          {p.name}
+                        </TableCell>
                         <TableCell>{p.specialty}</TableCell>
                         <TableCell>{p.cro}</TableCell>
                         <TableCell>{p.status}</TableCell>

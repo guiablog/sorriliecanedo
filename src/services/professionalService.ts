@@ -14,6 +14,7 @@ export const professionalService = {
       specialty: p.specialty,
       cro: p.cro,
       status: p.status as Professional['status'],
+      photo_url: p.photo_url,
     }))
   },
 
@@ -36,6 +37,7 @@ export const professionalService = {
       specialty: data.specialty,
       cro: data.cro,
       status: data.status as Professional['status'],
+      photo_url: data.photo_url,
     }
   },
 
@@ -60,6 +62,7 @@ export const professionalService = {
       specialty: data.specialty,
       cro: data.cro,
       status: data.status as Professional['status'],
+      photo_url: data.photo_url,
     }
   },
 

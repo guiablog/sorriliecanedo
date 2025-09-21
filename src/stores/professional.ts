@@ -7,6 +7,7 @@ export interface Professional {
   specialty: string
   cro: string
   status: 'Ativo' | 'Inativo'
+  photo_url?: string | null
 }
 
 interface ProfessionalState {
