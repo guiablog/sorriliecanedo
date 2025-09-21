@@ -52,18 +52,18 @@ export default function AdminLogin() {
 
   const handleLogin = async (data: LoginFormValues) => {
     setIsLoading(true)
-    const success = await adminLogin(data.email, data.password)
+    const result = await adminLogin(data.email, data.password)
     setIsLoading(false)
 
-    if (success) {
+    if (result === true) {
       navigate('/admin/dashboard')
     } else {
       toast({
         title: 'Falha no Login',
-        description: 'Credenciais inválidas ou usuário inativo.',
+        description: result,
         variant: 'destructive',
       })
-      form.setError('root', { message: 'Credenciais inválidas' })
+      form.setError('root', { message: result })
     }
   }
 
@@ -137,7 +137,7 @@ export default function AdminLogin() {
           {showRegisterLink && (
             <div className="mt-4 text-center text-sm">
               <Link to="/admin/register" className="underline">
-                Cadastrar usuário
+                Cadastrar primeiro administrador
               </Link>
             </div>
           )}

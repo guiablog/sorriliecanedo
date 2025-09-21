@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { adminUserService } from '@/services/adminUserService'
+import { supabase } from '@/lib/supabase/client'
 
 interface AuthState {
   isAuthenticated: boolean
@@ -8,7 +9,7 @@ interface AuthState {
   fullName: string | null // For patient
   adminUser: { name: string; email: string } | null // For admin
   patientLogin: (fullName: string) => void
-  adminLogin: (email: string, pass: string) => Promise<boolean>
+  adminLogin: (email: string, pass: string) => Promise<boolean | string>
   logout: () => void
 }
 
@@ -27,30 +28,58 @@ export const useAuthStore = create<AuthState>()(
           adminUser: null,
         }),
       adminLogin: async (email, password) => {
+        const { data: authData, error: authError } =
+          await supabase.auth.signInWithPassword({
+            email,
+            password,
+          })
+
+        if (authError) {
+          console.error('Supabase sign-in error:', authError.message)
+          return 'Credenciais inválidas'
+        }
+
+        if (!authData.user) {
+          return 'Credenciais inválidas'
+        }
+
         try {
-          const user = await adminUserService.getAdminUserByEmail(email)
-          if (user && user.password === password && user.status === 'active') {
-            set({
-              isAuthenticated: true,
-              userType: 'admin',
-              adminUser: { name: user.name, email: user.email },
-              fullName: null,
-            })
-            return true
+          const adminProfile = await adminUserService.getAdminUserByUserId(
+            authData.user.id,
+          )
+
+          if (!adminProfile) {
+            await supabase.auth.signOut()
+            return 'Perfil de administrador não encontrado.'
           }
-          return false
-        } catch (error) {
-          console.error('Admin login failed:', error)
-          return false
+
+          if (adminProfile.status !== 'active') {
+            await supabase.auth.signOut()
+            return 'Usuário inativo'
+          }
+
+          set({
+            isAuthenticated: true,
+            userType: 'admin',
+            adminUser: { name: adminProfile.name, email: adminProfile.email },
+            fullName: null,
+          })
+          return true
+        } catch (profileError) {
+          console.error('Error fetching admin profile:', profileError)
+          await supabase.auth.signOut()
+          return 'Erro ao verificar o perfil do usuário.'
         }
       },
-      logout: () =>
+      logout: () => {
+        supabase.auth.signOut()
         set({
           isAuthenticated: false,
           userType: null,
           fullName: null,
           adminUser: null,
-        }),
+        })
+      },
     }),
     {
       name: 'auth-storage',

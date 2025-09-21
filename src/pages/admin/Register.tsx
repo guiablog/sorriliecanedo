@@ -71,11 +71,14 @@ export default function AdminRegister() {
       await adminUserService.createAdminUser(data)
       toast({
         title: 'Cadastro Realizado!',
-        description: 'O primeiro administrador foi criado com sucesso.',
+        description:
+          'O primeiro administrador foi criado. Verifique seu e-mail para confirmação.',
       })
       navigate('/admin/login')
     } catch (error: any) {
-      const isDuplicate = error.message?.includes('duplicate key value')
+      const isDuplicate =
+        error.message?.includes('duplicate key value') ||
+        error.message?.includes('already registered')
       toast({
         title: 'Falha no Cadastro',
         description: isDuplicate

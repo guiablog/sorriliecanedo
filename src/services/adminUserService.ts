@@ -4,7 +4,7 @@ import { AdminUser } from '@/types/admin'
 type AdminUserCreationPayload = {
   name: string
   email: string
-  password?: string
+  password: string
 }
 
 export const adminUserService = {
@@ -35,16 +35,15 @@ export const adminUserService = {
     return count || 0
   },
 
-  async getAdminUserByEmail(email: string) {
+  async getAdminUserByUserId(userId: string) {
     const { data, error } = await supabase
       .from('admin_users')
       .select('*')
-      .eq('email', email)
+      .eq('user_id', userId)
       .single()
 
     if (error && error.code !== 'PGRST116') {
-      // PGRST116: "The result contains 0 rows"
-      console.error('Error fetching admin user by email:', error)
+      console.error('Error fetching admin user by user_id:', error)
       throw error
     }
     return data
@@ -53,28 +52,31 @@ export const adminUserService = {
   async createAdminUser(
     userData: AdminUserCreationPayload,
   ): Promise<AdminUser> {
-    const { data, error } = await supabase
-      .from('admin_users')
-      .insert({
-        name: userData.name,
-        email: userData.email,
-        password: userData.password, // Storing plain text as per user story. NOT FOR PRODUCTION.
-        status: 'active',
-      })
-      .select()
-      .single()
+    const { data, error } = await supabase.auth.signUp({
+      email: userData.email,
+      password: userData.password,
+      options: {
+        data: {
+          name: userData.name,
+        },
+      },
+    })
 
     if (error) {
-      console.error('Error creating admin user:', error)
+      console.error('Error signing up admin user:', error)
       throw error
     }
 
+    if (!data.user) {
+      throw new Error('User not created')
+    }
+
     return {
-      id: data.id,
-      name: data.name,
-      email: data.email,
-      status: data.status as 'active' | 'inactive',
-      created_at: data.created_at,
+      id: data.user.id,
+      name: data.user.user_metadata.name,
+      email: data.user.email ?? '',
+      status: 'active',
+      created_at: data.user.created_at ?? new Date().toISOString(),
     }
   },
 }

@@ -21,24 +21,50 @@ export type Database = {
           email: string
           id: string
           name: string
-          password: string
           status: string
+          user_id: string
         }
         Insert: {
           created_at?: string
           email: string
           id?: string
           name: string
-          password: string
           status?: string
+          user_id: string
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
           name?: string
-          password?: string
           status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'admin_users_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      app_settings: {
+        Row: {
+          id: number
+          logo_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id: number
+          logo_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: number
+          logo_url?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -83,6 +109,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          image_url: string | null
           published_date: string
           status: string
           title: string
@@ -92,6 +119,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          image_url?: string | null
           published_date: string
           status: string
           title: string
@@ -101,6 +129,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           published_date?: string
           status?: string
           title?: string
