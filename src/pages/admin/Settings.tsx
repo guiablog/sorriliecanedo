@@ -76,7 +76,11 @@ export default function AdminSettings() {
 
   useEffect(() => {
     if (settings) {
-      form.reset({ whatsapp_contact: settings.whatsapp_contact || '' })
+      form.reset({
+        whatsapp_contact: settings.whatsapp_contact
+          ? whatsappMask(settings.whatsapp_contact)
+          : '',
+      })
     }
   }, [settings, form])
 
