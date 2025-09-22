@@ -20,16 +20,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
 import { ContentItem } from '@/stores/content'
 import { storageService } from '@/services/storageService'
 import { toast } from '@/components/ui/use-toast'
-import { Loader2 } from 'lucide-react'
+import { CalendarIcon, Loader2 } from 'lucide-react'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { cn } from '@/lib/utils'
 
 const contentSchema = z.object({
   title: z.string().min(5, { message: 'Título é obrigatório (mín. 5).' }),
   content: z.string().min(10, { message: 'Conteúdo é obrigatório (mín. 10).' }),
   status: z.enum(['Publicado', 'Rascunho']),
   image_url: z.string().url().optional().nullable(),
+  published_date: z.date({
+    required_error: 'Data de publicação é obrigatória.',
+  }),
 })
 
 export type ContentFormValues = z.infer<typeof contentSchema>
@@ -57,6 +69,9 @@ export const ContentForm = ({
       content: contentItem?.content || '',
       status: contentItem?.status || 'Rascunho',
       image_url: contentItem?.image_url || null,
+      published_date: contentItem
+        ? new Date(contentItem.publishedDate)
+        : new Date(),
     },
   })
 
@@ -147,6 +162,44 @@ export const ContentForm = ({
             </div>
           )}
         </FormItem>
+        <FormField
+          control={form.control}
+          name="published_date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Data de Publicação</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-[240px] pl-3 text-left font-normal',
+                        !field.value && 'text-muted-foreground',
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, 'PPP', { locale: ptBR })
+                      ) : (
+                        <span>Escolha uma data</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="status"

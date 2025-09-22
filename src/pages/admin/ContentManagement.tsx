@@ -29,6 +29,7 @@ export default function AdminContentManagement() {
 
   const tips = content.filter((c) => c.type === 'tip')
   const news = content.filter((c) => c.type === 'news')
+  const publications = content.filter((c) => c.type === 'publication')
 
   const openModal = (
     type: ContentType,
@@ -41,20 +42,21 @@ export default function AdminContentManagement() {
 
   const handleFormSubmit = async (data: ContentFormValues) => {
     try {
+      const payload = {
+        ...data,
+        publishedDate: format(data.published_date, 'yyyy-MM-dd'),
+      }
+
       if (editingContent) {
         await updateContent({
           ...editingContent,
-          ...data,
-          image_url: data.image_url,
+          ...payload,
         })
         toast({ title: 'Conteúdo atualizado com sucesso!' })
       } else {
         await addContent({
-          ...data,
+          ...payload,
           type: contentType,
-          content: data.content,
-          publishedDate: format(new Date(), 'yyyy-MM-dd'),
-          image_url: data.image_url,
         })
         toast({ title: 'Conteúdo adicionado com sucesso!' })
       }
@@ -94,6 +96,17 @@ export default function AdminContentManagement() {
     ))
   }
 
+  const getContentTypeLabel = (type: ContentType) => {
+    const labels: Record<ContentType, string> = {
+      tip: 'Dica',
+      news: 'Novidade',
+      publication: 'Publicação',
+      promotion: 'Promoção',
+      highlight: 'Destaque',
+    }
+    return labels[type] || 'Conteúdo'
+  }
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Gerenciamento de Conteúdos</h1>
@@ -101,6 +114,7 @@ export default function AdminContentManagement() {
         <TabsList>
           <TabsTrigger value="tips">Dicas de Saúde</TabsTrigger>
           <TabsTrigger value="news">Novidades</TabsTrigger>
+          <TabsTrigger value="publications">Publicações</TabsTrigger>
         </TabsList>
         <TabsContent value="tips" className="mt-4">
           <div className="flex justify-end mb-4">
@@ -146,6 +160,28 @@ export default function AdminContentManagement() {
             </Table>
           </div>
         </TabsContent>
+        <TabsContent value="publications" className="mt-4">
+          <div className="flex justify-end mb-4">
+            <Button
+              onClick={() => openModal('publication')}
+              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+            >
+              Adicionar Publicação
+            </Button>
+          </div>
+          <div className="border rounded-lg">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Título</TableHead>
+                  <TableHead>Publicado em</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>{renderTableRows(publications)}</TableBody>
+            </Table>
+          </div>
+        </TabsContent>
       </Tabs>
 
       <Dialog open={isModalOpen} onOpenChange={setModalOpen}>
@@ -153,7 +189,7 @@ export default function AdminContentManagement() {
           <DialogHeader>
             <DialogTitle>
               {editingContent ? 'Editar' : 'Adicionar'}{' '}
-              {contentType === 'tip' ? 'Dica' : 'Novidade'}
+              {getContentTypeLabel(contentType)}
             </DialogTitle>
           </DialogHeader>
           <ContentForm
