@@ -204,7 +204,6 @@ export default function AdminDashboard() {
                   cx="50%"
                   cy="50%"
                   outerRadius={80}
-                  label
                 />
               </PieChart>
             </ChartContainer>

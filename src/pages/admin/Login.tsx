@@ -20,6 +20,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { AlertTriangle } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth'
 import { toast } from '@/components/ui/use-toast'
 import { adminUserService } from '@/services/adminUserService'
@@ -87,6 +89,14 @@ export default function AdminLogin() {
               onSubmit={form.handleSubmit(handleLogin)}
               className="grid gap-4"
             >
+              {form.formState.errors.root && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    {form.formState.errors.root.message}
+                  </AlertDescription>
+                </Alert>
+              )}
               <FormField
                 control={form.control}
                 name="email"

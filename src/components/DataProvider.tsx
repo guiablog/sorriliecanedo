@@ -25,9 +25,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
   const fetchNotifications = useNotificationStore(
     (state) => state.fetchNotifications,
   )
-  const fetchAppSettings = useAppSettingsStore(
-    (state) => state.fetchAppSettings,
-  )
+  const { settings, fetchAppSettings } = useAppSettingsStore()
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -56,7 +54,15 @@ export const DataProvider = ({ children }: DataProviderProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-primary" />
+      <div className="flex items-center justify-center min-h-screen bg-primary animate-fade-in">
+        {settings?.splash_screen_image_url && (
+          <img
+            src={settings.splash_screen_image_url}
+            alt="Sorriliê Odontologia Logo"
+            className="w-48 h-auto animate-pulse"
+          />
+        )}
+      </div>
     )
   }
 

@@ -65,9 +65,14 @@ export default function Schedule() {
   const [selectedAppointmentForReview, setSelectedAppointmentForReview] =
     useState<any>(null)
 
-  const { professionals } = useProfessionalStore()
-  const { services } = useServiceStore()
-  const { appointments, addAppointment, loading } = useAppointmentStore()
+  const { professionals, loading: professionalsLoading } =
+    useProfessionalStore()
+  const { services, loading: servicesLoading } = useServiceStore()
+  const {
+    appointments,
+    addAppointment,
+    loading: appointmentsLoading,
+  } = useAppointmentStore()
   const { fullName } = useAuthStore()
 
   const activeProfessionals = professionals.filter((p) => p.status === 'Ativo')
@@ -143,16 +148,22 @@ export default function Schedule() {
               <CardTitle>1. Escolha o Serviço</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
-              {activeServices.map((s) => (
-                <Button
-                  key={s.id}
-                  variant={selectedService === s.name ? 'secondary' : 'outline'}
-                  onClick={() => setSelectedService(s.name)}
-                  className="h-12"
-                >
-                  {s.name}
-                </Button>
-              ))}
+              {servicesLoading
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
+                  ))
+                : activeServices.map((s) => (
+                    <Button
+                      key={s.id}
+                      variant={
+                        selectedService === s.name ? 'secondary' : 'outline'
+                      }
+                      onClick={() => setSelectedService(s.name)}
+                      className="h-12"
+                    >
+                      {s.name}
+                    </Button>
+                  ))}
             </CardContent>
           </Card>
         )
@@ -163,31 +174,41 @@ export default function Schedule() {
               <CardTitle>2. Escolha o Profissional</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {activeProfessionals.map((p) => (
-                <Button
-                  key={p.id}
-                  variant="outline"
-                  className={cn(
-                    'w-full justify-start h-16 text-left',
-                    selectedProfessional === p.name &&
-                      'border-secondary border-2',
-                  )}
-                  onClick={() => setSelectedProfessional(p.name)}
-                >
-                  <Avatar className="mr-4">
-                    <AvatarImage src={p.photo_url || undefined} />
-                    <AvatarFallback>
-                      <User className="h-5 w-5" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <span className="font-semibold">{p.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {p.specialty}
-                    </span>
-                  </div>
-                </Button>
-              ))}
+              {professionalsLoading
+                ? Array.from({ length: 2 }).map((_, i) => (
+                    <div key={i} className="flex items-center space-x-4 p-2">
+                      <Skeleton className="h-16 w-16 rounded-full" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-[150px]" />
+                        <Skeleton className="h-4 w-[100px]" />
+                      </div>
+                    </div>
+                  ))
+                : activeProfessionals.map((p) => (
+                    <Button
+                      key={p.id}
+                      variant="outline"
+                      className={cn(
+                        'w-full justify-start h-auto p-2 text-left',
+                        selectedProfessional === p.name &&
+                          'border-secondary border-2',
+                      )}
+                      onClick={() => setSelectedProfessional(p.name)}
+                    >
+                      <Avatar className="h-16 w-16 mr-4">
+                        <AvatarImage src={p.photo_url || undefined} />
+                        <AvatarFallback>
+                          <User className="h-8 w-8" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="font-semibold">{p.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {p.specialty}
+                        </span>
+                      </div>
+                    </Button>
+                  ))}
             </CardContent>
           </Card>
         )
@@ -298,7 +319,7 @@ export default function Schedule() {
         <h2 className="text-xl font-semibold text-neutral-dark mb-4">
           Histórico de Consultas
         </h2>
-        {loading ? (
+        {appointmentsLoading ? (
           <div className="space-y-2">
             <Skeleton className="h-12 w-full" />
             <Skeleton className="h-12 w-full" />
