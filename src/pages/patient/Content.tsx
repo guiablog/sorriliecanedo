@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   Card,
   CardHeader,
@@ -7,6 +8,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useContentStore, ContentItem } from '@/stores/content'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ContentDetailsModal } from '@/components/ContentDetailsModal'
 
 const getImageQuery = (title: string) => {
   return encodeURIComponent(
@@ -14,10 +16,17 @@ const getImageQuery = (title: string) => {
   )
 }
 
-const ContentCard = ({ item }: { item: ContentItem }) => (
+const ContentCard = ({
+  item,
+  onClick,
+}: {
+  item: ContentItem
+  onClick: () => void
+}) => (
   <Card
     key={item.id}
     className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+    onClick={onClick}
   >
     <img
       src={
@@ -46,6 +55,11 @@ const LoadingSkeleton = () => (
 
 export default function Content() {
   const { content, loading } = useContentStore()
+  const [isModalOpen, setModalOpen] = useState(false)
+  const [selectedContent, setSelectedContent] = useState<ContentItem | null>(
+    null,
+  )
+  const [activeList, setActiveList] = useState<ContentItem[]>([])
 
   const tips = content.filter(
     (c) => c.type === 'tip' && c.status === 'Publicado',
@@ -53,6 +67,25 @@ export default function Content() {
   const news = content.filter(
     (c) => c.type === 'news' && c.status === 'Publicado',
   )
+
+  const handleCardClick = (item: ContentItem, list: ContentItem[]) => {
+    setSelectedContent(item)
+    setActiveList(list)
+    setModalOpen(true)
+  }
+
+  const handleNavigate = (direction: 'next' | 'prev') => {
+    if (!selectedContent) return
+
+    const currentIndex = activeList.findIndex(
+      (item) => item.id === selectedContent.id,
+    )
+    const newIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1
+
+    if (newIndex >= 0 && newIndex < activeList.length) {
+      setSelectedContent(activeList[newIndex])
+    }
+  }
 
   return (
     <div className="p-4 animate-fade-in-up">
@@ -66,16 +99,36 @@ export default function Content() {
             ? Array.from({ length: 2 }).map((_, index) => (
                 <LoadingSkeleton key={index} />
               ))
-            : tips.map((tip) => <ContentCard key={tip.id} item={tip} />)}
+            : tips.map((tip) => (
+                <ContentCard
+                  key={tip.id}
+                  item={tip}
+                  onClick={() => handleCardClick(tip, tips)}
+                />
+              ))}
         </TabsContent>
         <TabsContent value="news" className="space-y-4 mt-4">
           {loading
             ? Array.from({ length: 2 }).map((_, index) => (
                 <LoadingSkeleton key={index} />
               ))
-            : news.map((item) => <ContentCard key={item.id} item={item} />)}
+            : news.map((item) => (
+                <ContentCard
+                  key={item.id}
+                  item={item}
+                  onClick={() => handleCardClick(item, news)}
+                />
+              ))}
         </TabsContent>
       </Tabs>
+
+      <ContentDetailsModal
+        open={isModalOpen}
+        onOpenChange={setModalOpen}
+        selectedContent={selectedContent}
+        contentList={activeList}
+        onNavigate={handleNavigate}
+      />
     </div>
   )
 }
