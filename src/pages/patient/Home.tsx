@@ -47,6 +47,9 @@ export default function PatientHome() {
         new Date(`${b.date}T${b.time}`).getTime(),
     )[0]
 
+  const tips = content.filter(
+    (c) => c.type === 'tip' && c.status === 'Publicado',
+  )
   const promotions = content.filter(
     (c) => c.type === 'promotion' && c.status === 'Publicado',
   )
@@ -216,6 +219,11 @@ export default function PatientHome() {
         </div>
       </section>
 
+      <ContentCarousel
+        title="Dicas de Saúde"
+        items={tips}
+        onItemClick={handleContentClick}
+      />
       <ContentCarousel
         title="Promoções"
         items={promotions}
