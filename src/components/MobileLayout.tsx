@@ -17,6 +17,7 @@ export default function MobileLayout() {
   const { settings } = useAppSettingsStore()
   const title = routeTitles[location.pathname] || 'Sorriliê Odontologia'
   const showBackButton = location.pathname !== '/home'
+  const isHomePage = location.pathname === '/home'
 
   const whatsappNumber = settings?.whatsapp_contact || '5511999999999'
   const showWhatsappButton = settings?.whatsapp_button_enabled ?? true
@@ -32,7 +33,15 @@ export default function MobileLayout() {
             <ArrowLeft className="h-6 w-6 text-foreground" />
           </Link>
         )}
-        <h1 className="text-lg font-semibold text-foreground">{title}</h1>
+        {isHomePage && settings?.logo_url ? (
+          <img
+            src={settings.logo_url}
+            alt="Sorriliê Odontologia"
+            className="h-8"
+          />
+        ) : (
+          <h1 className="text-lg font-semibold text-foreground">{title}</h1>
+        )}
       </header>
 
       <main className="pt-14 pb-20">
