@@ -34,10 +34,10 @@ type ProfileFormValues = z.infer<typeof profileSchema>
 
 export default function Profile() {
   const navigate = useNavigate()
-  const { fullName, logout } = useAuthStore()
+  const { name, logout } = useAuthStore()
   const { patients, updatePatient } = usePatientStore()
 
-  const currentUser = patients.find((p) => p.name === fullName)
+  const currentUser = patients.find((p) => p.name === name)
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),

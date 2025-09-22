@@ -20,7 +20,7 @@ export default function MobileLayout() {
   const isHomePage = location.pathname === '/home'
 
   const whatsappNumber = settings?.whatsapp_contact || '5511999999999'
-  const showWhatsappButton = settings?.whatsapp_button_enabled ?? true
+  const showWhatsappButton = settings?.whatsapp_button_enabled === true
   const whatsappIconUrl =
     settings?.whatsapp_icon_url ||
     'https://img.usecurling.com/i?q=whatsapp&color=white&shape=hand-drawn'

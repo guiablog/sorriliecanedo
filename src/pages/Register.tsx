@@ -24,7 +24,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 const registerSchema = z
   .object({
-    fullName: z
+    name: z
       .string()
       .min(3, { message: 'Nome deve ter pelo menos 3 caracteres.' }),
     cpf: z.string().refine(isValidCPF, {
@@ -49,14 +49,14 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 export default function Register() {
   const navigate = useNavigate()
   const location = useLocation()
-  const loginAction = useAuthStore((state) => state.login)
+  const patientLogin = useAuthStore((state) => state.patientLogin)
   const { patients, addPatient } = usePatientStore()
   const { settings, loading: settingsLoading } = useAppSettingsStore()
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      fullName: '',
+      name: '',
       cpf: '',
       whatsapp: '',
       email: '',
@@ -87,7 +87,7 @@ export default function Register() {
 
     try {
       await addPatient(data)
-      loginAction('patient', data.fullName)
+      patientLogin(data.name)
       toast({
         title: 'Cadastro realizado com sucesso!',
         description: 'Você será redirecionado para a tela inicial.',
@@ -135,7 +135,7 @@ export default function Register() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="fullName"
+              name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nome Completo</FormLabel>

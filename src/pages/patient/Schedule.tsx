@@ -73,11 +73,11 @@ export default function Schedule() {
     addAppointment,
     loading: appointmentsLoading,
   } = useAppointmentStore()
-  const { fullName } = useAuthStore()
+  const { name } = useAuthStore()
 
   const activeProfessionals = professionals.filter((p) => p.status === 'Ativo')
   const activeServices = services.filter((s) => s.status === 'Ativo')
-  const userAppointments = appointments.filter((a) => a.patient === fullName)
+  const userAppointments = appointments.filter((a) => a.patient === name)
 
   const handleNext = async () => {
     if (step === 1 && !selectedService) {
@@ -106,12 +106,12 @@ export default function Schedule() {
     }
 
     if (step === 3 && selectedDate && selectedTime) {
-      if (selectedService && selectedProfessional && fullName) {
+      if (selectedService && selectedProfessional && name) {
         try {
           await addAppointment({
             date: format(selectedDate, 'yyyy-MM-dd'),
             time: selectedTime,
-            patient: fullName,
+            patient: name,
             service: selectedService,
             professional: selectedProfessional,
             status: 'Pendente',

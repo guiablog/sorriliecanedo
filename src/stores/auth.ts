@@ -6,9 +6,9 @@ import { supabase } from '@/lib/supabase/client'
 interface AuthState {
   isAuthenticated: boolean
   userType: 'patient' | 'admin' | null
-  fullName: string | null // For patient
-  adminUser: { name: string; email: string } | null // For admin
-  patientLogin: (fullName: string) => void
+  name: string | null
+  adminUser: { name: string; email: string } | null
+  patientLogin: (name: string) => void
   adminLogin: (email: string, pass: string) => Promise<boolean | string>
   logout: () => void
 }
@@ -18,13 +18,13 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       isAuthenticated: false,
       userType: null,
-      fullName: null,
+      name: null,
       adminUser: null,
-      patientLogin: (fullName) =>
+      patientLogin: (name) =>
         set({
           isAuthenticated: true,
           userType: 'patient',
-          fullName: fullName,
+          name: name,
           adminUser: null,
         }),
       adminLogin: async (email, password) => {
@@ -62,7 +62,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
             userType: 'admin',
             adminUser: { name: adminProfile.name, email: adminProfile.email },
-            fullName: null,
+            name: null,
           })
           return true
         } catch (profileError) {
@@ -76,7 +76,7 @@ export const useAuthStore = create<AuthState>()(
         set({
           isAuthenticated: false,
           userType: null,
-          fullName: null,
+          name: null,
           adminUser: null,
         })
       },

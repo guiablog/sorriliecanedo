@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase/client'
 import { Patient } from '@/stores/patient'
 
 type AddPatientPayload = {
-  fullName: string
+  name: string
   cpf: string
   whatsapp: string
   email: string
@@ -31,7 +31,7 @@ export const patientService = {
     const { data, error } = await supabase
       .from('patients')
       .insert({
-        name: patientData.fullName,
+        name: patientData.name,
         cpf: patientData.cpf,
         whatsapp: patientData.whatsapp,
         email: patientData.email,

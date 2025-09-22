@@ -18,7 +18,7 @@ interface PatientState {
   fetchPatients: () => Promise<void>
   setEmailForPasswordReset: (email: string | null) => void
   addPatient: (patient: {
-    fullName: string
+    name: string
     cpf: string
     whatsapp: string
     email: string
@@ -54,7 +54,7 @@ export const usePatientStore = create<PatientState>()((set) => ({
     const updatedPatient = await patientService.updatePatient(originalCpf, data)
     set((state) => ({
       patients: state.patients.map((p) =>
-        p.cpf === originalCpf ? { ...updatedPatient, ...data } : p,
+        p.cpf === originalCpf ? updatedPatient : p,
       ),
     }))
   },

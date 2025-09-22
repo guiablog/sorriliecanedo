@@ -15,7 +15,7 @@ import { ContentDetailsModal } from '@/components/ContentDetailsModal'
 import { ContentCarousel } from '@/components/ContentCarousel'
 
 export default function PatientHome() {
-  const { fullName } = useAuthStore()
+  const { name } = useAuthStore()
   const { appointments, updateAppointmentStatus } = useAppointmentStore()
   const { content } = useContentStore()
 
@@ -32,12 +32,12 @@ export default function PatientHome() {
   )
   const [activeList, setActiveList] = useState<ContentItem[]>([])
 
-  const patientName = fullName ? fullName.split(' ')[0] : 'Paciente'
+  const patientName = name ? name.split(' ')[0] : 'Paciente'
 
   const nextAppointment = appointments
     .filter(
       (appt) =>
-        appt.patient === fullName &&
+        appt.patient === name &&
         (appt.status === 'Confirmado' || appt.status === 'Pendente') &&
         new Date(`${appt.date}T${appt.time}`) >= new Date(),
     )

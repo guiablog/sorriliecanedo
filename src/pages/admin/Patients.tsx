@@ -96,7 +96,7 @@ export default function AdminPatients() {
         await updatePatient(selectedPatient.cpf, data)
         toast({ title: 'Paciente atualizado com sucesso!' })
       } else {
-        await addPatient({ ...data, fullName: data.name })
+        await addPatient(data)
         toast({ title: 'Paciente adicionado com sucesso!' })
       }
       setFormModalOpen(false)
