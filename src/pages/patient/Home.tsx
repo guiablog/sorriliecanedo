@@ -47,11 +47,10 @@ export default function PatientHome() {
         new Date(`${b.date}T${b.time}`).getTime(),
     )[0]
 
-  const promotions = content.filter(
-    (c) => c.type === 'promotion' && c.status === 'Publicado',
-  )
-  const highlights = content.filter(
-    (c) => c.type === 'highlight' && c.status === 'Publicado',
+  const promotionsAndHighlights = content.filter(
+    (c) =>
+      (c.type === 'promotion' || c.type === 'highlight') &&
+      c.status === 'Publicado',
   )
 
   useEffect(() => {
@@ -217,13 +216,8 @@ export default function PatientHome() {
       </section>
 
       <ContentCarousel
-        title="Promoções"
-        items={promotions}
-        onItemClick={handleContentClick}
-      />
-      <ContentCarousel
-        title="Destaques"
-        items={highlights}
+        title="Promoções e Destaques"
+        items={promotionsAndHighlights}
         onItemClick={handleContentClick}
       />
 
