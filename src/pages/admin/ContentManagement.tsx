@@ -29,7 +29,9 @@ export default function AdminContentManagement() {
 
   const tips = content.filter((c) => c.type === 'tip')
   const news = content.filter((c) => c.type === 'news')
-  const publications = content.filter((c) => c.type === 'publication')
+  const promotionsAndHighlights = content.filter(
+    (c) => c.type === 'promotion' || c.type === 'highlight',
+  )
 
   const openModal = (
     type: ContentType,
@@ -71,7 +73,18 @@ export default function AdminContentManagement() {
     }
   }
 
-  const renderTableRows = (items: ContentItem[]) => {
+  const getContentTypeLabel = (type: ContentType) => {
+    const labels: Record<ContentType, string> = {
+      tip: 'Dica',
+      news: 'Novidade',
+      publication: 'Publicação',
+      promotion: 'Promoção',
+      highlight: 'Destaque',
+    }
+    return labels[type] || 'Conteúdo'
+  }
+
+  const renderSimpleTableRows = (items: ContentItem[]) => {
     if (loading) {
       return Array.from({ length: 3 }).map((_, i) => (
         <TableRow key={i}>
@@ -96,15 +109,30 @@ export default function AdminContentManagement() {
     ))
   }
 
-  const getContentTypeLabel = (type: ContentType) => {
-    const labels: Record<ContentType, string> = {
-      tip: 'Dica',
-      news: 'Novidade',
-      publication: 'Publicação',
-      promotion: 'Promoção',
-      highlight: 'Destaque',
+  const renderTypedTableRows = (items: ContentItem[]) => {
+    if (loading) {
+      return Array.from({ length: 3 }).map((_, i) => (
+        <TableRow key={i}>
+          <TableCell colSpan={4}>
+            <Skeleton className="h-8 w-full" />
+          </TableCell>
+        </TableRow>
+      ))
     }
-    return labels[type] || 'Conteúdo'
+    return items.map((item) => (
+      <TableRow
+        key={item.id}
+        onClick={() => openModal(item.type, item)}
+        className="cursor-pointer"
+      >
+        <TableCell>{item.title}</TableCell>
+        <TableCell>{getContentTypeLabel(item.type)}</TableCell>
+        <TableCell>
+          {format(new Date(item.publishedDate), 'dd/MM/yyyy')}
+        </TableCell>
+        <TableCell>{item.status}</TableCell>
+      </TableRow>
+    ))
   }
 
   return (
@@ -114,7 +142,9 @@ export default function AdminContentManagement() {
         <TabsList>
           <TabsTrigger value="tips">Dicas de Saúde</TabsTrigger>
           <TabsTrigger value="news">Novidades</TabsTrigger>
-          <TabsTrigger value="publications">Publicações</TabsTrigger>
+          <TabsTrigger value="promotions-highlights">
+            Promoções e Destaques
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="tips" className="mt-4">
           <div className="flex justify-end mb-4">
@@ -134,7 +164,7 @@ export default function AdminContentManagement() {
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>{renderTableRows(tips)}</TableBody>
+              <TableBody>{renderSimpleTableRows(tips)}</TableBody>
             </Table>
           </div>
         </TabsContent>
@@ -156,17 +186,23 @@ export default function AdminContentManagement() {
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>{renderTableRows(news)}</TableBody>
+              <TableBody>{renderSimpleTableRows(news)}</TableBody>
             </Table>
           </div>
         </TabsContent>
-        <TabsContent value="publications" className="mt-4">
-          <div className="flex justify-end mb-4">
+        <TabsContent value="promotions-highlights" className="mt-4">
+          <div className="flex justify-end gap-2 mb-4">
             <Button
-              onClick={() => openModal('publication')}
+              onClick={() => openModal('promotion')}
               className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
             >
-              Adicionar Publicação
+              Adicionar Promoção
+            </Button>
+            <Button
+              onClick={() => openModal('highlight')}
+              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+            >
+              Adicionar Destaque
             </Button>
           </div>
           <div className="border rounded-lg">
@@ -174,11 +210,14 @@ export default function AdminContentManagement() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Título</TableHead>
+                  <TableHead>Tipo</TableHead>
                   <TableHead>Publicado em</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>{renderTableRows(publications)}</TableBody>
+              <TableBody>
+                {renderTypedTableRows(promotionsAndHighlights)}
+              </TableBody>
             </Table>
           </div>
         </TabsContent>
