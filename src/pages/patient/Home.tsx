@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import {
@@ -44,6 +44,8 @@ export default function PatientHome() {
   const [isCancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null)
+  const [bannerWidth, setBannerWidth] = useState<number | undefined>()
+  const bannerRef = useRef<HTMLDivElement>(null)
 
   const patientName = fullName ? fullName.split(' ')[0] : 'Paciente'
 
@@ -59,6 +61,18 @@ export default function PatientHome() {
         new Date(`${a.date}T${a.time}`).getTime() -
         new Date(`${b.date}T${b.time}`).getTime(),
     )[0]
+
+  useEffect(() => {
+    if (bannerRef.current) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          setBannerWidth(entry.contentRect.width)
+        }
+      })
+      resizeObserver.observe(bannerRef.current)
+      return () => resizeObserver.disconnect()
+    }
+  }, [nextAppointment])
 
   const handleViewDetails = (appointment: Appointment) => {
     setSelectedAppointment(appointment)
@@ -101,7 +115,10 @@ export default function PatientHome() {
 
       <section>
         {nextAppointment ? (
-          <Card className="bg-secondary text-secondary-foreground">
+          <Card
+            ref={bannerRef}
+            className="bg-secondary text-secondary-foreground"
+          >
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
@@ -218,6 +235,7 @@ export default function PatientHome() {
         appointment={selectedAppointment}
         open={isDetailsModalOpen}
         onOpenChange={setDetailsModalOpen}
+        customWidth={bannerWidth}
       />
       <CancelConfirmationDialog
         open={isCancelDialogOpen}

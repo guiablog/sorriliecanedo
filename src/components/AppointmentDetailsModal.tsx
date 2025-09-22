@@ -18,17 +18,20 @@ import {
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
 
 interface AppointmentDetailsModalProps {
   appointment: Appointment | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  customWidth?: number
 }
 
 export const AppointmentDetailsModal = ({
   appointment,
   open,
   onOpenChange,
+  customWidth,
 }: AppointmentDetailsModalProps) => {
   if (!appointment) return null
 
@@ -36,7 +39,10 @@ export const AppointmentDetailsModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        className={cn({ 'sm:max-w-md': !customWidth })}
+        style={{ width: customWidth ? `${customWidth}px` : undefined }}
+      >
         <DialogHeader>
           <DialogTitle>Detalhes da Consulta</DialogTitle>
           <DialogDescription>
