@@ -1,20 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '@/components/ui/card'
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from '@/components/ui/carousel'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar, Stethoscope, Lightbulb } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth'
 import { useAppointmentStore, Appointment } from '@/stores/appointment'
@@ -23,29 +10,27 @@ import { CancelConfirmationDialog } from '@/components/CancelConfirmationDialog'
 import { toast } from '@/components/ui/use-toast'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-
-const mockPromotions = [
-  {
-    title: 'Clareamento Dental',
-    description: 'Sorriso mais branco com 20% de desconto!',
-    image: 'https://img.usecurling.com/p/400/200?q=teeth%20whitening',
-  },
-  {
-    title: 'Check-up Preventivo',
-    description: 'Agende sua avaliação e previna problemas futuros.',
-    image: 'https://img.usecurling.com/p/400/200?q=dental%20checkup',
-  },
-]
+import { useContentStore, ContentItem } from '@/stores/content'
+import { ContentDetailsModal } from '@/components/ContentDetailsModal'
+import { ContentCarousel } from '@/components/ContentCarousel'
 
 export default function PatientHome() {
   const { fullName } = useAuthStore()
   const { appointments, updateAppointmentStatus } = useAppointmentStore()
+  const { content } = useContentStore()
+
   const [isDetailsModalOpen, setDetailsModalOpen] = useState(false)
   const [isCancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null)
   const [bannerWidth, setBannerWidth] = useState<number | undefined>()
   const bannerRef = useRef<HTMLDivElement>(null)
+
+  const [isContentModalOpen, setContentModalOpen] = useState(false)
+  const [selectedContent, setSelectedContent] = useState<ContentItem | null>(
+    null,
+  )
+  const [activeList, setActiveList] = useState<ContentItem[]>([])
 
   const patientName = fullName ? fullName.split(' ')[0] : 'Paciente'
 
@@ -61,6 +46,13 @@ export default function PatientHome() {
         new Date(`${a.date}T${a.time}`).getTime() -
         new Date(`${b.date}T${b.time}`).getTime(),
     )[0]
+
+  const promotions = content.filter(
+    (c) => c.type === 'promotion' && c.status === 'Publicado',
+  )
+  const highlights = content.filter(
+    (c) => c.type === 'highlight' && c.status === 'Publicado',
+  )
 
   useEffect(() => {
     if (bannerRef.current) {
@@ -102,6 +94,25 @@ export default function PatientHome() {
     }
     setCancelDialogOpen(false)
     setSelectedAppointment(null)
+  }
+
+  const handleContentClick = (item: ContentItem, list: ContentItem[]) => {
+    setSelectedContent(item)
+    setActiveList(list)
+    setContentModalOpen(true)
+  }
+
+  const handleNavigate = (direction: 'next' | 'prev') => {
+    if (!selectedContent) return
+
+    const currentIndex = activeList.findIndex(
+      (item) => item.id === selectedContent.id,
+    )
+    const newIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1
+
+    if (newIndex >= 0 && newIndex < activeList.length) {
+      setSelectedContent(activeList[newIndex])
+    }
   }
 
   return (
@@ -205,32 +216,17 @@ export default function PatientHome() {
         </div>
       </section>
 
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold text-neutral-dark">
-          Promoções e Destaques
-        </h2>
-        <Carousel opts={{ loop: true }}>
-          <CarouselContent>
-            {mockPromotions.map((promo, index) => (
-              <CarouselItem key={index}>
-                <Card className="overflow-hidden">
-                  <img
-                    src={promo.image}
-                    alt={promo.title}
-                    className="w-full h-32 object-cover"
-                  />
-                  <CardHeader>
-                    <CardTitle>{promo.title}</CardTitle>
-                    <CardDescription>{promo.description}</CardDescription>
-                  </CardHeader>
-                </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="left-2" />
-          <CarouselNext className="right-2" />
-        </Carousel>
-      </section>
+      <ContentCarousel
+        title="Promoções"
+        items={promotions}
+        onItemClick={handleContentClick}
+      />
+      <ContentCarousel
+        title="Destaques"
+        items={highlights}
+        onItemClick={handleContentClick}
+      />
+
       <AppointmentDetailsModal
         appointment={selectedAppointment}
         open={isDetailsModalOpen}
@@ -241,6 +237,13 @@ export default function PatientHome() {
         open={isCancelDialogOpen}
         onOpenChange={setCancelDialogOpen}
         onConfirm={handleConfirmCancel}
+      />
+      <ContentDetailsModal
+        open={isContentModalOpen}
+        onOpenChange={setContentModalOpen}
+        selectedContent={selectedContent}
+        contentList={activeList}
+        onNavigate={handleNavigate}
       />
     </div>
   )

@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { contentService } from '@/services/contentService'
 
-export type ContentType = 'tip' | 'news'
+export type ContentType = 'tip' | 'news' | 'promotion' | 'highlight'
 
 export interface ContentItem {
   id: string
