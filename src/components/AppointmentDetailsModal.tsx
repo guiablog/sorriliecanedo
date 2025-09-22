@@ -40,7 +40,7 @@ export const AppointmentDetailsModal = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={cn({ 'sm:max-w-md': !customWidth })}
+        className={cn('rounded-lg', { 'sm:max-w-md': !customWidth })}
         style={{ width: customWidth ? `${customWidth}px` : undefined }}
       >
         <DialogHeader>
