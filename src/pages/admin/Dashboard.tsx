@@ -1,4 +1,4 @@
-import { BarChart, LineChart, PieChart } from 'recharts'
+import { LineChart, PieChart } from 'recharts'
 import {
   subDays,
   isAfter,
