@@ -19,6 +19,8 @@ import { cpfMask, whatsappMask } from '@/lib/masks'
 import { isValidCPF } from '@/lib/utils'
 import { useEffect } from 'react'
 import { ArrowLeft } from 'lucide-react'
+import { useAppSettingsStore } from '@/stores/appSettings'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const registerSchema = z
   .object({
@@ -49,6 +51,7 @@ export default function Register() {
   const location = useLocation()
   const loginAction = useAuthStore((state) => state.login)
   const { patients, addPatient } = usePatientStore()
+  const { settings, loading: settingsLoading } = useAppSettingsStore()
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -99,6 +102,9 @@ export default function Register() {
     }
   }
 
+  const defaultLogo =
+    'https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black'
+
   return (
     <div className="flex flex-col min-h-screen bg-neutral-light p-6 md:p-8 justify-center animate-fade-in">
       <div className="w-full max-w-md mx-auto relative">
@@ -109,11 +115,15 @@ export default function Register() {
           </Button>
         </Link>
         <div className="text-center mb-8">
-          <img
-            src="https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black"
-            alt="Logo Sorriliê"
-            className="h-12 mx-auto mb-4"
-          />
+          {settingsLoading ? (
+            <Skeleton className="h-12 w-48 mx-auto mb-4" />
+          ) : (
+            <img
+              src={settings?.logo_url || defaultLogo}
+              alt="Logo Sorriliê"
+              className="h-12 mx-auto mb-4"
+            />
+          )}
           <h1 className="text-2xl font-bold text-neutral-dark">
             Crie sua Conta
           </h1>
