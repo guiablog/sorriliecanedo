@@ -268,27 +268,6 @@ export default function Schedule() {
 
   return (
     <div className="p-4 space-y-4 animate-fade-in-up">
-      {settings?.clinic_address && settings?.clinic_phone && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <MapPin className="h-5 w-5 text-accent" />
-              Endereço:
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <p className="text-sm">{settings.clinic_address}</p>
-            <a
-              href={`tel:${settings.clinic_phone.replace(/\D/g, '')}`}
-              className="flex items-center gap-2 text-sm text-secondary font-medium hover:underline"
-            >
-              <Phone className="h-4 w-4" />
-              Telefone: {settings.clinic_phone}
-            </a>
-          </CardContent>
-        </Card>
-      )}
-
       {renderStep()}
       <div className="flex justify-between gap-2">
         {step > 1 && step < 4 && (
@@ -305,6 +284,49 @@ export default function Schedule() {
           </Button>
         )}
       </div>
+
+      {step < 4 && (
+        <>
+          {settings?.clinic_address && settings?.clinic_phone && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <MapPin className="h-5 w-5 text-accent" />
+                  Endereço:
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <p className="text-sm">{settings.clinic_address}</p>
+                <a
+                  href={`tel:${settings.clinic_phone.replace(/\D/g, '')}`}
+                  className="flex items-center gap-2 text-sm text-secondary font-medium hover:underline"
+                >
+                  <Phone className="h-4 w-4" />
+                  Telefone: {settings.clinic_phone}
+                </a>
+              </CardContent>
+            </Card>
+          )}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <MapPin className="h-5 w-5 text-accent" />
+                Localização da Clínica
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3821.995506969596!2d-49.11485412587116!3d-16.69989613949953!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x935ef59355555555%3A0x8a0b252c0d429e9f!2sSorrili%C3%AA%20Odontologia!5e0!3m2!1sen!2sbr!4v1721889809545!5m2!1sen!2sbr"
+                className="w-full h-64 border-0 rounded-b-lg"
+                allowFullScreen={true}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Localização da Clínica Sorriliê"
+              ></iframe>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   )
 }

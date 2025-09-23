@@ -44,6 +44,8 @@ export type Database = {
       }
       app_settings: {
         Row: {
+          clinic_address: string | null
+          clinic_phone: string | null
           id: number
           logo_url: string | null
           splash_screen_image_url: string | null
@@ -53,6 +55,8 @@ export type Database = {
           whatsapp_icon_url: string | null
         }
         Insert: {
+          clinic_address?: string | null
+          clinic_phone?: string | null
           id: number
           logo_url?: string | null
           splash_screen_image_url?: string | null
@@ -62,6 +66,8 @@ export type Database = {
           whatsapp_icon_url?: string | null
         }
         Update: {
+          clinic_address?: string | null
+          clinic_phone?: string | null
           id?: number
           logo_url?: string | null
           splash_screen_image_url?: string | null
