@@ -52,14 +52,14 @@ export const AppointmentHistoryModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-sm rounded-lg">
         <DialogHeader>
           <DialogTitle>Histórico de Consultas</DialogTitle>
           <DialogDescription>
             Aqui estão todas as suas consultas, passadas e futuras.
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="h-[60vh] pr-4">
+        <ScrollArea className="h-[50vh] pr-4">
           <div className="space-y-4">
             {loading ? (
               Array.from({ length: 4 }).map((_, i) => (
