@@ -7,6 +7,8 @@ export interface AppSettings {
   splash_screen_image_url: string | null
   whatsapp_button_enabled: boolean | null
   whatsapp_icon_url: string | null
+  clinic_address: string | null
+  clinic_phone: string | null
 }
 
 const formatWhatsappNumber = (

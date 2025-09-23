@@ -17,12 +17,15 @@ import {
   Stethoscope,
   Calendar as CalendarIcon,
   Clock,
+  MapPin,
+  Phone,
 } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { useProfessionalStore } from '@/stores/professional'
 import { useAppointmentStore } from '@/stores/appointment'
 import { useAuthStore } from '@/stores/auth'
 import { useServiceStore } from '@/stores/service'
+import { useAppSettingsStore } from '@/stores/appSettings'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -46,6 +49,7 @@ export default function Schedule() {
   const { services, loading: servicesLoading } = useServiceStore()
   const { addAppointment } = useAppointmentStore()
   const { name } = useAuthStore()
+  const { settings } = useAppSettingsStore()
 
   const activeProfessionals = professionals.filter((p) => p.status === 'Ativo')
   const activeServices = services.filter((s) => s.status === 'Ativo')
@@ -264,6 +268,27 @@ export default function Schedule() {
 
   return (
     <div className="p-4 space-y-4 animate-fade-in-up">
+      {settings?.clinic_address && settings?.clinic_phone && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <MapPin className="h-5 w-5 text-accent" />
+              Endereço:
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p className="text-sm">{settings.clinic_address}</p>
+            <a
+              href={`tel:${settings.clinic_phone.replace(/\D/g, '')}`}
+              className="flex items-center gap-2 text-sm text-secondary font-medium hover:underline"
+            >
+              <Phone className="h-4 w-4" />
+              Telefone: {settings.clinic_phone}
+            </a>
+          </CardContent>
+        </Card>
+      )}
+
       {renderStep()}
       <div className="flex justify-between gap-2">
         {step > 1 && step < 4 && (
