@@ -81,10 +81,7 @@ export default function Register() {
       return
     }
 
-    const { error } = await patientService.signUpPatient({
-      ...data,
-      cpf: data.cpf.replace(/\D/g, ''),
-    })
+    const { error } = await patientService.signUpPatient(data)
 
     if (error) {
       toast({

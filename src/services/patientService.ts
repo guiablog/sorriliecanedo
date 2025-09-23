@@ -36,7 +36,7 @@ export const patientService = {
       options: {
         data: {
           name: patientData.name,
-          cpf: patientData.cpf,
+          cpf: patientData.cpf.replace(/\D/g, ''),
           whatsapp: patientData.whatsapp,
         },
       },
@@ -80,10 +80,11 @@ export const patientService = {
   },
 
   async getPatientByCpf(cpf: string): Promise<Patient | null> {
+    const cleanedCpf = cpf.replace(/\D/g, '')
     const { data, error } = await supabase
       .from('patients')
       .select('*')
-      .eq('cpf', cpf)
+      .eq('cpf', cleanedCpf)
       .single()
 
     if (error && error.code !== 'PGRST116') {
