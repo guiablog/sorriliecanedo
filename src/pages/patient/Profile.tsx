@@ -19,24 +19,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
-import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/stores/auth'
 import { usePatientStore } from '@/stores/patient'
-import { useAppointmentStore } from '@/stores/appointment'
 import { isValidCPF } from '@/lib/utils'
 import { whatsappMask, cpfMask } from '@/lib/masks'
 import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import { ReviewDrawer } from '@/components/ReviewDrawer'
-import { Skeleton } from '@/components/ui/skeleton'
 
 const profileSchema = z.object({
   name: z
@@ -51,31 +39,13 @@ const profileSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileSchema>
 
-const getStatusVariant = (status: string) => {
-  switch (status) {
-    case 'Realizado':
-      return 'default'
-    case 'Confirmado':
-      return 'secondary'
-    case 'Cancelado':
-      return 'destructive'
-    default:
-      return 'outline'
-  }
-}
-
 export default function Profile() {
   const navigate = useNavigate()
   const { name, logout } = useAuthStore()
   const { patients, updatePatient } = usePatientStore()
-  const { appointments, loading: appointmentsLoading } = useAppointmentStore()
   const [isDetailsVisible, setIsDetailsVisible] = useState(false)
-  const [isReviewDrawerOpen, setReviewDrawerOpen] = useState(false)
-  const [selectedAppointmentForReview, setSelectedAppointmentForReview] =
-    useState<any>(null)
 
   const currentUser = patients.find((p) => p.name === name)
-  const userAppointments = appointments.filter((a) => a.patient === name)
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -110,11 +80,6 @@ export default function Profile() {
         variant: 'destructive',
       })
     }
-  }
-
-  const handleOpenReview = (appointment: any) => {
-    setSelectedAppointmentForReview(appointment)
-    setReviewDrawerOpen(true)
   }
 
   const handleLogout = () => {
@@ -210,52 +175,9 @@ export default function Profile() {
         </CollapsibleContent>
       </Collapsible>
 
-      <section>
-        <h2 className="text-xl font-semibold text-neutral-dark mb-4">
-          Histórico de Consultas
-        </h2>
-        {appointmentsLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
-          </div>
-        ) : (
-          <Accordion type="single" collapsible className="w-full">
-            {userAppointments.map((item) => (
-              <AccordionItem value={item.id} key={item.id}>
-                <AccordionTrigger>
-                  {format(new Date(`${item.date}T00:00:00`), 'dd/MM/yyyy')} -{' '}
-                  {item.service}
-                </AccordionTrigger>
-                <AccordionContent className="flex justify-between items-center">
-                  <Badge variant={getStatusVariant(item.status)}>
-                    {item.status}
-                  </Badge>
-                  {item.status === 'Realizado' && (
-                    <Button
-                      variant="link"
-                      className="text-accent"
-                      onClick={() => handleOpenReview(item)}
-                    >
-                      Avaliar
-                    </Button>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        )}
-      </section>
-
       <Button variant="destructive" className="w-full" onClick={handleLogout}>
         Sair
       </Button>
-
-      <ReviewDrawer
-        appointment={selectedAppointmentForReview}
-        open={isReviewDrawerOpen}
-        onOpenChange={setReviewDrawerOpen}
-      />
     </div>
   )
 }
