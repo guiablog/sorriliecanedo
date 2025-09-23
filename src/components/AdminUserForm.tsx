@@ -11,13 +11,26 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { AdminUser } from '@/types/admin'
+import { useEffect } from 'react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
-const adminUserSchema = z
+const baseSchema = {
+  name: z
+    .string()
+    .min(3, { message: 'Nome deve ter pelo menos 3 caracteres.' }),
+  email: z.string().email({ message: 'E-mail inválido.' }),
+}
+
+const createAdminUserSchema = z
   .object({
-    name: z
-      .string()
-      .min(3, { message: 'Nome deve ter pelo menos 3 caracteres.' }),
-    email: z.string().email({ message: 'E-mail inválido.' }),
+    ...baseSchema,
     password: z
       .string()
       .min(6, { message: 'Senha deve ter no mínimo 6 caracteres.' }),
@@ -28,23 +41,62 @@ const adminUserSchema = z
     path: ['confirmPassword'],
   })
 
-export type AdminUserFormValues = z.infer<typeof adminUserSchema>
+const editAdminUserSchema = z.object({
+  ...baseSchema,
+  status: z.enum(['active', 'inactive']),
+})
+
+export type AdminUserFormValues =
+  | z.infer<typeof createAdminUserSchema>
+  | z.infer<typeof editAdminUserSchema>
 
 interface AdminUserFormProps {
+  adminUser?: AdminUser | null
   onSubmit: (data: AdminUserFormValues) => void
   onCancel: () => void
 }
 
-export const AdminUserForm = ({ onSubmit, onCancel }: AdminUserFormProps) => {
+export const AdminUserForm = ({
+  adminUser,
+  onSubmit,
+  onCancel,
+}: AdminUserFormProps) => {
+  const isEditing = !!adminUser
+
   const form = useForm<AdminUserFormValues>({
-    resolver: zodResolver(adminUserSchema),
-    defaultValues: {
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-    },
+    resolver: zodResolver(
+      isEditing ? editAdminUserSchema : createAdminUserSchema,
+    ),
+    defaultValues: isEditing
+      ? {
+          name: adminUser.name,
+          email: adminUser.email,
+          status: adminUser.status,
+        }
+      : {
+          name: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+        },
   })
+
+  useEffect(() => {
+    if (adminUser) {
+      form.reset({
+        name: adminUser.name,
+        email: adminUser.email,
+        status: adminUser.status,
+      })
+    } else {
+      form.reset({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+      })
+    }
+  }, [adminUser, form])
 
   return (
     <Form {...form}>
@@ -79,32 +131,62 @@ export const AdminUserForm = ({ onSubmit, onCancel }: AdminUserFormProps) => {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Senha</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="confirmPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confirmar Senha</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {!isEditing && (
+          <>
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Senha</FormLabel>
+                  <FormControl>
+                    <Input type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirmar Senha</FormLabel>
+                  <FormControl>
+                    <Input type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
+        {isEditing && (
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="active">Ativo</SelectItem>
+                    <SelectItem value="inactive">Inativo</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         <div className="flex justify-end gap-2 pt-4">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
@@ -113,7 +195,7 @@ export const AdminUserForm = ({ onSubmit, onCancel }: AdminUserFormProps) => {
             type="submit"
             className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
           >
-            Salvar
+            {isEditing ? 'Salvar Alterações' : 'Salvar'}
           </Button>
         </div>
       </form>

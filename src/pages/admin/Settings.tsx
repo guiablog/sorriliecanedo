@@ -15,6 +15,22 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
   Card,
   CardContent,
   CardDescription,
@@ -33,7 +49,7 @@ import { AdminUser } from '@/types/admin'
 import { format } from 'date-fns'
 import { useAppSettingsStore } from '@/stores/appSettings'
 import { storageService } from '@/services/storageService'
-import { Loader2 } from 'lucide-react'
+import { Loader2, MoreHorizontal, Trash2, Edit, View } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -45,6 +61,8 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { whatsappMask } from '@/lib/masks'
+import { AdminUserDetailsModal } from '@/components/AdminUserDetailsModal'
+import { useAuthStore } from '@/stores/auth'
 
 const settingsSchema = z.object({
   whatsapp_contact: z
@@ -61,7 +79,12 @@ type SettingsFormValues = z.infer<typeof settingsSchema>
 export default function AdminSettings() {
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([])
   const [loadingUsers, setLoadingUsers] = useState(true)
-  const [isModalOpen, setModalOpen] = useState(false)
+  const [isFormModalOpen, setFormModalOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
+  const [isDetailsModalOpen, setDetailsModalOpen] = useState(false)
+  const [isDeleteAlertOpen, setDeleteAlertOpen] = useState(false)
+  const { adminUser: currentAdmin } = useAuthStore()
+
   const {
     settings,
     updateAppSettings,
@@ -114,17 +137,28 @@ export default function AdminSettings() {
 
   const handleAdminFormSubmit = async (data: AdminUserFormValues) => {
     try {
-      await adminUserService.createAdminUser(data)
-      toast({ title: 'Administrador adicionado com sucesso!' })
-      setModalOpen(false)
+      if (selectedUser) {
+        await adminUserService.updateAdminUser(
+          selectedUser.user_id,
+          data as any,
+        )
+        toast({ title: 'Administrador atualizado com sucesso!' })
+      } else {
+        await adminUserService.createAdminUser(data as any)
+        toast({ title: 'Administrador adicionado com sucesso!' })
+      }
+      setFormModalOpen(false)
+      setSelectedUser(null)
       fetchAdminUsers()
     } catch (error: any) {
-      const isDuplicate = error.message?.includes('duplicate key value')
+      const isDuplicate =
+        error.message?.includes('duplicate key value') ||
+        error.message?.includes('already registered')
       toast({
         title: 'Erro',
         description: isDuplicate
           ? 'Este e-mail já está em uso.'
-          : 'Não foi possível adicionar o administrador.',
+          : 'Não foi possível salvar o administrador.',
         variant: 'destructive',
       })
     }
@@ -178,6 +212,40 @@ export default function AdminSettings() {
         description: 'Não foi possível salvar as configurações.',
         variant: 'destructive',
       })
+    }
+  }
+
+  const handleViewDetails = (user: AdminUser) => {
+    setSelectedUser(user)
+    setDetailsModalOpen(true)
+  }
+
+  const handleEditUser = (user: AdminUser) => {
+    setSelectedUser(user)
+    setFormModalOpen(true)
+  }
+
+  const handleDeleteUser = (user: AdminUser) => {
+    setSelectedUser(user)
+    setDeleteAlertOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!selectedUser) return
+    try {
+      await adminUserService.deleteAdminUser(selectedUser.user_id)
+      toast({ title: 'Administrador excluído com sucesso!' })
+      fetchAdminUsers()
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description:
+          error.message || 'Não foi possível excluir o administrador.',
+        variant: 'destructive',
+      })
+    } finally {
+      setDeleteAlertOpen(false)
+      setSelectedUser(null)
     }
   }
 
@@ -335,7 +403,10 @@ export default function AdminSettings() {
             </CardDescription>
           </div>
           <Button
-            onClick={() => setModalOpen(true)}
+            onClick={() => {
+              setSelectedUser(null)
+              setFormModalOpen(true)
+            }}
             className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
           >
             Adicionar Administrador
@@ -348,8 +419,8 @@ export default function AdminSettings() {
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Criado em</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -366,9 +437,37 @@ export default function AdminSettings() {
                         <TableCell>{user.name}</TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>
-                          {format(new Date(user.created_at), 'dd/MM/yyyy')}
+                          {user.status === 'active' ? 'Ativo' : 'Inativo'}
                         </TableCell>
-                        <TableCell>{user.status}</TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => handleViewDetails(user)}
+                              >
+                                <View className="mr-2 h-4 w-4" /> Ver Detalhes
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleEditUser(user)}
+                              >
+                                <Edit className="mr-2 h-4 w-4" /> Editar
+                              </DropdownMenuItem>
+                              {currentAdmin?.email !== user.email && (
+                                <DropdownMenuItem
+                                  className="text-destructive"
+                                  onClick={() => handleDeleteUser(user)}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" /> Excluir
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
                       </TableRow>
                     ))}
               </TableBody>
@@ -377,17 +476,47 @@ export default function AdminSettings() {
         </CardContent>
       </Card>
 
-      <Dialog open={isModalOpen} onOpenChange={setModalOpen}>
+      <Dialog open={isFormModalOpen} onOpenChange={setFormModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Adicionar Novo Administrador</DialogTitle>
+            <DialogTitle>
+              {selectedUser ? 'Editar' : 'Adicionar'} Administrador
+            </DialogTitle>
           </DialogHeader>
           <AdminUserForm
+            adminUser={selectedUser}
             onSubmit={handleAdminFormSubmit}
-            onCancel={() => setModalOpen(false)}
+            onCancel={() => {
+              setFormModalOpen(false)
+              setSelectedUser(null)
+            }}
           />
         </DialogContent>
       </Dialog>
+
+      <AdminUserDetailsModal
+        user={selectedUser}
+        open={isDetailsModalOpen}
+        onOpenChange={setDetailsModalOpen}
+      />
+
+      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Isso excluirá permanentemente o
+              usuário "{selectedUser?.name}" e removerá seu acesso ao painel.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>
+              Sim, excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
