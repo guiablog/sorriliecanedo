@@ -267,7 +267,7 @@ export default function Schedule() {
   }
 
   return (
-    <div className="p-4 space-y-4 animate-fade-in-up">
+    <div className="p-4 space-y-4 animate-fade-in-up bg-schedule-background">
       {renderStep()}
       <div className="flex justify-between gap-2">
         {step > 1 && step < 4 && (

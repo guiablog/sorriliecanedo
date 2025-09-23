@@ -39,6 +39,8 @@
 
     --radius: 0.75rem;
 
+    --schedule-background: 195 53% 79%; /* #ADD8E6 */
+
     --chart-1: 224 64% 22%;
     --chart-2: 223 64% 33%;
     --chart-3: 203 92% 60%;
@@ -74,6 +76,8 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+
+    --schedule-background: 195 53% 79%; /* #ADD8E6 */
   }
 }
 
