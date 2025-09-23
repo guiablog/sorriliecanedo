@@ -125,12 +125,11 @@ export default function Schedule() {
                 : activeServices.map((s) => (
                     <Button
                       key={s.id}
-                      variant="outline"
                       onClick={() => setSelectedService(s.name)}
                       className={cn(
-                        'h-12 font-bold border-2',
+                        'h-12 font-bold border-2 bg-schedule-button text-primary border-primary/20 hover:bg-schedule-button/80',
                         selectedService === s.name &&
-                          'bg-schedule-button text-primary border-secondary',
+                          'bg-secondary text-secondary-foreground border-secondary',
                       )}
                     >
                       {s.name}
@@ -159,11 +158,10 @@ export default function Schedule() {
                 : activeProfessionals.map((p) => (
                     <Button
                       key={p.id}
-                      variant="outline"
                       className={cn(
-                        'w-full justify-start h-auto p-2 text-left font-bold border-2',
+                        'w-full justify-start h-auto p-2 text-left font-bold border-2 bg-schedule-button text-primary border-primary/20 hover:bg-schedule-button/80',
                         selectedProfessional === p.name &&
-                          'bg-schedule-button border-secondary text-primary',
+                          'bg-secondary text-secondary-foreground border-secondary',
                       )}
                       onClick={() => setSelectedProfessional(p.name)}
                     >
@@ -209,7 +207,7 @@ export default function Schedule() {
                     <RadioGroupItem value={t} id={t} className="peer sr-only" />
                     <Label
                       htmlFor={t}
-                      className="flex h-10 w-full items-center justify-center rounded-md border-2 border-muted bg-popover p-2 text-sm font-bold hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-secondary peer-data-[state=checked]:bg-schedule-button peer-data-[state=checked]:text-primary"
+                      className="flex h-10 w-full items-center justify-center rounded-md border-2 border-primary/20 bg-schedule-button p-2 text-sm font-bold text-primary hover:bg-schedule-button/80 cursor-pointer peer-data-[state=checked]:border-secondary peer-data-[state=checked]:bg-secondary peer-data-[state=checked]:text-secondary-foreground"
                     >
                       {t}
                     </Label>
