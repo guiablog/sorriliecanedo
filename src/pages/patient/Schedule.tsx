@@ -129,7 +129,7 @@ export default function Schedule() {
                         selectedService === s.name ? 'secondary' : 'outline'
                       }
                       onClick={() => setSelectedService(s.name)}
-                      className="h-12"
+                      className="h-12 font-bold border-2"
                     >
                       {s.name}
                     </Button>
@@ -159,9 +159,8 @@ export default function Schedule() {
                       key={p.id}
                       variant="outline"
                       className={cn(
-                        'w-full justify-start h-auto p-2 text-left',
-                        selectedProfessional === p.name &&
-                          'border-secondary border-2',
+                        'w-full justify-start h-auto p-2 text-left font-bold border-2',
+                        selectedProfessional === p.name && 'border-secondary',
                       )}
                       onClick={() => setSelectedProfessional(p.name)}
                     >
@@ -207,7 +206,7 @@ export default function Schedule() {
                     <RadioGroupItem value={t} id={t} className="peer sr-only" />
                     <Label
                       htmlFor={t}
-                      className="flex h-10 w-full items-center justify-center rounded-md border-2 border-muted bg-popover p-2 text-sm hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-secondary [&:has([data-state=checked])]:border-secondary"
+                      className="flex h-10 w-full items-center justify-center rounded-md border-2 border-muted bg-popover p-2 text-sm font-bold hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-secondary [&:has([data-state=checked])]:border-secondary"
                     >
                       {t}
                     </Label>
@@ -271,14 +270,18 @@ export default function Schedule() {
       {renderStep()}
       <div className="flex justify-between gap-2">
         {step > 1 && step < 4 && (
-          <Button variant="outline" onClick={() => setStep(step - 1)}>
+          <Button
+            variant="outline"
+            onClick={() => setStep(step - 1)}
+            className="font-bold border-2"
+          >
             Voltar
           </Button>
         )}
         {step < 4 && (
           <Button
             onClick={handleNext}
-            className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+            className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold border-2 border-secondary"
           >
             {getButtonText()}
           </Button>
