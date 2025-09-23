@@ -128,7 +128,7 @@ export default function Schedule() {
                       className={cn(
                         'h-12 font-bold border-2 bg-schedule-button text-black border-primary/20 hover:bg-schedule-button/80',
                         selectedService === s.name &&
-                          'bg-secondary text-secondary-foreground border-secondary',
+                          'bg-accent text-accent-foreground border-accent',
                       )}
                     >
                       {s.name}
@@ -160,7 +160,7 @@ export default function Schedule() {
                       className={cn(
                         'w-full justify-start h-auto p-2 text-left font-bold border-2 bg-schedule-button text-black border-primary/20 hover:bg-schedule-button/80',
                         selectedProfessional === p.name &&
-                          'bg-secondary text-secondary-foreground border-secondary',
+                          'bg-accent text-accent-foreground border-accent',
                       )}
                       onClick={() => setSelectedProfessional(p.name)}
                     >
@@ -206,7 +206,7 @@ export default function Schedule() {
                     <RadioGroupItem value={t} id={t} className="peer sr-only" />
                     <Label
                       htmlFor={t}
-                      className="flex h-10 w-full items-center justify-center rounded-md border-2 border-primary/20 bg-schedule-button p-2 text-sm font-bold text-black hover:bg-schedule-button/80 cursor-pointer peer-data-[state=checked]:border-secondary peer-data-[state=checked]:bg-secondary peer-data-[state=checked]:text-secondary-foreground"
+                      className="flex h-10 w-full items-center justify-center rounded-md border-2 border-primary/20 bg-schedule-button p-2 text-sm font-bold text-black hover:bg-schedule-button/80 cursor-pointer peer-data-[state=checked]:border-accent peer-data-[state=checked]:bg-accent peer-data-[state=checked]:text-accent-foreground"
                     >
                       {t}
                     </Label>
