@@ -17,15 +17,12 @@ import {
   Stethoscope,
   Calendar as CalendarIcon,
   Clock,
-  MapPin,
-  Phone,
 } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { useProfessionalStore } from '@/stores/professional'
 import { useAppointmentStore } from '@/stores/appointment'
 import { useAuthStore } from '@/stores/auth'
 import { useServiceStore } from '@/stores/service'
-import { useAppSettingsStore } from '@/stores/appSettings'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -49,7 +46,6 @@ export default function Schedule() {
   const { services, loading: servicesLoading } = useServiceStore()
   const { addAppointment } = useAppointmentStore()
   const { name } = useAuthStore()
-  const { settings } = useAppSettingsStore()
 
   const activeProfessionals = professionals.filter((p) => p.status === 'Ativo')
   const activeServices = services.filter((s) => s.status === 'Ativo')
@@ -288,55 +284,6 @@ export default function Schedule() {
           </Button>
         )}
       </div>
-
-      {step < 4 && (
-        <>
-          {settings?.clinic_address && settings?.clinic_phone && (
-            <Card className="bg-schedule-background">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <MapPin className="h-5 w-5 text-accent" />
-                  Endereço:
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <p className="text-sm">{settings.clinic_address}</p>
-                <a
-                  href={`tel:${settings.clinic_phone.replace(/\D/g, '')}`}
-                  className="flex items-center gap-2 text-sm text-secondary font-medium hover:underline"
-                >
-                  <Phone className="h-4 w-4" />
-                  Telefone: {settings.clinic_phone}
-                </a>
-              </CardContent>
-            </Card>
-          )}
-          <Card className="bg-schedule-background">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <MapPin className="h-5 w-5 text-accent" />
-                Localização da Clínica
-              </CardTitle>
-            </CardHeader>
-            <a
-              href="https://maps.app.goo.gl/vQhX47tweSYcdg478?g_st=ac"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <CardContent className="p-0">
-                <iframe
-                  src="https://maps.google.com/maps?q=-16.729138263625725,-49.08742592883618&z=17&output=embed"
-                  className="w-full h-64 border-0 rounded-b-lg pointer-events-none"
-                  allowFullScreen={true}
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Localização da Clínica Sorriliê"
-                ></iframe>
-              </CardContent>
-            </a>
-          </Card>
-        </>
-      )}
     </div>
   )
 }
