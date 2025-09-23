@@ -267,7 +267,6 @@ export default function Schedule() {
 
   return (
     <div className="p-4 space-y-4 animate-fade-in-up">
-      <HistoryCard onClick={() => setHistoryModalOpen(true)} />
       {renderStep()}
       <div className="flex justify-between gap-2">
         {step > 1 && step < 4 && (
@@ -288,6 +287,7 @@ export default function Schedule() {
           </Button>
         )}
       </div>
+      <HistoryCard onClick={() => setHistoryModalOpen(true)} />
       <AppointmentHistoryModal
         open={isHistoryModalOpen}
         onOpenChange={setHistoryModalOpen}
