@@ -12,13 +12,6 @@ import { Calendar } from '@/components/ui/calendar'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
-import { Badge } from '@/components/ui/badge'
-import {
   CheckCircle,
   User,
   Stethoscope,
@@ -32,25 +25,11 @@ import { useAuthStore } from '@/stores/auth'
 import { useServiceStore } from '@/stores/service'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { ReviewDrawer } from '@/components/ReviewDrawer'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 
 const availableTimes = ['09:00', '10:30', '11:00', '14:00', '15:30']
-
-const getStatusVariant = (status: string) => {
-  switch (status) {
-    case 'Realizado':
-      return 'default'
-    case 'Confirmado':
-      return 'secondary'
-    case 'Cancelado':
-      return 'destructive'
-    default:
-      return 'outline'
-  }
-}
 
 export default function Schedule() {
   const navigate = useNavigate()
@@ -61,23 +40,15 @@ export default function Schedule() {
   >(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
-  const [isReviewDrawerOpen, setReviewDrawerOpen] = useState(false)
-  const [selectedAppointmentForReview, setSelectedAppointmentForReview] =
-    useState<any>(null)
 
   const { professionals, loading: professionalsLoading } =
     useProfessionalStore()
   const { services, loading: servicesLoading } = useServiceStore()
-  const {
-    appointments,
-    addAppointment,
-    loading: appointmentsLoading,
-  } = useAppointmentStore()
+  const { addAppointment } = useAppointmentStore()
   const { name } = useAuthStore()
 
   const activeProfessionals = professionals.filter((p) => p.status === 'Ativo')
   const activeServices = services.filter((s) => s.status === 'Ativo')
-  const userAppointments = appointments.filter((a) => a.patient === name)
 
   const handleNext = async () => {
     if (step === 1 && !selectedService) {
@@ -132,11 +103,6 @@ export default function Schedule() {
     } else {
       setStep(step + 1)
     }
-  }
-
-  const handleOpenReview = (appointment: any) => {
-    setSelectedAppointmentForReview(appointment)
-    setReviewDrawerOpen(true)
   }
 
   const renderStep = () => {
@@ -314,49 +280,6 @@ export default function Schedule() {
           </Button>
         )}
       </div>
-
-      <section className="pt-4">
-        <h2 className="text-xl font-semibold text-neutral-dark mb-4">
-          Histórico de Consultas
-        </h2>
-        {appointmentsLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
-          </div>
-        ) : (
-          <Accordion type="single" collapsible className="w-full">
-            {userAppointments.map((item) => (
-              <AccordionItem value={item.id} key={item.id}>
-                <AccordionTrigger>
-                  {format(new Date(`${item.date}T00:00:00`), 'dd/MM/yyyy')} -{' '}
-                  {item.service}
-                </AccordionTrigger>
-                <AccordionContent className="flex justify-between items-center">
-                  <Badge variant={getStatusVariant(item.status)}>
-                    {item.status}
-                  </Badge>
-                  {item.status === 'Realizado' && (
-                    <Button
-                      variant="link"
-                      className="text-accent"
-                      onClick={() => handleOpenReview(item)}
-                    >
-                      Avaliar
-                    </Button>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        )}
-      </section>
-
-      <ReviewDrawer
-        appointment={selectedAppointmentForReview}
-        open={isReviewDrawerOpen}
-        onOpenChange={setReviewDrawerOpen}
-      />
     </div>
   )
 }
