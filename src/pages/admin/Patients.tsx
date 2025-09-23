@@ -41,8 +41,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { format } from 'date-fns'
 
 export default function AdminPatients() {
-  const { patients, addPatient, updatePatient, deletePatient, loading } =
-    usePatientStore()
+  const { patients, updatePatient, deletePatient, loading } = usePatientStore()
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
   const [isDetailsModalOpen, setDetailsModalOpen] = useState(false)
   const [isFormModalOpen, setFormModalOpen] = useState(false)
@@ -69,11 +68,6 @@ export default function AdminPatients() {
     setFormModalOpen(true)
   }
 
-  const handleAdd = () => {
-    setSelectedPatient(null)
-    setFormModalOpen(true)
-  }
-
   const handleDelete = async (cpf: string) => {
     try {
       await deletePatient(cpf)
@@ -91,20 +85,16 @@ export default function AdminPatients() {
   }
 
   const handleFormSubmit = async (data: PatientFormValues) => {
+    if (!selectedPatient) return
     try {
-      if (selectedPatient) {
-        await updatePatient(selectedPatient.cpf, data)
-        toast({ title: 'Paciente atualizado com sucesso!' })
-      } else {
-        await addPatient(data)
-        toast({ title: 'Paciente adicionado com sucesso!' })
-      }
+      await updatePatient(selectedPatient.cpf, data)
+      toast({ title: 'Paciente atualizado com sucesso!' })
       setFormModalOpen(false)
       setSelectedPatient(null)
     } catch (error) {
       toast({
         title: 'Erro',
-        description: 'Não foi possível salvar o paciente.',
+        description: 'Não foi possível salvar as alterações do paciente.',
         variant: 'destructive',
       })
     }
@@ -117,12 +107,6 @@ export default function AdminPatients() {
         <div className="flex gap-2">
           <Button variant="outline">
             <FileDown className="mr-2 h-4 w-4" /> Exportar CSV
-          </Button>
-          <Button
-            onClick={handleAdd}
-            className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-          >
-            Adicionar Paciente
           </Button>
         </div>
       </div>
@@ -227,9 +211,7 @@ export default function AdminPatients() {
       <Dialog open={isFormModalOpen} onOpenChange={setFormModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {selectedPatient ? 'Editar' : 'Adicionar'} Paciente
-            </DialogTitle>
+            <DialogTitle>Editar Paciente</DialogTitle>
           </DialogHeader>
           <PatientForm
             patient={selectedPatient}

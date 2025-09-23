@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -21,8 +21,8 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { toast } from '@/components/ui/use-toast'
-import { usePatientStore } from '@/stores/patient'
 import { ArrowLeft } from 'lucide-react'
+import { supabase } from '@/lib/supabase/client'
 
 const resetPasswordSchema = z
   .object({
@@ -40,12 +40,7 @@ type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>
 
 export default function PatientResetPassword() {
   const navigate = useNavigate()
-  const {
-    emailForPasswordReset,
-    setEmailForPasswordReset,
-    patients,
-    updatePatient,
-  } = usePatientStore()
+  const [isSessionReady, setIsSessionReady] = useState(false)
 
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
@@ -56,48 +51,44 @@ export default function PatientResetPassword() {
   })
 
   useEffect(() => {
-    if (!emailForPasswordReset) {
-      toast({
-        title: 'Link Inválido',
-        description: 'O link de redefinição de senha é inválido ou expirou.',
-        variant: 'destructive',
-      })
-      navigate('/login')
-    }
-  }, [emailForPasswordReset, navigate])
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsSessionReady(true)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [])
 
   async function onSubmit(data: ResetPasswordFormValues) {
-    if (!emailForPasswordReset) return
+    const { error } = await supabase.auth.updateUser({
+      password: data.password,
+    })
 
-    const patientToUpdate = patients.find(
-      (p) => p.email === emailForPasswordReset,
-    )
-
-    if (patientToUpdate) {
-      try {
-        await updatePatient(patientToUpdate.cpf, { password: data.password })
-        toast({
-          title: 'Senha Redefinida',
-          description:
-            'Sua senha foi alterada com sucesso. Você já pode fazer login.',
-        })
-        setEmailForPasswordReset(null)
-        navigate('/login')
-      } catch (error) {
-        toast({
-          title: 'Erro',
-          description: 'Não foi possível redefinir a senha.',
-          variant: 'destructive',
-        })
-      }
-    } else {
+    if (error) {
       toast({
         title: 'Erro',
         description:
-          'Não foi possível encontrar o usuário para atualizar a senha.',
+          'Não foi possível redefinir a senha. O link pode ter expirado.',
         variant: 'destructive',
       })
+    } else {
+      toast({
+        title: 'Senha Redefinida',
+        description:
+          'Sua senha foi alterada com sucesso. Você já pode fazer login.',
+      })
+      navigate('/login')
     }
+  }
+
+  if (!isSessionReady) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        Verificando link de recuperação...
+      </div>
+    )
   }
 
   return (
@@ -155,11 +146,6 @@ export default function PatientResetPassword() {
               </Button>
             </form>
           </Form>
-          <div className="mt-4 text-center text-sm">
-            <Link to="/login" className="underline">
-              Voltar para o login
-            </Link>
-          </div>
         </CardContent>
       </Card>
     </div>

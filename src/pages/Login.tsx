@@ -13,7 +13,6 @@ import {
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { usePatientStore } from '@/stores/patient'
 import { useAuthStore } from '@/stores/auth'
 import { isValidCPF } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
@@ -21,6 +20,7 @@ import { cpfMask } from '@/lib/masks'
 import { Eye, EyeOff } from 'lucide-react'
 import { useAppSettingsStore } from '@/stores/appSettings'
 import { Skeleton } from '@/components/ui/skeleton'
+import { patientService } from '@/services/patientService'
 
 const cpfSchema = z.object({
   cpf: z.string().refine(isValidCPF, {
@@ -37,14 +37,13 @@ type PasswordFormValues = z.infer<typeof passwordSchema>
 
 export default function Login() {
   const navigate = useNavigate()
-  const { patients } = usePatientStore()
   const patientLogin = useAuthStore((state) => state.patientLogin)
   const { settings, loading: settingsLoading } = useAppSettingsStore()
 
   const [step, setStep] = useState<'cpf' | 'password'>('cpf')
   const [currentUser, setCurrentUser] = useState<{
     name: string
-    cpf: string
+    email: string
   } | null>(null)
   const [showPassword, setShowPassword] = useState(false)
 
@@ -60,33 +59,35 @@ export default function Login() {
     mode: 'onChange',
   })
 
-  function handleCpfSubmit(data: CpfFormValues) {
-    const patient = patients.find((p) => {
-      const storedCpf = p.cpf.replace(/\D/g, '')
-      const inputCpf = data.cpf.replace(/\D/g, '')
-      return storedCpf === inputCpf
-    })
+  async function handleCpfSubmit(data: CpfFormValues) {
+    const patient = await patientService.getPatientByCpf(data.cpf)
 
     if (patient && patient.status === 'Ativo') {
-      setCurrentUser({ name: patient.name, cpf: patient.cpf })
+      setCurrentUser({ name: patient.name, email: patient.email })
       setStep('password')
+    } else if (patient) {
+      toast({
+        title: 'Conta Inativa',
+        description:
+          'Sua conta não está ativa. Entre em contato com a clínica.',
+        variant: 'destructive',
+      })
     } else {
       navigate('/register', { state: { cpf: data.cpf } })
     }
   }
 
-  function handlePasswordSubmit(data: PasswordFormValues) {
+  async function handlePasswordSubmit(data: PasswordFormValues) {
     if (!currentUser) return
 
-    const patient = patients.find((p) => p.cpf === currentUser.cpf)
+    const result = await patientLogin(currentUser.email, data.password)
 
-    if (patient && patient.password === data.password) {
-      patientLogin(patient.name)
+    if (result === true) {
       navigate('/home')
     } else {
       toast({
-        title: 'Senha Incorreta',
-        description: 'A senha informada está incorreta. Tente novamente.',
+        title: 'Falha no Login',
+        description: result as string,
         variant: 'destructive',
       })
       passwordForm.setError('password', { message: ' ' })

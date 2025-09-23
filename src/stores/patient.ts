@@ -2,13 +2,13 @@ import { create } from 'zustand'
 import { patientService } from '@/services/patientService'
 
 export interface Patient {
+  user_id: string | null
   name: string
   cpf: string
   whatsapp: string
   email: string
   registered: string
   status: 'Ativo' | 'Inativo' | 'Pendente de Verificação'
-  password?: string
 }
 
 interface PatientState {
@@ -17,16 +17,9 @@ interface PatientState {
   emailForPasswordReset: string | null
   fetchPatients: () => Promise<void>
   setEmailForPasswordReset: (email: string | null) => void
-  addPatient: (patient: {
-    name: string
-    cpf: string
-    whatsapp: string
-    email: string
-    password?: string
-  }) => Promise<void>
   updatePatient: (
     originalCpf: string,
-    data: Partial<Omit<Patient, 'registered'>>,
+    data: Partial<Omit<Patient, 'registered' | 'cpf'>>,
   ) => Promise<void>
   deletePatient: (cpf: string) => Promise<void>
 }
@@ -46,15 +39,11 @@ export const usePatientStore = create<PatientState>()((set) => ({
     }
   },
   setEmailForPasswordReset: (email) => set({ emailForPasswordReset: email }),
-  addPatient: async (patientData) => {
-    const newPatient = await patientService.addPatient(patientData)
-    set((state) => ({ patients: [...state.patients, newPatient] }))
-  },
   updatePatient: async (originalCpf, data) => {
     const updatedPatient = await patientService.updatePatient(originalCpf, data)
     set((state) => ({
       patients: state.patients.map((p) =>
-        p.cpf === originalCpf ? updatedPatient : p,
+        p.cpf === originalCpf ? { ...p, ...updatedPatient } : p,
       ),
     }))
   },

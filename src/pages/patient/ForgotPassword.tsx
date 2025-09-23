@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { toast } from '@/components/ui/use-toast'
-import { usePatientStore } from '@/stores/patient'
+import { supabase } from '@/lib/supabase/client'
 
 const forgotPasswordSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um e-mail válido.' }),
@@ -30,7 +30,6 @@ type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>
 
 export default function PatientForgotPassword() {
   const navigate = useNavigate()
-  const { patients, setEmailForPasswordReset } = usePatientStore()
 
   const form = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -39,27 +38,23 @@ export default function PatientForgotPassword() {
     },
   })
 
-  function onSubmit(data: ForgotPasswordFormValues) {
-    const patient = patients.find((p) => p.email === data.email)
+  async function onSubmit(data: ForgotPasswordFormValues) {
+    const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
 
-    if (patient) {
-      setEmailForPasswordReset(patient.email)
+    if (error) {
+      toast({
+        title: 'Erro',
+        description:
+          'Não foi possível enviar o e-mail de recuperação. Tente novamente.',
+        variant: 'destructive',
+      })
+    } else {
       toast({
         title: 'Instruções Enviadas',
         description:
-          'Simulando envio de e-mail. Você será redirecionado para a tela de redefinição.',
-      })
-      setTimeout(() => navigate('/reset-password'), 2000)
-    } else {
-      form.setError('email', {
-        type: 'manual',
-        message:
-          'E-mail não encontrado. Verifique o endereço e tente novamente.',
-      })
-      toast({
-        title: 'Erro',
-        description: 'E-mail não encontrado.',
-        variant: 'destructive',
+          'Se o e-mail estiver cadastrado, você receberá um link para redefinir sua senha.',
       })
     }
   }

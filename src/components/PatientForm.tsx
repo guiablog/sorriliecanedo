@@ -122,6 +122,7 @@ export const PatientForm = ({
                   type="email"
                   placeholder="paciente@email.com"
                   {...field}
+                  disabled={!!patient}
                 />
               </FormControl>
               <FormMessage />

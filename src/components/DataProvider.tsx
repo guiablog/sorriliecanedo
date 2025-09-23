@@ -6,6 +6,7 @@ import { useAppointmentStore } from '@/stores/appointment'
 import { useContentStore } from '@/stores/content'
 import { useNotificationStore } from '@/stores/notification'
 import { useAppSettingsStore } from '@/stores/appSettings'
+import { useAuthStore } from '@/stores/auth'
 
 interface DataProviderProps {
   children: React.ReactNode
@@ -26,10 +27,12 @@ export const DataProvider = ({ children }: DataProviderProps) => {
     (state) => state.fetchNotifications,
   )
   const { settings, fetchAppSettings } = useAppSettingsStore()
+  const checkSession = useAuthStore((state) => state.checkSession)
 
   useEffect(() => {
-    const fetchAllData = async () => {
+    const initializeApp = async () => {
       setIsLoading(true)
+      await checkSession()
       await Promise.all([
         fetchPatients(),
         fetchProfessionals(),
@@ -41,8 +44,9 @@ export const DataProvider = ({ children }: DataProviderProps) => {
       ])
       setIsLoading(false)
     }
-    fetchAllData()
+    initializeApp()
   }, [
+    checkSession,
     fetchPatients,
     fetchProfessionals,
     fetchServices,

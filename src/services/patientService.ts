@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase/client'
 import { Patient } from '@/stores/patient'
 
-type AddPatientPayload = {
+type PatientSignUpPayload = {
   name: string
   cpf: string
   whatsapp: string
@@ -17,49 +17,36 @@ export const patientService = {
       throw error
     }
     return data.map((p) => ({
+      user_id: p.user_id,
       name: p.name,
       cpf: p.cpf,
       whatsapp: p.whatsapp,
       email: p.email,
-      password: p.password || undefined,
-      registered: p.created_at, // Return ISO string
+      registered: p.created_at,
       status: p.status as Patient['status'],
     }))
   },
 
-  async addPatient(patientData: AddPatientPayload): Promise<Patient> {
-    const { data, error } = await supabase
-      .from('patients')
-      .insert({
-        name: patientData.name,
-        cpf: patientData.cpf,
-        whatsapp: patientData.whatsapp,
-        email: patientData.email,
-        password: patientData.password,
-        status: 'Ativo',
-      })
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Error adding patient:', error)
-      throw error
-    }
-
-    return {
-      name: data.name,
-      cpf: data.cpf,
-      whatsapp: data.whatsapp,
-      email: data.email,
-      password: data.password || undefined,
-      registered: data.created_at,
-      status: data.status as Patient['status'],
-    }
+  async signUpPatient(
+    patientData: PatientSignUpPayload,
+  ): Promise<{ user: any; error: any }> {
+    const { data, error } = await supabase.auth.signUp({
+      email: patientData.email,
+      password: patientData.password!,
+      options: {
+        data: {
+          name: patientData.name,
+          cpf: patientData.cpf,
+          whatsapp: patientData.whatsapp,
+        },
+      },
+    })
+    return { user: data.user, error }
   },
 
   async updatePatient(
     cpf: string,
-    patientData: Partial<Omit<Patient, 'registered'>>,
+    patientData: Partial<Omit<Patient, 'registered' | 'cpf'>>,
   ): Promise<Patient> {
     const { data, error } = await supabase
       .from('patients')
@@ -74,11 +61,11 @@ export const patientService = {
     }
 
     return {
+      user_id: data.user_id,
       name: data.name,
       cpf: data.cpf,
       whatsapp: data.whatsapp,
       email: data.email,
-      password: data.password || undefined,
       registered: data.created_at,
       status: data.status as Patient['status'],
     }
@@ -89,6 +76,30 @@ export const patientService = {
     if (error) {
       console.error('Error deleting patient:', error)
       throw error
+    }
+  },
+
+  async getPatientByCpf(cpf: string): Promise<Patient | null> {
+    const { data, error } = await supabase
+      .from('patients')
+      .select('*')
+      .eq('cpf', cpf)
+      .single()
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching patient by CPF:', error)
+      throw error
+    }
+    if (!data) return null
+
+    return {
+      user_id: data.user_id,
+      name: data.name,
+      cpf: data.cpf,
+      whatsapp: data.whatsapp,
+      email: data.email,
+      registered: data.created_at,
+      status: data.status as Patient['status'],
     }
   },
 }

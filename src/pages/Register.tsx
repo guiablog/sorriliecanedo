@@ -14,13 +14,13 @@ import {
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
 import { useAuthStore } from '@/stores/auth'
-import { usePatientStore } from '@/stores/patient'
 import { cpfMask, whatsappMask } from '@/lib/masks'
 import { isValidCPF } from '@/lib/utils'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { useAppSettingsStore } from '@/stores/appSettings'
 import { Skeleton } from '@/components/ui/skeleton'
+import { patientService } from '@/services/patientService'
 
 const registerSchema = z
   .object({
@@ -50,8 +50,8 @@ export default function Register() {
   const navigate = useNavigate()
   const location = useLocation()
   const patientLogin = useAuthStore((state) => state.patientLogin)
-  const { patients, addPatient } = usePatientStore()
   const { settings, loading: settingsLoading } = useAppSettingsStore()
+  const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -72,33 +72,44 @@ export default function Register() {
   }, [location.state, form])
 
   async function onSubmit(data: RegisterFormValues) {
-    const isCpfDuplicate = patients.some(
-      (p) => p.cpf.replace(/\D/g, '') === data.cpf.replace(/\D/g, ''),
-    )
-    if (isCpfDuplicate) {
+    setIsLoading(true)
+
+    const existingPatient = await patientService.getPatientByCpf(data.cpf)
+    if (existingPatient) {
       form.setError('cpf', { message: 'Este CPF já está cadastrado.' })
-      return
-    }
-    const isEmailDuplicate = patients.some((p) => p.email === data.email)
-    if (isEmailDuplicate) {
-      form.setError('email', { message: 'Este e-mail já está cadastrado.' })
+      setIsLoading(false)
       return
     }
 
-    try {
-      await addPatient(data)
-      patientLogin(data.name)
-      toast({
-        title: 'Cadastro realizado com sucesso!',
-        description: 'Você será redirecionado para a tela inicial.',
-      })
-      setTimeout(() => navigate('/home'), 1500)
-    } catch (error) {
+    const { error } = await patientService.signUpPatient({
+      ...data,
+      cpf: data.cpf.replace(/\D/g, ''),
+    })
+
+    if (error) {
       toast({
         title: 'Erro no Cadastro',
-        description: 'Não foi possível criar sua conta. Tente novamente.',
+        description: error.message.includes('already registered')
+          ? 'Este e-mail já está em uso.'
+          : 'Não foi possível criar sua conta.',
         variant: 'destructive',
       })
+      setIsLoading(false)
+    } else {
+      const loginSuccess = await patientLogin(data.email, data.password)
+      if (loginSuccess === true) {
+        toast({
+          title: 'Cadastro realizado com sucesso!',
+          description: 'Você será redirecionado para a tela inicial.',
+        })
+        setTimeout(() => navigate('/home'), 1500)
+      } else {
+        toast({
+          title: 'Cadastro realizado!',
+          description: 'Faça login para continuar.',
+        })
+        navigate('/login')
+      }
     }
   }
 
@@ -229,8 +240,9 @@ export default function Register() {
               type="submit"
               className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
               size="lg"
+              disabled={isLoading}
             >
-              Cadastrar
+              {isLoading ? 'Cadastrando...' : 'Cadastrar'}
             </Button>
           </form>
         </Form>
