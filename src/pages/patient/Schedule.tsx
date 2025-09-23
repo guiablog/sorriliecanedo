@@ -28,6 +28,8 @@ import { ptBR } from 'date-fns/locale'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
+import { HistoryCard } from '@/components/HistoryCard'
+import { AppointmentHistoryModal } from '@/components/AppointmentHistoryModal'
 
 const availableTimes = ['09:00', '10:30', '11:00', '14:00', '15:30']
 
@@ -40,6 +42,7 @@ export default function Schedule() {
   >(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
+  const [isHistoryModalOpen, setHistoryModalOpen] = useState(false)
 
   const { professionals, loading: professionalsLoading } =
     useProfessionalStore()
@@ -264,6 +267,7 @@ export default function Schedule() {
 
   return (
     <div className="p-4 space-y-4 animate-fade-in-up">
+      <HistoryCard onClick={() => setHistoryModalOpen(true)} />
       {renderStep()}
       <div className="flex justify-between gap-2">
         {step > 1 && step < 4 && (
@@ -284,6 +288,10 @@ export default function Schedule() {
           </Button>
         )}
       </div>
+      <AppointmentHistoryModal
+        open={isHistoryModalOpen}
+        onOpenChange={setHistoryModalOpen}
+      />
     </div>
   )
 }
