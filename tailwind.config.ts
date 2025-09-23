@@ -65,6 +65,7 @@ export default {
         success: 'hsl(var(--success))',
         warning: 'hsl(var(--warning))',
         'schedule-background': 'hsl(var(--schedule-background))',
+        'schedule-button': 'hsl(var(--schedule-button))',
         chart: {
           1: 'hsl(var(--chart-1))',
           2: 'hsl(var(--chart-2))',
