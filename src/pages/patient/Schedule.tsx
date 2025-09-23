@@ -314,16 +314,22 @@ export default function Schedule() {
                 Localização da Clínica
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3821.995506969596!2d-49.11485412587116!3d-16.69989613949953!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x935ef59355555555%3A0x8a0b252c0d429e9f!2sSorrili%C3%AA%20Odontologia!5e0!3m2!1sen!2sbr!4v1721889809545!5m2!1sen!2sbr"
-                className="w-full h-64 border-0 rounded-b-lg"
-                allowFullScreen={true}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Localização da Clínica Sorriliê"
-              ></iframe>
-            </CardContent>
+            <a
+              href="https://www.google.com/maps/dir//Sorrili%C3%AA+Cl%C3%ADnica+Odontol%C3%B3gica+%7C+Dentista+em+Senador+Canedo+-+GO+-+Av.+Pedro+Miranda,+Quadra:+05+Lote+38+Sala+1+e+2+-+Res.+Pedro+Miranda,+Sen.+Canedo+-+GO,+75262-553,+Brasil/@-16.7291845,-49.0874152,17z/data=!4m9!4m8!1m0!1m5!1m1!1s0x935a33868d2c7469:0xa3c0ec3565f53533!2m2!1d-49.0874152!2d-16.7291845!3e2?entry=ttu&g_ep=EgoyMDI1MDkxNy4wIKXMDSoASAFQAw%3D%3D"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <CardContent className="p-0">
+                <iframe
+                  src="https://maps.google.com/maps?q=-16.729138263625725,-49.08742592883618&z=17&output=embed"
+                  className="w-full h-64 border-0 rounded-b-lg pointer-events-none"
+                  allowFullScreen={true}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Localização da Clínica Sorriliê"
+                ></iframe>
+              </CardContent>
+            </a>
           </Card>
         </>
       )}
