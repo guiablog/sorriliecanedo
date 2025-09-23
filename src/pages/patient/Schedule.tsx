@@ -113,7 +113,7 @@ export default function Schedule() {
     switch (step) {
       case 1:
         return (
-          <Card>
+          <Card className="bg-schedule-background">
             <CardHeader>
               <CardTitle>1. Escolha o Serviço</CardTitle>
             </CardHeader>
@@ -139,7 +139,7 @@ export default function Schedule() {
         )
       case 2:
         return (
-          <Card>
+          <Card className="bg-schedule-background">
             <CardHeader>
               <CardTitle>2. Escolha o Profissional</CardTitle>
             </CardHeader>
@@ -184,7 +184,7 @@ export default function Schedule() {
         )
       case 3:
         return (
-          <Card>
+          <Card className="bg-schedule-background">
             <CardHeader>
               <CardTitle>3. Escolha a Data e Horário</CardTitle>
             </CardHeader>
@@ -219,7 +219,7 @@ export default function Schedule() {
         )
       case 4:
         return (
-          <Card className="text-center">
+          <Card className="text-center bg-schedule-background">
             <CardHeader>
               <CheckCircle className="mx-auto h-12 w-12 text-success" />
               <CardTitle>Agendamento Realizado!</CardTitle>
@@ -267,7 +267,7 @@ export default function Schedule() {
   }
 
   return (
-    <div className="p-4 space-y-4 animate-fade-in-up bg-schedule-background">
+    <div className="p-4 space-y-4 animate-fade-in-up">
       {renderStep()}
       <div className="flex justify-between gap-2">
         {step > 1 && step < 4 && (
@@ -288,7 +288,7 @@ export default function Schedule() {
       {step < 4 && (
         <>
           {settings?.clinic_address && settings?.clinic_phone && (
-            <Card>
+            <Card className="bg-schedule-background">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <MapPin className="h-5 w-5 text-accent" />
@@ -307,7 +307,7 @@ export default function Schedule() {
               </CardContent>
             </Card>
           )}
-          <Card>
+          <Card className="bg-schedule-background">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <MapPin className="h-5 w-5 text-accent" />
