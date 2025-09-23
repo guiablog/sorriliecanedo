@@ -315,7 +315,7 @@ export default function Schedule() {
               </CardTitle>
             </CardHeader>
             <a
-              href="https://www.google.com/maps/dir//Sorrili%C3%AA+Cl%C3%ADnica+Odontol%C3%B3gica+%7C+Dentista+em+Senador+Canedo+-+GO+-+Av.+Pedro+Miranda,+Quadra:+05+Lote+38+Sala+1+e+2+-+Res.+Pedro+Miranda,+Sen.+Canedo+-+GO,+75262-553,+Brasil/@-16.7291845,-49.0874152,17z/data=!4m9!4m8!1m0!1m5!1m1!1s0x935a33868d2c7469:0xa3c0ec3565f53533!2m2!1d-49.0874152!2d-16.7291845!3e2?entry=ttu&g_ep=EgoyMDI1MDkxNy4wIKXMDSoASAFQAw%3D%3D"
+              href="https://maps.app.goo.gl/vQhX47tweSYcdg478?g_st=ac"
               target="_blank"
               rel="noopener noreferrer"
             >
