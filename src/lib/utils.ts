@@ -32,3 +32,22 @@ export function isValidCPF(cpf: string): boolean {
   }
   return rest(10) === cpfDigits[9] && rest(11) === cpfDigits[10]
 }
+
+/**
+ * Formats plain text with newlines into HTML paragraphs and line breaks.
+ * @param text - The plain text to format.
+ * @returns An HTML string with <p> and <br> tags.
+ */
+export function formatContentText(text: string): string {
+  if (!text) {
+    return ''
+  }
+
+  return text
+    .split(/\n\s*\n/)
+    .map((paragraph) => {
+      const lines = paragraph.trim().replace(/\n/g, '<br />')
+      return `<p>${lines}</p>`
+    })
+    .join('')
+}

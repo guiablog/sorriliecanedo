@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { ContentItem } from '@/stores/content'
-import { cn } from '@/lib/utils'
+import { cn, formatContentText } from '@/lib/utils'
 
 interface ContentDetailsModalProps {
   open: boolean
@@ -67,7 +67,9 @@ export const ContentDetailsModal = ({
             )}
             <div
               className="prose prose-sm sm:prose-base max-w-none"
-              dangerouslySetInnerHTML={{ __html: selectedContent.content }}
+              dangerouslySetInnerHTML={{
+                __html: formatContentText(selectedContent.content),
+              }}
             />
           </div>
         </ScrollArea>
