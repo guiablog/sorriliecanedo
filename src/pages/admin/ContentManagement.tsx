@@ -29,9 +29,7 @@ export default function AdminContentManagement() {
 
   const tips = content.filter((c) => c.type === 'tip')
   const news = content.filter((c) => c.type === 'news')
-  const promotionsAndHighlights = content.filter(
-    (c) => c.type === 'promotion' || c.type === 'highlight',
-  )
+  const healthFocusContent = content.filter((c) => c.type === 'health_focus')
 
   const openModal = (
     type: ContentType,
@@ -78,8 +76,7 @@ export default function AdminContentManagement() {
       tip: 'Dica',
       news: 'Novidade',
       publication: 'Publicação',
-      promotion: 'Promoção',
-      highlight: 'Destaque',
+      health_focus: 'Saúde em Foco',
     }
     return labels[type] || 'Conteúdo'
   }
@@ -109,32 +106,6 @@ export default function AdminContentManagement() {
     ))
   }
 
-  const renderTypedTableRows = (items: ContentItem[]) => {
-    if (loading) {
-      return Array.from({ length: 3 }).map((_, i) => (
-        <TableRow key={i}>
-          <TableCell colSpan={4}>
-            <Skeleton className="h-8 w-full" />
-          </TableCell>
-        </TableRow>
-      ))
-    }
-    return items.map((item) => (
-      <TableRow
-        key={item.id}
-        onClick={() => openModal(item.type, item)}
-        className="cursor-pointer"
-      >
-        <TableCell>{item.title}</TableCell>
-        <TableCell>{getContentTypeLabel(item.type)}</TableCell>
-        <TableCell>
-          {format(new Date(item.publishedDate), 'dd/MM/yyyy')}
-        </TableCell>
-        <TableCell>{item.status}</TableCell>
-      </TableRow>
-    ))
-  }
-
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Gerenciamento de Conteúdos</h1>
@@ -142,9 +113,7 @@ export default function AdminContentManagement() {
         <TabsList>
           <TabsTrigger value="tips">Dicas de Saúde</TabsTrigger>
           <TabsTrigger value="news">Novidades</TabsTrigger>
-          <TabsTrigger value="promotions-highlights">
-            Promoções e Destaques
-          </TabsTrigger>
+          <TabsTrigger value="health-focus">Saúde em Foco</TabsTrigger>
         </TabsList>
         <TabsContent value="tips" className="mt-4">
           <div className="flex justify-end mb-4">
@@ -190,19 +159,13 @@ export default function AdminContentManagement() {
             </Table>
           </div>
         </TabsContent>
-        <TabsContent value="promotions-highlights" className="mt-4">
-          <div className="flex justify-end gap-2 mb-4">
+        <TabsContent value="health-focus" className="mt-4">
+          <div className="flex justify-end mb-4">
             <Button
-              onClick={() => openModal('promotion')}
+              onClick={() => openModal('health_focus')}
               className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
             >
-              Adicionar Promoção
-            </Button>
-            <Button
-              onClick={() => openModal('highlight')}
-              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-            >
-              Adicionar Destaque
+              Adicionar 'Saúde em Foco'
             </Button>
           </div>
           <div className="border rounded-lg">
@@ -210,14 +173,11 @@ export default function AdminContentManagement() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Título</TableHead>
-                  <TableHead>Tipo</TableHead>
                   <TableHead>Publicado em</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                {renderTypedTableRows(promotionsAndHighlights)}
-              </TableBody>
+              <TableBody>{renderSimpleTableRows(healthFocusContent)}</TableBody>
             </Table>
           </div>
         </TabsContent>
