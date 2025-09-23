@@ -1,11 +1,11 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Calendar, BookOpen, User, Trophy } from 'lucide-react'
+import { Home, Calendar, BookOpen, User, MapPin } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { to: '/home', label: 'Início', icon: Home },
   { to: '/schedule', label: 'Agendar', icon: Calendar },
-  { to: '/loyalty', label: 'Fidelidade', icon: Trophy },
+  { to: '/localizar', label: 'Localizar', icon: MapPin },
   { to: '/content', label: 'Conteúdo', icon: BookOpen },
   { to: '/profile', label: 'Perfil', icon: User },
 ]

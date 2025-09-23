@@ -9,7 +9,7 @@ const routeTitles: { [key: string]: string } = {
   '/schedule': 'Agendar Consulta',
   '/content': 'Conteúdo Educativo',
   '/profile': 'Meu Perfil',
-  '/loyalty': 'Programa de Fidelidade',
+  '/localizar': 'Localizar',
 }
 
 export default function MobileLayout() {

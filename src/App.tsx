@@ -18,7 +18,7 @@ import PatientHome from './pages/patient/Home'
 import PatientSchedule from './pages/patient/Schedule'
 import PatientContent from './pages/patient/Content'
 import PatientProfile from './pages/patient/Profile'
-import PatientLoyalty from './pages/patient/Loyalty'
+import PatientLocalizar from './pages/patient/Localizar'
 
 import AdminLogin from './pages/admin/Login'
 import AdminRegister from './pages/admin/Register'
@@ -76,7 +76,7 @@ const App = () => (
                 <Route path="/schedule" element={<PatientSchedule />} />
                 <Route path="/content" element={<PatientContent />} />
                 <Route path="/profile" element={<PatientProfile />} />
-                <Route path="/loyalty" element={<PatientLoyalty />} />
+                <Route path="/localizar" element={<PatientLocalizar />} />
               </Route>
             </Route>
 

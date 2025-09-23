@@ -178,8 +178,8 @@ export type Database = {
           email: string
           id: string
           name: string
-          password: string | null
           status: string
+          user_id: string | null
           whatsapp: string
         }
         Insert: {
@@ -188,8 +188,8 @@ export type Database = {
           email: string
           id?: string
           name: string
-          password?: string | null
           status?: string
+          user_id?: string | null
           whatsapp: string
         }
         Update: {
@@ -198,8 +198,8 @@ export type Database = {
           email?: string
           id?: string
           name?: string
-          password?: string | null
           status?: string
+          user_id?: string | null
           whatsapp?: string
         }
         Relationships: []
