@@ -1,10 +1,41 @@
+import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MapPin, Phone } from 'lucide-react'
 import { useAppSettingsStore } from '@/stores/appSettings'
 import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from '@/components/ui/use-toast'
 
 export default function PatientLocalizar() {
   const { settings, loading } = useAppSettingsStore()
+
+  const clinicAddress = settings?.clinic_address
+
+  const mapEmbedUrl = useMemo(() => {
+    const address =
+      clinicAddress ||
+      'Av. Pedro Miranda, Quadra: 05 Lote 38 Sala 1 Res. Pedro Miranda, Sen. Canedo - GO, 75262-553, Brasil'
+    return `https://maps.google.com/maps?q=${encodeURIComponent(
+      address,
+    )}&z=17&output=embed`
+  }, [clinicAddress])
+
+  const mapDirectionsUrl = useMemo(() => {
+    if (!clinicAddress) return '#'
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+      clinicAddress,
+    )}&travelmode=driving`
+  }, [clinicAddress])
+
+  const handleMapClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!clinicAddress) {
+      e.preventDefault()
+      toast({
+        title: 'Endereço não disponível',
+        description: 'Não foi possível obter a rota para a clínica.',
+        variant: 'destructive',
+      })
+    }
+  }
 
   return (
     <div className="p-4 space-y-6 animate-fade-in-up">
@@ -24,8 +55,7 @@ export default function PatientLocalizar() {
           ) : (
             <>
               <p className="text-neutral-dark/80 mb-2">
-                {settings?.clinic_address ||
-                  'Endereço não disponível no momento.'}
+                {clinicAddress || 'Endereço não disponível no momento.'}
               </p>
               {settings?.clinic_phone && (
                 <a
@@ -43,14 +73,16 @@ export default function PatientLocalizar() {
 
       <Card>
         <a
-          href="https://maps.app.goo.gl/vQhX47tweSYcdg478?g_st=ac"
+          href={mapDirectionsUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleMapClick}
+          aria-label="Abrir rotas para a clínica no mapa"
         >
           <CardContent className="p-0">
             <iframe
-              src="https://maps.google.com/maps?q=-16.729138263625725,-49.08742592883618&z=17&output=embed"
-              className="w-full h-80 border-0 rounded-b-lg"
+              src={mapEmbedUrl}
+              className="w-full h-80 border-0 rounded-b-lg pointer-events-none"
               allowFullScreen={true}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
