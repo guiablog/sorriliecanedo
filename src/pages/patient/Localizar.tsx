@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { MapPin, Phone } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { MapPin, Phone, Facebook, Instagram } from 'lucide-react'
 import { useAppSettingsStore } from '@/stores/appSettings'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/components/ui/use-toast'
@@ -90,6 +91,38 @@ export default function PatientLocalizar() {
             ></iframe>
           </CardContent>
         </a>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Nos siga nas Redes Sociais</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <a
+              href="https://www.facebook.com/sorrilie/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full"
+            >
+              <Button variant="outline" className="w-full">
+                <Facebook className="mr-2 h-5 w-5 text-blue-600" />
+                Facebook
+              </Button>
+            </a>
+            <a
+              href="https://www.instagram.com/sorrilie/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full"
+            >
+              <Button variant="outline" className="w-full">
+                <Instagram className="mr-2 h-5 w-5 text-pink-500" />
+                Instagram
+              </Button>
+            </a>
+          </div>
+        </CardContent>
       </Card>
     </div>
   )
