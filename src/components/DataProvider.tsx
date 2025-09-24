@@ -25,7 +25,9 @@ export const DataProvider = ({ children }: DataProviderProps) => {
   const fetchNotifications = useNotificationStore(
     (state) => state.fetchNotifications,
   )
-  const { fetchAppSettings } = useAppSettingsStore()
+  const fetchAppSettings = useAppSettingsStore(
+    (state) => state.fetchAppSettings,
+  )
   const checkSession = useAuthStore((state) => state.checkSession)
 
   useEffect(() => {
