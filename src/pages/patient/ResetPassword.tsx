@@ -23,6 +23,7 @@ import {
 import { toast } from '@/components/ui/use-toast'
 import { ArrowLeft } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
+import { Seo } from '@/components/Seo'
 
 const resetPasswordSchema = z
   .object({
@@ -92,62 +93,73 @@ export default function PatientResetPassword() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-neutral-light">
-      <Card className="mx-auto max-w-sm w-full relative">
-        <Link to="/login" className="absolute top-4 left-4 z-10">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-6 w-6" />
-            <span className="sr-only">Voltar</span>
-          </Button>
-        </Link>
-        <CardHeader className="text-center">
-          <img
-            src="https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black"
-            alt="Logo Sorriliê"
-            className="h-12 mx-auto mb-4"
-          />
-          <CardTitle className="text-2xl">Redefinir Senha</CardTitle>
-          <CardDescription>Crie uma nova senha para sua conta.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nova Senha</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirmar Nova Senha</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type="submit"
-                className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+    <>
+      <Seo
+        title="Redefinir Senha - Sorriliê Odontologia"
+        description="Crie uma nova senha para sua conta no aplicativo da Sorriliê Odontologia."
+      />
+      <div className="flex items-center justify-center min-h-screen bg-neutral-light">
+        <Card className="mx-auto max-w-sm w-full relative">
+          <Link to="/login" className="absolute top-4 left-4 z-10">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-6 w-6" />
+              <span className="sr-only">Voltar</span>
+            </Button>
+          </Link>
+          <CardHeader className="text-center">
+            <img
+              src="https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black"
+              alt="Logo Sorriliê"
+              className="h-12 mx-auto mb-4"
+            />
+            <CardTitle className="text-2xl">Redefinir Senha</CardTitle>
+            <CardDescription>
+              Crie uma nova senha para sua conta.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="grid gap-4"
               >
-                Salvar Nova Senha
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nova Senha</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirmar Nova Senha</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="submit"
+                  className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                >
+                  Salvar Nova Senha
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   )
 }

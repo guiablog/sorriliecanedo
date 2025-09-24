@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/form'
 import { toast } from '@/components/ui/use-toast'
 import { adminUserService } from '@/services/adminUserService'
+import { Seo } from '@/components/Seo'
 
 const registerSchema = z
   .object({
@@ -92,98 +93,104 @@ export default function AdminRegister() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-neutral-light">
-      <Card className="mx-auto max-w-sm w-full">
-        <CardHeader className="text-center">
-          <img
-            src="https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black"
-            alt="Logo Sorriliê"
-            className="h-12 mx-auto mb-4"
-          />
-          <CardTitle className="text-2xl">Cadastrar Administrador</CardTitle>
-          <CardDescription>
-            Crie o primeiro usuário para acessar o painel.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleRegister)}
-              className="grid gap-4"
-            >
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome completo" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-mail</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="admin@sorrilie.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Senha</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirmar Senha</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type="submit"
-                className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-                disabled={isLoading}
+    <>
+      <Seo
+        title="Cadastro Admin - Sorriliê Odontologia"
+        description="Cadastro do primeiro administrador do painel da Clínica Sorriliê Odontologia."
+      />
+      <div className="flex items-center justify-center min-h-screen bg-neutral-light">
+        <Card className="mx-auto max-w-sm w-full">
+          <CardHeader className="text-center">
+            <img
+              src="https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black"
+              alt="Logo Sorriliê"
+              className="h-12 mx-auto mb-4"
+            />
+            <CardTitle className="text-2xl">Cadastrar Administrador</CardTitle>
+            <CardDescription>
+              Crie o primeiro usuário para acessar o painel.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(handleRegister)}
+                className="grid gap-4"
               >
-                {isLoading ? 'Cadastrando...' : 'Cadastrar'}
-              </Button>
-            </form>
-          </Form>
-          <div className="mt-4 text-center text-sm">
-            Já tem uma conta?{' '}
-            <Link to="/admin/login" className="underline">
-              Fazer login
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nome completo" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>E-mail</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="admin@sorrilie.com"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Senha</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirmar Senha</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="submit"
+                  className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Cadastrando...' : 'Cadastrar'}
+                </Button>
+              </form>
+            </Form>
+            <div className="mt-4 text-center text-sm">
+              Já tem uma conta?{' '}
+              <Link to="/admin/login" className="underline">
+                Fazer login
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   )
 }

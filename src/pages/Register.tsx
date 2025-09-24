@@ -21,6 +21,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useAppSettingsStore } from '@/stores/appSettings'
 import { Skeleton } from '@/components/ui/skeleton'
 import { patientService } from '@/services/patientService'
+import { Seo } from '@/components/Seo'
 
 const registerSchema = z
   .object({
@@ -114,145 +115,154 @@ export default function Register() {
     'https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black'
 
   return (
-    <div className="flex flex-col min-h-screen bg-neutral-light p-6 md:p-8 justify-center animate-fade-in">
-      <div className="w-full max-w-md mx-auto relative">
-        <Link to="/login" className="absolute top-0 left-0 z-10">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-6 w-6" />
-            <span className="sr-only">Voltar</span>
-          </Button>
-        </Link>
-        <div className="text-center mb-8">
-          {settingsLoading ? (
-            <Skeleton className="h-12 w-48 mx-auto mb-4" />
-          ) : (
-            <img
-              src={settings?.logo_url || defaultLogo}
-              alt="Logo Sorriliê"
-              className="h-12 mx-auto mb-4"
-            />
-          )}
-          <h1 className="text-2xl font-bold text-neutral-dark">
-            Crie sua Conta
-          </h1>
-          <p className="text-neutral-dark/70">
-            Preencha seus dados para começar.
+    <>
+      <Seo
+        title="Cadastro - Sorriliê Odontologia"
+        description="Crie sua conta no aplicativo da Sorriliê Odontologia para agendar consultas e cuidar do seu sorriso."
+        keywords="cadastro, sorriliê, odontologia, novo paciente, criar conta"
+      />
+      <div className="flex flex-col min-h-screen bg-neutral-light p-6 md:p-8 justify-center animate-fade-in">
+        <div className="w-full max-w-md mx-auto relative">
+          <Link to="/login" className="absolute top-0 left-0 z-10">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-6 w-6" />
+              <span className="sr-only">Voltar</span>
+            </Button>
+          </Link>
+          <div className="text-center mb-8">
+            {settingsLoading ? (
+              <Skeleton className="h-12 w-48 mx-auto mb-4" />
+            ) : (
+              <img
+                src={settings?.logo_url || defaultLogo}
+                alt="Logo Sorriliê"
+                className="h-12 mx-auto mb-4"
+              />
+            )}
+            <h1 className="text-2xl font-bold text-neutral-dark">
+              Crie sua Conta
+            </h1>
+            <p className="text-neutral-dark/70">
+              Preencha seus dados para começar.
+            </p>
+          </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome Completo</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Seu nome completo" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cpf"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CPF</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="000.000.000-00"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(cpfMask(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="whatsapp"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>WhatsApp</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="(00) 00000-0000"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(whatsappMask(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>E-mail</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="seu@email.com"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Senha</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar Senha</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                size="lg"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Cadastrando...' : 'Cadastrar'}
+              </Button>
+            </form>
+          </Form>
+          <p className="mt-6 text-center text-sm text-neutral-dark/70">
+            Já tem uma conta?{' '}
+            <Link
+              to="/login"
+              className="font-semibold text-accent hover:underline ml-1"
+            >
+              Faça login.
+            </Link>
           </p>
         </div>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome Completo</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Seu nome completo" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="cpf"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>CPF</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="000.000.000-00"
-                      {...field}
-                      onChange={(e) => field.onChange(cpfMask(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="whatsapp"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>WhatsApp</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="(00) 00000-0000"
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(whatsappMask(e.target.value))
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>E-mail</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="seu@email.com"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Senha</FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirmar Senha</FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button
-              type="submit"
-              className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-              size="lg"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Cadastrando...' : 'Cadastrar'}
-            </Button>
-          </form>
-        </Form>
-        <p className="mt-6 text-center text-sm text-neutral-dark/70">
-          Já tem uma conta?{' '}
-          <Link
-            to="/login"
-            className="font-semibold text-accent hover:underline ml-1"
-          >
-            Faça login.
-          </Link>
-        </p>
       </div>
-    </div>
+    </>
   )
 }

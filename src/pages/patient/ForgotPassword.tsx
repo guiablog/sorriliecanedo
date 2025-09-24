@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/form'
 import { toast } from '@/components/ui/use-toast'
 import { supabase } from '@/lib/supabase/client'
+import { Seo } from '@/components/Seo'
 
 const forgotPasswordSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um e-mail válido.' }),
@@ -60,55 +61,64 @@ export default function PatientForgotPassword() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-neutral-light">
-      <Card className="mx-auto max-w-sm w-full">
-        <CardHeader className="text-center">
-          <img
-            src="https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black"
-            alt="Logo Sorriliê"
-            className="h-12 mx-auto mb-4"
-          />
-          <CardTitle className="text-2xl">Recuperar Senha</CardTitle>
-          <CardDescription>
-            Digite seu e-mail para receber as instruções de recuperação.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-mail</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="seu@email.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type="submit"
-                className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+    <>
+      <Seo
+        title="Recuperar Senha - Sorriliê Odontologia"
+        description="Esqueceu sua senha? Recupere o acesso à sua conta no aplicativo da Sorriliê Odontologia."
+      />
+      <div className="flex items-center justify-center min-h-screen bg-neutral-light">
+        <Card className="mx-auto max-w-sm w-full">
+          <CardHeader className="text-center">
+            <img
+              src="https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black"
+              alt="Logo Sorriliê"
+              className="h-12 mx-auto mb-4"
+            />
+            <CardTitle className="text-2xl">Recuperar Senha</CardTitle>
+            <CardDescription>
+              Digite seu e-mail para receber as instruções de recuperação.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="grid gap-4"
               >
-                Enviar Link de Recuperação
-              </Button>
-            </form>
-          </Form>
-          <div className="mt-4 text-center text-sm">
-            Lembrou a senha?{' '}
-            <Link to="/login" className="underline">
-              Voltar para o login
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>E-mail</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="seu@email.com"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="submit"
+                  className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                >
+                  Enviar Link de Recuperação
+                </Button>
+              </form>
+            </Form>
+            <div className="mt-4 text-center text-sm">
+              Lembrou a senha?{' '}
+              <Link to="/login" className="underline">
+                Voltar para o login
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   )
 }

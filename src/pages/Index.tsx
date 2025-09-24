@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/auth'
 import { useAppSettingsStore } from '@/stores/appSettings'
+import { Seo } from '@/components/Seo'
 
 export default function SplashScreen() {
   const navigate = useNavigate()
@@ -35,16 +36,23 @@ export default function SplashScreen() {
   const splashImage = settings?.splash_screen_image_url
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-primary animate-fade-in">
-      {splashImage ? (
-        <img
-          src={splashImage}
-          alt="Sorriliê Odontologia Logo"
-          className="w-48 h-auto animate-pulse"
-        />
-      ) : (
-        <div className="w-48 h-48" />
-      )}
-    </div>
+    <>
+      <Seo
+        title="Bem-vindo à Sorriliê Odontologia"
+        description="Aplicativo oficial da clínica Sorriliê Odontologia. Agende suas consultas e cuide do seu sorriso."
+        ogImage={splashImage || undefined}
+      />
+      <div className="flex items-center justify-center min-h-screen bg-primary animate-fade-in">
+        {splashImage ? (
+          <img
+            src={splashImage}
+            alt="Sorriliê Odontologia Logo"
+            className="w-48 h-auto animate-pulse"
+          />
+        ) : (
+          <div className="w-48 h-48" />
+        )}
+      </div>
+    </>
   )
 }
