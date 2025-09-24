@@ -59,6 +59,7 @@ export const adminUserService = {
       options: {
         data: {
           name: userData.name,
+          role: 'admin',
         },
       },
     })
