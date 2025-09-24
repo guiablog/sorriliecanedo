@@ -10,6 +10,7 @@ const routeTitles: { [key: string]: string } = {
   '/content': 'Conteúdo Educativo',
   '/profile': 'Meu Perfil',
   '/localizar': 'Localizar',
+  '/contact': 'Fale Conosco',
 }
 
 export default function MobileLayout() {

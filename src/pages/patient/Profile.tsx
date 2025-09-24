@@ -14,13 +14,15 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuthStore } from '@/stores/auth'
 import { usePatientStore } from '@/stores/patient'
 import { isValidCPF } from '@/lib/utils'
 import { whatsappMask, cpfMask } from '@/lib/masks'
-import { User } from 'lucide-react'
+import { Mail } from 'lucide-react'
 import { ProfileCard } from '@/components/ProfileCard'
-import { Card, CardContent } from '@/components/ui/card'
+import { AppointmentList } from '@/components/AppointmentList'
 
 const profileSchema = z.object({
   name: z
@@ -39,7 +41,6 @@ export default function Profile() {
   const navigate = useNavigate()
   const { name, logout } = useAuthStore()
   const { patients, updatePatient } = usePatientStore()
-  const [isFormVisible, setIsFormVisible] = useState(false)
 
   const currentUser = patients.find((p) => p.name === name)
 
@@ -84,17 +85,27 @@ export default function Profile() {
   }
 
   return (
-    <div className="p-4 space-y-8 animate-fade-in-up">
-      <div className="space-y-4">
-        <ProfileCard
-          icon={<User className="h-6 w-6 text-secondary" />}
-          title="Dados de Cadastro"
-          subtitle="Visualize e edite suas informações pessoais"
-          onClick={() => setIsFormVisible((prev) => !prev)}
-        />
-        {isFormVisible && (
-          <Card className="animate-fade-in">
-            <CardContent className="p-4">
+    <div className="p-4 space-y-6 animate-fade-in-up">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-neutral-dark">
+          Olá, {currentUser?.name?.split(' ')[0]}!
+        </h1>
+        <p className="text-neutral-dark/70">
+          Gerencie suas informações e agendamentos.
+        </p>
+      </div>
+
+      <Tabs defaultValue="profile" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="profile">Meu Perfil</TabsTrigger>
+          <TabsTrigger value="appointments">Consultas</TabsTrigger>
+        </TabsList>
+        <TabsContent value="profile" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Dados de Cadastro</CardTitle>
+            </CardHeader>
+            <CardContent>
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
@@ -173,8 +184,18 @@ export default function Profile() {
               </Form>
             </CardContent>
           </Card>
-        )}
-      </div>
+        </TabsContent>
+        <TabsContent value="appointments" className="mt-4">
+          <AppointmentList />
+        </TabsContent>
+      </Tabs>
+
+      <ProfileCard
+        icon={<Mail className="h-6 w-6 text-secondary" />}
+        title="Fale Conosco"
+        subtitle="Envie suas dúvidas ou sugestões"
+        onClick={() => navigate('/contact')}
+      />
 
       <Button variant="destructive" className="w-full" onClick={handleLogout}>
         Sair

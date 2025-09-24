@@ -27,6 +27,7 @@ const PatientSchedule = lazy(() => import('./pages/patient/Schedule'))
 const PatientContent = lazy(() => import('./pages/patient/Content'))
 const PatientProfile = lazy(() => import('./pages/patient/Profile'))
 const PatientLocalizar = lazy(() => import('./pages/patient/Localizar'))
+const PatientContact = lazy(() => import('./pages/patient/Contact'))
 
 const AdminLogin = lazy(() => import('./pages/admin/Login'))
 const AdminRegister = lazy(() => import('./pages/admin/Register'))
@@ -91,6 +92,7 @@ const App = () => (
                   <Route path="/content" element={<PatientContent />} />
                   <Route path="/profile" element={<PatientProfile />} />
                   <Route path="/localizar" element={<PatientLocalizar />} />
+                  <Route path="/contact" element={<PatientContact />} />
                 </Route>
               </Route>
 
