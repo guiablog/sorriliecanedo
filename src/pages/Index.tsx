@@ -5,12 +5,13 @@ import { useAppSettingsStore } from '@/stores/appSettings'
 
 export default function SplashScreen() {
   const navigate = useNavigate()
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
-  const userType = useAuthStore((state) => state.userType)
-  const { settings, loading } = useAppSettingsStore()
+  const { isAuthenticated, userType, loading: authLoading } = useAuthStore()
+  const { settings, loading: settingsLoading } = useAppSettingsStore()
+
+  const isLoading = authLoading || settingsLoading
 
   useEffect(() => {
-    if (loading) {
+    if (isLoading) {
       return
     }
 
@@ -21,28 +22,29 @@ export default function SplashScreen() {
         } else if (userType === 'admin') {
           navigate('/admin')
         } else {
-          // Fallback for an unlikely state
           navigate('/login')
         }
       } else {
         navigate('/login')
       }
-    }, 2500)
+    }, 1500)
 
     return () => clearTimeout(timer)
-  }, [navigate, isAuthenticated, userType, loading])
+  }, [isLoading, isAuthenticated, userType, navigate])
 
   const splashImage = settings?.splash_screen_image_url
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-primary animate-fade-in">
-      {!loading && splashImage ? (
+      {splashImage ? (
         <img
           src={splashImage}
           alt="Sorriliê Odontologia Logo"
-          className="w-48 h-auto animate-fade-in"
+          className="w-48 h-auto animate-pulse"
         />
-      ) : null}
+      ) : (
+        <div className="w-48 h-48" />
+      )}
     </div>
   )
 }

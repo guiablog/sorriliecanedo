@@ -263,7 +263,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      delete_user: {
+        Args: { user_id_to_delete: string }
+        Returns: undefined
+      }
+      update_admin_user: {
+        Args: { new_email: string; new_name: string; user_id_to_update: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

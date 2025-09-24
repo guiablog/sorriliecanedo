@@ -8,6 +8,7 @@ interface AuthState {
   userType: 'patient' | 'admin' | null
   name: string | null
   adminUser: { name: string; email: string } | null
+  loading: boolean
   patientLogin: (email: string, pass: string) => Promise<boolean | string>
   adminLogin: (email: string, pass: string) => Promise<boolean | string>
   logout: () => void
@@ -21,6 +22,7 @@ export const useAuthStore = create<AuthState>()(
       userType: null,
       name: null,
       adminUser: null,
+      loading: true,
       patientLogin: async (email, password) => {
         const { data: authData, error: authError } =
           await supabase.auth.signInWithPassword({
@@ -54,6 +56,7 @@ export const useAuthStore = create<AuthState>()(
           userType: 'patient',
           name: patientProfile.name,
           adminUser: null,
+          loading: false,
         })
         return true
       },
@@ -92,6 +95,7 @@ export const useAuthStore = create<AuthState>()(
             userType: 'admin',
             adminUser: { name: adminProfile.name, email: adminProfile.email },
             name: null,
+            loading: false,
           })
           return true
         } catch (profileError) {
@@ -106,6 +110,7 @@ export const useAuthStore = create<AuthState>()(
           userType: null,
           name: null,
           adminUser: null,
+          loading: false,
         })
       },
       checkSession: async () => {
@@ -129,6 +134,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
             userType: 'admin',
             adminUser: { name: adminProfile.name, email: adminProfile.email },
+            loading: false,
           })
         } else {
           const { data: patientProfile } = await supabase
@@ -142,6 +148,7 @@ export const useAuthStore = create<AuthState>()(
               isAuthenticated: true,
               userType: 'patient',
               name: patientProfile.name,
+              loading: false,
             })
           } else {
             get().logout()
