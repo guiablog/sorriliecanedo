@@ -20,9 +20,11 @@ import { useAuthStore } from '@/stores/auth'
 import { usePatientStore } from '@/stores/patient'
 import { isValidCPF } from '@/lib/utils'
 import { whatsappMask, cpfMask } from '@/lib/masks'
-import { Mail } from 'lucide-react'
+import { Mail, Bell } from 'lucide-react'
 import { ProfileCard } from '@/components/ProfileCard'
 import { AppointmentList } from '@/components/AppointmentList'
+import { Switch } from '@/components/ui/switch'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
 
 const profileSchema = z.object({
   name: z
@@ -41,6 +43,7 @@ export default function Profile() {
   const navigate = useNavigate()
   const { name, logout } = useAuthStore()
   const { patients, updatePatient } = usePatientStore()
+  const { isSubscribed, requestPermissionAndSubscribe } = usePushNotifications()
 
   const currentUser = patients.find((p) => p.name === name)
 
@@ -84,6 +87,20 @@ export default function Profile() {
     navigate('/login')
   }
 
+  const handleNotificationToggle = (checked: boolean) => {
+    if (checked) {
+      requestPermissionAndSubscribe()
+    } else {
+      // Note: Unsubscribing is complex and often handled by token invalidation.
+      // For now, we just inform the user.
+      toast({
+        title: 'Notificações',
+        description:
+          'Para desativar, gerencie as permissões no seu navegador ou dispositivo.',
+      })
+    }
+  }
+
   return (
     <div className="p-4 space-y-6 animate-fade-in-up">
       <div className="text-center">
@@ -100,7 +117,7 @@ export default function Profile() {
           <TabsTrigger value="profile">Meu Perfil</TabsTrigger>
           <TabsTrigger value="appointments">Consultas</TabsTrigger>
         </TabsList>
-        <TabsContent value="profile" className="mt-4">
+        <TabsContent value="profile" className="mt-4 space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Dados de Cadastro</CardTitle>
@@ -182,6 +199,25 @@ export default function Profile() {
                   </Button>
                 </form>
               </Form>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="bg-secondary/10 p-3 rounded-full mr-4">
+                  <Bell className="h-6 w-6 text-secondary" />
+                </div>
+                <div>
+                  <p className="font-bold text-neutral-dark">Notificações</p>
+                  <p className="text-sm text-neutral-dark/70">
+                    Receber avisos de consultas
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={isSubscribed}
+                onCheckedChange={handleNotificationToggle}
+              />
             </CardContent>
           </Card>
         </TabsContent>
