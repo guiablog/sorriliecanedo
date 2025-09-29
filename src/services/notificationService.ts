@@ -45,21 +45,4 @@ export const notificationService = {
       date: format(new Date(data.created_at), 'dd/MM/yyyy'),
     }
   },
-
-  async sendPushNotification(payload: {
-    title: string
-    message: string
-    segment: string
-  }): Promise<{ error: any }> {
-    const { error } = await supabase.functions.invoke(
-      'send-push-notification',
-      {
-        body: payload,
-      },
-    )
-    if (error) {
-      console.error('Error sending push notification:', error)
-    }
-    return { error }
-  },
 }

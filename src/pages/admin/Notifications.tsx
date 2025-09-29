@@ -20,10 +20,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useNotificationStore } from '@/stores/notification'
-import { notificationService } from '@/services/notificationService'
 import { toast } from '@/components/ui/use-toast'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Switch } from '@/components/ui/switch'
 import { Loader2 } from 'lucide-react'
 
 export default function AdminNotifications() {
@@ -31,7 +29,6 @@ export default function AdminNotifications() {
   const [title, setTitle] = useState('')
   const [message, setMessage] = useState('')
   const [segment, setSegment] = useState('')
-  const [isPush, setIsPush] = useState(false)
   const [isSending, setIsSending] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,24 +43,15 @@ export default function AdminNotifications() {
     }
     setIsSending(true)
     try {
-      if (isPush) {
-        await notificationService.sendPushNotification({
-          title,
-          message,
-          segment,
-        })
-        toast({ title: 'Notificação Push enviada com sucesso!' })
-      }
-      // Also save to history
       await addNotification({ title, message, segment })
+      toast({ title: 'Notificação salva no histórico com sucesso!' })
       setTitle('')
       setMessage('')
       setSegment('')
-      setIsPush(false)
     } catch (error) {
       toast({
         title: 'Erro',
-        description: 'Não foi possível enviar a notificação.',
+        description: 'Não foi possível salvar a notificação.',
         variant: 'destructive',
       })
     } finally {
@@ -81,14 +69,6 @@ export default function AdminNotifications() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
-                <Label htmlFor="is-push">Enviar como Push Notification</Label>
-                <Switch
-                  id="is-push"
-                  checked={isPush}
-                  onCheckedChange={setIsPush}
-                />
-              </div>
               <div>
                 <Label htmlFor="title">Título</Label>
                 <Input
@@ -130,7 +110,7 @@ export default function AdminNotifications() {
                 disabled={isSending}
               >
                 {isSending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Enviar Notificação
+                Salvar Notificação
               </Button>
             </form>
           </CardContent>

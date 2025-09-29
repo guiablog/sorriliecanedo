@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -20,11 +20,9 @@ import { useAuthStore } from '@/stores/auth'
 import { usePatientStore } from '@/stores/patient'
 import { isValidCPF } from '@/lib/utils'
 import { whatsappMask, cpfMask } from '@/lib/masks'
-import { Mail, Bell } from 'lucide-react'
+import { Mail } from 'lucide-react'
 import { ProfileCard } from '@/components/ProfileCard'
 import { AppointmentList } from '@/components/AppointmentList'
-import { Switch } from '@/components/ui/switch'
-import { usePushNotifications } from '@/hooks/usePushNotifications'
 
 const profileSchema = z.object({
   name: z
@@ -43,7 +41,6 @@ export default function Profile() {
   const navigate = useNavigate()
   const { name, logout } = useAuthStore()
   const { patients, updatePatient } = usePatientStore()
-  const { isSubscribed, requestPermissionAndSubscribe } = usePushNotifications()
 
   const currentUser = patients.find((p) => p.name === name)
 
@@ -85,20 +82,6 @@ export default function Profile() {
   const handleLogout = () => {
     logout()
     navigate('/login')
-  }
-
-  const handleNotificationToggle = (checked: boolean) => {
-    if (checked) {
-      requestPermissionAndSubscribe()
-    } else {
-      // Note: Unsubscribing is complex and often handled by token invalidation.
-      // For now, we just inform the user.
-      toast({
-        title: 'Notificações',
-        description:
-          'Para desativar, gerencie as permissões no seu navegador ou dispositivo.',
-      })
-    }
   }
 
   return (
@@ -199,25 +182,6 @@ export default function Profile() {
                   </Button>
                 </form>
               </Form>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="bg-secondary/10 p-3 rounded-full mr-4">
-                  <Bell className="h-6 w-6 text-secondary" />
-                </div>
-                <div>
-                  <p className="font-bold text-neutral-dark">Notificações</p>
-                  <p className="text-sm text-neutral-dark/70">
-                    Receber avisos de consultas
-                  </p>
-                </div>
-              </div>
-              <Switch
-                checked={isSubscribed}
-                onCheckedChange={handleNotificationToggle}
-              />
             </CardContent>
           </Card>
         </TabsContent>
