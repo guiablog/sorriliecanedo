@@ -24,7 +24,7 @@ export const notificationService = {
   async addNotification(
     notificationData: Omit<Notification, 'date'>,
   ): Promise<Notification> {
-    const { data, error } = await supabase
+    const { data, error: dbError } = await supabase
       .from('notifications')
       .insert({
         title: notificationData.title,
@@ -34,10 +34,30 @@ export const notificationService = {
       .select()
       .single()
 
-    if (error) {
-      console.error('Error adding notification:', error)
-      throw error
+    if (dbError) {
+      console.error('Error adding notification to DB:', dbError)
+      throw dbError
     }
+
+    // Invoke the Edge Function to send the push notification
+    const { error: functionError } = await supabase.functions.invoke(
+      'send-fcm-notification',
+      {
+        body: {
+          title: notificationData.title,
+          message: notificationData.message,
+          segment: notificationData.segment,
+        },
+      },
+    )
+
+    if (functionError) {
+      console.error(
+        'Error invoking send-fcm-notification function:',
+        functionError,
+      )
+    }
+
     return {
       title: data.title,
       message: data.message,
