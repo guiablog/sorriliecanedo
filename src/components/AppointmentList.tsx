@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAppointmentStore, Appointment } from '@/stores/appointment'
 import { useAuthStore } from '@/stores/auth'
+import { usePatientStore } from '@/stores/patient'
 import { AppointmentDetailsModal } from '@/components/AppointmentDetailsModal'
 import { CancelConfirmationDialog } from '@/components/CancelConfirmationDialog'
 import { toast } from '@/components/ui/use-toast'
@@ -56,7 +57,8 @@ const AppointmentItem = ({
 )
 
 export const AppointmentList = () => {
-  const { name } = useAuthStore()
+  const { userId } = useAuthStore()
+  const { patients } = usePatientStore()
   const {
     appointments,
     updateAppointmentStatus,
@@ -68,10 +70,15 @@ export const AppointmentList = () => {
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null)
 
-  const userAppointments = useMemo(
-    () => appointments.filter((a) => a.patient === name),
-    [appointments, name],
+  const currentUser = useMemo(
+    () => patients.find((p) => p.user_id === userId),
+    [patients, userId],
   )
+
+  const userAppointments = useMemo(() => {
+    if (!currentUser) return []
+    return appointments.filter((a) => a.patient_id === currentUser.id)
+  }, [appointments, currentUser])
 
   const upcomingAppointments = useMemo(
     () =>

@@ -39,12 +39,12 @@ type CompleteProfileFormValues = z.infer<typeof completeProfileSchema>
 
 export default function CompleteProfile() {
   const navigate = useNavigate()
-  const { name } = useAuthStore()
+  const { userId } = useAuthStore()
   const { patients, updatePatient } = usePatientStore()
   const { settings, loading: settingsLoading } = useAppSettingsStore()
   const [isLoading, setIsLoading] = useState(false)
 
-  const currentUser = patients.find((p) => p.name === name)
+  const currentUser = patients.find((p) => p.user_id === userId)
 
   const form = useForm<CompleteProfileFormValues>({
     resolver: zodResolver(completeProfileSchema),
@@ -60,7 +60,7 @@ export default function CompleteProfile() {
   }, [currentUser, navigate])
 
   async function onSubmit(data: CompleteProfileFormValues) {
-    if (!currentUser || !currentUser.user_id) {
+    if (!userId) {
       toast({
         title: 'Erro',
         description: 'Usuário não encontrado. Por favor, faça login novamente.',
@@ -70,7 +70,7 @@ export default function CompleteProfile() {
     }
     setIsLoading(true)
     try {
-      await updatePatient(currentUser.user_id, { whatsapp: data.whatsapp })
+      await updatePatient(userId, { whatsapp: data.whatsapp })
       toast({
         title: 'Cadastro Completo!',
         description: 'Seu número de WhatsApp foi salvo com sucesso.',

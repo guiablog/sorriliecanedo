@@ -35,10 +35,10 @@ type ProfileFormValues = z.infer<typeof profileSchema>
 
 export default function Profile() {
   const navigate = useNavigate()
-  const { name, logout } = useAuthStore()
+  const { userId, logout } = useAuthStore()
   const { patients, updatePatient } = usePatientStore()
 
-  const currentUser = patients.find((p) => p.name === name)
+  const currentUser = patients.find((p) => p.user_id === userId)
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -60,9 +60,9 @@ export default function Profile() {
   }, [currentUser, form])
 
   async function onSubmit(data: ProfileFormValues) {
-    if (!currentUser || !currentUser.user_id) return
+    if (!userId) return
     try {
-      await updatePatient(currentUser.user_id, data)
+      await updatePatient(userId, data)
       toast({ title: 'Alterações salvas com sucesso!' })
     } catch (error) {
       toast({

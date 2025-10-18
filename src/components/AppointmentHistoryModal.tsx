@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAppointmentStore } from '@/stores/appointment'
 import { useAuthStore } from '@/stores/auth'
+import { usePatientStore } from '@/stores/patient'
 import { useMemo } from 'react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -37,18 +38,25 @@ export const AppointmentHistoryModal = ({
   open,
   onOpenChange,
 }: AppointmentHistoryModalProps) => {
-  const { name } = useAuthStore()
+  const { userId } = useAuthStore()
+  const { patients } = usePatientStore()
   const { appointments, loading } = useAppointmentStore()
 
+  const currentUser = useMemo(
+    () => patients.find((p) => p.user_id === userId),
+    [patients, userId],
+  )
+
   const userAppointments = useMemo(() => {
+    if (!currentUser) return []
     return appointments
-      .filter((a) => a.patient === name)
+      .filter((a) => a.patient_id === currentUser.id)
       .sort(
         (a, b) =>
           new Date(`${b.date}T${b.time}`).getTime() -
           new Date(`${a.date}T${a.time}`).getTime(),
       )
-  }, [appointments, name])
+  }, [appointments, currentUser])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

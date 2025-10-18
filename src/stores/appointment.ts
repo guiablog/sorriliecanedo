@@ -21,6 +21,7 @@ export type AppointmentStatus =
 
 export interface Appointment {
   id: string
+  patient_id: string | null
   date: string // YYYY-MM-DD
   time: string
   patient: string
@@ -32,6 +33,7 @@ export interface Appointment {
 
 const mapRowToAppointment = (row: Tables<'appointments'>): Appointment => ({
   id: row.id,
+  patient_id: row.patient_id,
   date: row.date,
   time: row.time,
   patient: row.patient_name,
@@ -46,7 +48,10 @@ interface AppointmentState {
   loading: boolean
   channel: RealtimeChannel | null
   fetchAppointments: () => Promise<void>
-  addAppointment: (appointment: Omit<Appointment, 'id'>) => Promise<void>
+  addAppointment: (
+    appointment: Omit<Appointment, 'id' | 'patient_id'>,
+    userId: string,
+  ) => Promise<void>
   updateAppointmentStatus: (
     id: string,
     status: AppointmentStatus,
@@ -74,8 +79,11 @@ export const useAppointmentStore = create<AppointmentState>()((set, get) => ({
       set({ loading: false })
     }
   },
-  addAppointment: async (appointment) => {
-    const newAppointment = await appointmentService.addAppointment(appointment)
+  addAppointment: async (appointment, userId) => {
+    const newAppointment = await appointmentService.addAppointment(
+      appointment,
+      userId,
+    )
     set((state) => ({
       appointments: [...state.appointments, newAppointment],
     }))

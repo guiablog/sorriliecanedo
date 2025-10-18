@@ -7,6 +7,7 @@ import { toast } from '@/components/ui/use-toast'
 interface AuthState {
   isAuthenticated: boolean
   userType: 'patient' | 'admin' | null
+  userId: string | null
   name: string | null
   adminUser: { name: string; email: string } | null
   loading: boolean
@@ -22,6 +23,7 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       isAuthenticated: false,
       userType: null,
+      userId: null,
       name: null,
       adminUser: null,
       loading: true,
@@ -56,6 +58,7 @@ export const useAuthStore = create<AuthState>()(
         set({
           isAuthenticated: true,
           userType: 'patient',
+          userId: authData.user.id,
           name: patientProfile.name,
           adminUser: null,
           loading: false,
@@ -69,11 +72,7 @@ export const useAuthStore = create<AuthState>()(
             password,
           })
 
-        if (authError) {
-          return 'Credenciais inválidas'
-        }
-
-        if (!authData.user) {
+        if (authError || !authData.user) {
           return 'Credenciais inválidas'
         }
 
@@ -95,6 +94,7 @@ export const useAuthStore = create<AuthState>()(
           set({
             isAuthenticated: true,
             userType: 'admin',
+            userId: authData.user.id,
             adminUser: { name: adminProfile.name, email: adminProfile.email },
             name: null,
             loading: false,
@@ -128,6 +128,7 @@ export const useAuthStore = create<AuthState>()(
         set({
           isAuthenticated: false,
           userType: null,
+          userId: null,
           name: null,
           adminUser: null,
           loading: false,
@@ -142,6 +143,7 @@ export const useAuthStore = create<AuthState>()(
           set({
             isAuthenticated: false,
             userType: null,
+            userId: null,
             name: null,
             adminUser: null,
             loading: false,
@@ -160,6 +162,7 @@ export const useAuthStore = create<AuthState>()(
           set({
             isAuthenticated: true,
             userType: 'admin',
+            userId: user.id,
             adminUser: { name: adminProfile.name, email: adminProfile.email },
             loading: false,
           })
@@ -174,6 +177,7 @@ export const useAuthStore = create<AuthState>()(
             set({
               isAuthenticated: true,
               userType: 'patient',
+              userId: user.id,
               name: patientProfile.name,
               loading: false,
             })

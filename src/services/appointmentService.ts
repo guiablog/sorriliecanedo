@@ -11,6 +11,7 @@ export const appointmentService = {
     }
     return data.map((a) => ({
       id: a.id,
+      patient_id: a.patient_id,
       date: a.date,
       time: a.time,
       patient: a.patient_name,
@@ -22,11 +23,24 @@ export const appointmentService = {
   },
 
   async addAppointment(
-    appointmentData: Omit<Appointment, 'id'>,
+    appointmentData: Omit<Appointment, 'id' | 'patient_id'>,
+    userId: string,
   ): Promise<Appointment> {
+    const { data: patientData, error: patientError } = await supabase
+      .from('patients')
+      .select('id')
+      .eq('user_id', userId)
+      .single()
+
+    if (patientError || !patientData) {
+      console.error('Error finding patient for appointment:', patientError)
+      throw new Error('Patient profile not found.')
+    }
+
     const { data, error } = await supabase
       .from('appointments')
       .insert({
+        patient_id: patientData.id,
         patient_name: appointmentData.patient,
         professional_name: appointmentData.professional,
         service_name: appointmentData.service,
@@ -44,6 +58,7 @@ export const appointmentService = {
     }
     return {
       id: data.id,
+      patient_id: data.patient_id,
       date: data.date,
       time: data.time,
       patient: data.patient_name,
@@ -71,6 +86,7 @@ export const appointmentService = {
     }
     return {
       id: data.id,
+      patient_id: data.patient_id,
       date: data.date,
       time: data.time,
       patient: data.patient_name,
@@ -128,6 +144,7 @@ export const appointmentService = {
     }
     return {
       id: data.id,
+      patient_id: data.patient_id,
       date: data.date,
       time: data.time,
       patient: data.patient_name,

@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar, Stethoscope, Lightbulb } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth'
+import { usePatientStore } from '@/stores/patient'
 import { useAppointmentStore, Appointment } from '@/stores/appointment'
 import { AppointmentDetailsModal } from '@/components/AppointmentDetailsModal'
 import { CancelConfirmationDialog } from '@/components/CancelConfirmationDialog'
@@ -15,7 +16,8 @@ import { ContentDetailsModal } from '@/components/ContentDetailsModal'
 import { ContentCarousel } from '@/components/ContentCarousel'
 
 export default function PatientHome() {
-  const { name } = useAuthStore()
+  const { userId } = useAuthStore()
+  const { patients } = usePatientStore()
   const { appointments, updateAppointmentStatus } = useAppointmentStore()
   const { content } = useContentStore()
 
@@ -32,20 +34,27 @@ export default function PatientHome() {
   )
   const [activeList, setActiveList] = useState<ContentItem[]>([])
 
-  const patientName = name ? name.split(' ')[0] : 'Paciente'
+  const currentUser = useMemo(
+    () => patients.find((p) => p.user_id === userId),
+    [patients, userId],
+  )
+  const patientName = currentUser ? currentUser.name.split(' ')[0] : 'Paciente'
 
-  const nextAppointment = appointments
-    .filter(
-      (appt) =>
-        appt.patient === name &&
-        (appt.status === 'Confirmado' || appt.status === 'Pendente') &&
-        new Date(`${appt.date}T${appt.time}`) >= new Date(),
-    )
-    .sort(
-      (a, b) =>
-        new Date(`${a.date}T${a.time}`).getTime() -
-        new Date(`${b.date}T${b.time}`).getTime(),
-    )[0]
+  const nextAppointment = useMemo(() => {
+    if (!currentUser) return null
+    return appointments
+      .filter(
+        (appt) =>
+          appt.patient_id === currentUser.id &&
+          (appt.status === 'Confirmado' || appt.status === 'Pendente') &&
+          new Date(`${appt.date}T${appt.time}`) >= new Date(),
+      )
+      .sort(
+        (a, b) =>
+          new Date(`${a.date}T${a.time}`).getTime() -
+          new Date(`${b.date}T${b.time}`).getTime(),
+      )[0]
+  }, [appointments, currentUser])
 
   const healthFocusContent = content.filter(
     (c) => c.type === 'health_focus' && c.status === 'Publicado',

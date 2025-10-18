@@ -8,7 +8,7 @@ export const ProfileCompletionGuard = () => {
   const {
     isAuthenticated,
     userType,
-    name,
+    userId,
     loading: authLoading,
   } = useAuthStore()
   const { patients, loading: patientsLoading } = usePatientStore()
@@ -19,8 +19,8 @@ export const ProfileCompletionGuard = () => {
     return <PageLoader />
   }
 
-  if (isAuthenticated && userType === 'patient') {
-    const currentUser = patients.find((p) => p.name === name)
+  if (isAuthenticated && userType === 'patient' && userId) {
+    const currentUser = patients.find((p) => p.user_id === userId)
 
     if (currentUser && !currentUser.whatsapp) {
       if (location.pathname !== '/complete-profile') {

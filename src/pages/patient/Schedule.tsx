@@ -48,7 +48,7 @@ export default function Schedule() {
     useProfessionalStore()
   const { services, loading: servicesLoading } = useServiceStore()
   const { addAppointment } = useAppointmentStore()
-  const { name } = useAuthStore()
+  const { name, userId } = useAuthStore()
 
   const activeProfessionals = professionals.filter((p) => p.status === 'Ativo')
   const activeServices = services.filter((s) => s.status === 'Ativo')
@@ -80,16 +80,19 @@ export default function Schedule() {
     }
 
     if (step === 3 && selectedDate && selectedTime) {
-      if (selectedService && selectedProfessional && name) {
+      if (selectedService && selectedProfessional && name && userId) {
         try {
-          await addAppointment({
-            date: format(selectedDate, 'yyyy-MM-dd'),
-            time: selectedTime,
-            patient: name,
-            service: selectedService,
-            professional: selectedProfessional,
-            status: 'Pendente',
-          })
+          await addAppointment(
+            {
+              date: format(selectedDate, 'yyyy-MM-dd'),
+              time: selectedTime,
+              patient: name,
+              service: selectedService,
+              professional: selectedProfessional,
+              status: 'Pendente',
+            },
+            userId,
+          )
           setStep(4)
           toast({
             title: 'Agendamento realizado com sucesso!',
