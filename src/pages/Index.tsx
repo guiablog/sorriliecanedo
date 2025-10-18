@@ -3,20 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/auth'
 import { useAppSettingsStore } from '@/stores/appSettings'
 import { Seo } from '@/components/Seo'
-import { usePatientStore } from '@/stores/patient'
 
 export default function SplashScreen() {
   const navigate = useNavigate()
-  const {
-    isAuthenticated,
-    userType,
-    name,
-    loading: authLoading,
-  } = useAuthStore()
+  const { isAuthenticated, userType, loading: authLoading } = useAuthStore()
   const { settings, loading: settingsLoading } = useAppSettingsStore()
-  const { patients, loading: patientsLoading } = usePatientStore()
 
-  const isLoading = authLoading || settingsLoading || patientsLoading
+  const isLoading = authLoading || settingsLoading
 
   useEffect(() => {
     if (isLoading) {
@@ -26,12 +19,7 @@ export default function SplashScreen() {
     const timer = setTimeout(() => {
       if (isAuthenticated) {
         if (userType === 'patient') {
-          const currentUser = patients.find((p) => p.name === name)
-          if (currentUser && !currentUser.whatsapp) {
-            navigate('/complete-profile')
-          } else {
-            navigate('/home')
-          }
+          navigate('/home')
         } else if (userType === 'admin') {
           navigate('/admin')
         } else {
@@ -43,7 +31,7 @@ export default function SplashScreen() {
     }, 1500)
 
     return () => clearTimeout(timer)
-  }, [isLoading, isAuthenticated, userType, navigate, patients, name])
+  }, [isLoading, isAuthenticated, userType, navigate])
 
   const splashImage = settings?.splash_screen_image_url
 
