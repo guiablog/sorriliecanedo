@@ -14,6 +14,11 @@ const ProtectedRoute = lazy(() =>
     default: module.ProtectedRoute,
   })),
 )
+const ProfileCompletionGuard = lazy(() =>
+  import('./components/ProfileCompletionGuard').then((module) => ({
+    default: module.ProfileCompletionGuard,
+  })),
+)
 
 const SplashScreen = lazy(() => import('./pages/Index'))
 const Login = lazy(() => import('./pages/Login'))
@@ -22,6 +27,7 @@ const PatientForgotPassword = lazy(
   () => import('./pages/patient/ForgotPassword'),
 )
 const PatientResetPassword = lazy(() => import('./pages/patient/ResetPassword'))
+const CompleteProfile = lazy(() => import('./pages/patient/CompleteProfile'))
 const PatientHome = lazy(() => import('./pages/patient/Home'))
 const PatientSchedule = lazy(() => import('./pages/patient/Schedule'))
 const PatientContent = lazy(() => import('./pages/patient/Content'))
@@ -86,13 +92,16 @@ const App = () => (
                   />
                 }
               >
-                <Route element={<MobileLayout />}>
-                  <Route path="/home" element={<PatientHome />} />
-                  <Route path="/schedule" element={<PatientSchedule />} />
-                  <Route path="/content" element={<PatientContent />} />
-                  <Route path="/profile" element={<PatientProfile />} />
-                  <Route path="/localizar" element={<PatientLocalizar />} />
-                  <Route path="/contact" element={<PatientContact />} />
+                <Route path="/complete-profile" element={<CompleteProfile />} />
+                <Route element={<ProfileCompletionGuard />}>
+                  <Route element={<MobileLayout />}>
+                    <Route path="/home" element={<PatientHome />} />
+                    <Route path="/schedule" element={<PatientSchedule />} />
+                    <Route path="/content" element={<PatientContent />} />
+                    <Route path="/profile" element={<PatientProfile />} />
+                    <Route path="/localizar" element={<PatientLocalizar />} />
+                    <Route path="/contact" element={<PatientContact />} />
+                  </Route>
                 </Route>
               </Route>
 

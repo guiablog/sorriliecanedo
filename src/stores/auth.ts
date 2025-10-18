@@ -134,11 +134,18 @@ export const useAuthStore = create<AuthState>()(
         })
       },
       checkSession: async () => {
+        set({ loading: true })
         const {
           data: { session },
         } = await supabase.auth.getSession()
         if (!session) {
-          get().logout()
+          set({
+            isAuthenticated: false,
+            userType: null,
+            name: null,
+            adminUser: null,
+            loading: false,
+          })
           return
         }
 
@@ -171,13 +178,8 @@ export const useAuthStore = create<AuthState>()(
               loading: false,
             })
           } else {
-            // This could be a new user from OAuth, wait for trigger
-            // or an existing user with non-active status.
-            // For now, we log them out if profile is not active.
-            // A better UX might show a "pending verification" page.
             if (session && !patientProfile && !adminProfile) {
-              // Potentially a new user, let's wait a bit for the trigger
-              setTimeout(() => get().checkSession(), 1000)
+              setTimeout(() => get().checkSession(), 1500)
             } else {
               get().logout()
             }

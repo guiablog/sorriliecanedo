@@ -46,7 +46,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 
 export default function Register() {
   const navigate = useNavigate()
-  const { patientLogin, signInWithGoogle } = useAuthStore()
+  const { signInWithGoogle } = useAuthStore()
   const { settings, loading: settingsLoading } = useAppSettingsStore()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -75,20 +75,12 @@ export default function Register() {
       })
       setIsLoading(false)
     } else {
-      const loginSuccess = await patientLogin(data.email, data.password)
-      if (loginSuccess === true) {
-        toast({
-          title: 'Cadastro realizado com sucesso!',
-          description: 'Você será redirecionado para a tela inicial.',
-        })
-        setTimeout(() => navigate('/home'), 1500)
-      } else {
-        toast({
-          title: 'Cadastro realizado!',
-          description: 'Faça login para continuar.',
-        })
-        navigate('/login')
-      }
+      toast({
+        title: 'Verifique seu e-mail!',
+        description:
+          'Enviamos um link de confirmação para o seu e-mail. Após confirmar, você poderá fazer login.',
+      })
+      navigate('/login')
     }
   }
 
