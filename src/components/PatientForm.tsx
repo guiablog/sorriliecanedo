@@ -19,19 +19,18 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Patient } from '@/stores/patient'
-import { isValidCPF } from '@/lib/utils'
-import { cpfMask, whatsappMask } from '@/lib/masks'
+import { whatsappMask } from '@/lib/masks'
 
 const patientSchema = z.object({
   name: z
     .string()
     .min(3, { message: 'Nome deve ter pelo menos 3 caracteres.' }),
-  cpf: z.string().refine(isValidCPF, {
-    message: 'Por favor, insira um CPF válido.',
-  }),
-  whatsapp: z.string().regex(/^\(\d{2}\) \d{5}-\d{4}$/, {
-    message: 'WhatsApp inválido. Use o formato (00) 00000-0000.',
-  }),
+  whatsapp: z
+    .string()
+    .regex(/^\(\d{2}\) \d{5}-\d{4}$/, {
+      message: 'WhatsApp inválido. Use o formato (00) 00000-0000.',
+    })
+    .nullable(),
   email: z.string().email({ message: 'E-mail inválido.' }),
   status: z.enum(['Ativo', 'Inativo', 'Pendente de Verificação']),
 })
@@ -53,8 +52,7 @@ export const PatientForm = ({
     resolver: zodResolver(patientSchema),
     defaultValues: {
       name: patient?.name || '',
-      cpf: patient?.cpf || '',
-      whatsapp: patient?.whatsapp || '',
+      whatsapp: patient?.whatsapp || null,
       email: patient?.email || '',
       status: patient?.status || 'Ativo',
     },
@@ -78,24 +76,6 @@ export const PatientForm = ({
         />
         <FormField
           control={form.control}
-          name="cpf"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>CPF</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="000.000.000-00"
-                  {...field}
-                  onChange={(e) => field.onChange(cpfMask(e.target.value))}
-                  disabled={!!patient}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
           name="whatsapp"
           render={({ field }) => (
             <FormItem>
@@ -104,6 +84,7 @@ export const PatientForm = ({
                 <Input
                   placeholder="(00) 00000-0000"
                   {...field}
+                  value={field.value || ''}
                   onChange={(e) => field.onChange(whatsappMask(e.target.value))}
                 />
               </FormControl>

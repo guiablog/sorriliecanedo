@@ -18,8 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuthStore } from '@/stores/auth'
 import { usePatientStore } from '@/stores/patient'
-import { isValidCPF } from '@/lib/utils'
-import { whatsappMask, cpfMask } from '@/lib/masks'
+import { whatsappMask } from '@/lib/masks'
 import { Mail } from 'lucide-react'
 import { ProfileCard } from '@/components/ProfileCard'
 import { AppointmentList } from '@/components/AppointmentList'
@@ -28,10 +27,7 @@ const profileSchema = z.object({
   name: z
     .string()
     .min(3, { message: 'Nome deve ter pelo menos 3 caracteres.' }),
-  cpf: z.string().refine(isValidCPF, {
-    message: 'Por favor, insira um CPF válido.',
-  }),
-  whatsapp: z.string().min(14, { message: 'WhatsApp inválido.' }),
+  whatsapp: z.string().min(14, { message: 'WhatsApp inválido.' }).nullable(),
   email: z.string().email({ message: 'E-mail inválido.' }),
 })
 
@@ -48,7 +44,6 @@ export default function Profile() {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: '',
-      cpf: '',
       whatsapp: '',
       email: '',
     },
@@ -58,7 +53,6 @@ export default function Profile() {
     if (currentUser) {
       form.reset({
         name: currentUser.name,
-        cpf: currentUser.cpf,
         whatsapp: currentUser.whatsapp,
         email: currentUser.email,
       })
@@ -66,9 +60,9 @@ export default function Profile() {
   }, [currentUser, form])
 
   async function onSubmit(data: ProfileFormValues) {
-    if (!currentUser) return
+    if (!currentUser || !currentUser.user_id) return
     try {
-      await updatePatient(currentUser.cpf, data)
+      await updatePatient(currentUser.user_id, data)
       toast({ title: 'Alterações salvas com sucesso!' })
     } catch (error) {
       toast({
@@ -126,25 +120,6 @@ export default function Profile() {
                   />
                   <FormField
                     control={form.control}
-                    name="cpf"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>CPF</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(cpfMask(e.target.value))
-                            }
-                            disabled
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
                     name="whatsapp"
                     render={({ field }) => (
                       <FormItem>
@@ -152,6 +127,7 @@ export default function Profile() {
                         <FormControl>
                           <Input
                             {...field}
+                            value={field.value || ''}
                             onChange={(e) =>
                               field.onChange(whatsappMask(e.target.value))
                             }
@@ -168,7 +144,7 @@ export default function Profile() {
                       <FormItem>
                         <FormLabel>E-mail</FormLabel>
                         <FormControl>
-                          <Input type="email" {...field} />
+                          <Input type="email" {...field} disabled />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

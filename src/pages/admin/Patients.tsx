@@ -24,7 +24,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import {
   Dialog,
@@ -53,8 +52,8 @@ export default function AdminPatients() {
     return patients.filter(
       (p) =>
         p.name.toLowerCase().includes(lowercasedFilter) ||
-        p.cpf.replace(/\D/g, '').includes(lowercasedFilter) ||
-        p.whatsapp.replace(/\D/g, '').includes(lowercasedFilter),
+        p.email.toLowerCase().includes(lowercasedFilter) ||
+        p.whatsapp?.replace(/\D/g, '').includes(lowercasedFilter),
     )
   }, [patients, searchTerm])
 
@@ -68,9 +67,9 @@ export default function AdminPatients() {
     setFormModalOpen(true)
   }
 
-  const handleDelete = async (cpf: string) => {
+  const handleDelete = async (userId: string) => {
     try {
-      await deletePatient(cpf)
+      await deletePatient(userId)
       toast({
         title: 'Sucesso',
         description: 'Paciente excluído com sucesso.',
@@ -85,9 +84,9 @@ export default function AdminPatients() {
   }
 
   const handleFormSubmit = async (data: PatientFormValues) => {
-    if (!selectedPatient) return
+    if (!selectedPatient || !selectedPatient.user_id) return
     try {
-      await updatePatient(selectedPatient.cpf, data)
+      await updatePatient(selectedPatient.user_id, data)
       toast({ title: 'Paciente atualizado com sucesso!' })
       setFormModalOpen(false)
       setSelectedPatient(null)
@@ -114,7 +113,7 @@ export default function AdminPatients() {
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Buscar por nome, CPF ou WhatsApp..."
+          placeholder="Buscar por nome, e-mail ou WhatsApp..."
           className="pl-8"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -125,8 +124,8 @@ export default function AdminPatients() {
           <TableHeader>
             <TableRow>
               <TableHead>Nome</TableHead>
-              <TableHead>CPF</TableHead>
               <TableHead>WhatsApp</TableHead>
+              <TableHead>E-mail</TableHead>
               <TableHead>Cadastro</TableHead>
               <TableHead>Status</TableHead>
               <TableHead></TableHead>
@@ -142,10 +141,10 @@ export default function AdminPatients() {
                   </TableRow>
                 ))
               : filteredPatients.map((p) => (
-                  <TableRow key={p.cpf}>
+                  <TableRow key={p.id}>
                     <TableCell className="font-medium">{p.name}</TableCell>
-                    <TableCell>{p.cpf}</TableCell>
-                    <TableCell>{p.whatsapp}</TableCell>
+                    <TableCell>{p.whatsapp || '-'}</TableCell>
+                    <TableCell>{p.email}</TableCell>
                     <TableCell>
                       {format(new Date(p.registered), 'dd/MM/yyyy')}
                     </TableCell>
@@ -188,7 +187,9 @@ export default function AdminPatients() {
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                 <AlertDialogAction
-                                  onClick={() => handleDelete(p.cpf)}
+                                  onClick={() =>
+                                    p.user_id && handleDelete(p.user_id)
+                                  }
                                 >
                                   Sim, excluir
                                 </AlertDialogAction>

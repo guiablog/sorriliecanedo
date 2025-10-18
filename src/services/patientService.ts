@@ -3,7 +3,6 @@ import { Patient } from '@/stores/patient'
 
 type PatientSignUpPayload = {
   name: string
-  cpf: string
   whatsapp: string
   email: string
   password?: string
@@ -17,9 +16,9 @@ export const patientService = {
       throw error
     }
     return data.map((p) => ({
+      id: p.id,
       user_id: p.user_id,
       name: p.name,
-      cpf: p.cpf,
       whatsapp: p.whatsapp,
       email: p.email,
       registered: p.created_at,
@@ -36,7 +35,6 @@ export const patientService = {
       options: {
         data: {
           name: patientData.name,
-          cpf: patientData.cpf.replace(/\D/g, ''),
           whatsapp: patientData.whatsapp,
         },
       },
@@ -45,13 +43,13 @@ export const patientService = {
   },
 
   async updatePatient(
-    cpf: string,
-    patientData: Partial<Omit<Patient, 'registered' | 'cpf'>>,
+    userId: string,
+    patientData: Partial<Omit<Patient, 'registered' | 'id' | 'user_id'>>,
   ): Promise<Patient> {
     const { data, error } = await supabase
       .from('patients')
       .update(patientData)
-      .eq('cpf', cpf)
+      .eq('user_id', userId)
       .select()
       .single()
 
@@ -61,9 +59,9 @@ export const patientService = {
     }
 
     return {
+      id: data.id,
       user_id: data.user_id,
       name: data.name,
-      cpf: data.cpf,
       whatsapp: data.whatsapp,
       email: data.email,
       registered: data.created_at,
@@ -71,32 +69,34 @@ export const patientService = {
     }
   },
 
-  async deletePatient(cpf: string): Promise<void> {
-    const { error } = await supabase.from('patients').delete().eq('cpf', cpf)
+  async deletePatient(userId: string): Promise<void> {
+    const { error } = await supabase
+      .from('patients')
+      .delete()
+      .eq('user_id', userId)
     if (error) {
       console.error('Error deleting patient:', error)
       throw error
     }
   },
 
-  async getPatientByCpf(cpf: string): Promise<Patient | null> {
-    const cleanedCpf = cpf.replace(/\D/g, '')
+  async getPatientByUserId(userId: string): Promise<Patient | null> {
     const { data, error } = await supabase
       .from('patients')
       .select('*')
-      .eq('cpf', cleanedCpf)
+      .eq('user_id', userId)
       .single()
 
     if (error && error.code !== 'PGRST116') {
-      console.error('Error fetching patient by CPF:', error)
+      console.error('Error fetching patient by user ID:', error)
       throw error
     }
     if (!data) return null
 
     return {
+      id: data.id,
       user_id: data.user_id,
       name: data.name,
-      cpf: data.cpf,
       whatsapp: data.whatsapp,
       email: data.email,
       registered: data.created_at,

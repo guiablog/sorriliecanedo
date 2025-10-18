@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Patient } from '@/stores/patient'
-import { User, Hash, Phone, Mail, Calendar, BadgeCheck } from 'lucide-react'
+import { User, Phone, Mail, Calendar, BadgeCheck } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -42,17 +42,12 @@ export const PatientDetailsModal = ({
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Hash className="h-5 w-5 text-accent" />
-            <div>
-              <p className="text-sm text-muted-foreground">CPF</p>
-              <p className="font-medium">{patient.cpf}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
             <Phone className="h-5 w-5 text-accent" />
             <div>
               <p className="text-sm text-muted-foreground">WhatsApp</p>
-              <p className="font-medium">{patient.whatsapp}</p>
+              <p className="font-medium">
+                {patient.whatsapp || 'Não informado'}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-4">

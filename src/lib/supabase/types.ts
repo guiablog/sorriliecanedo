@@ -83,6 +83,7 @@ export type Database = {
           created_at: string
           date: string
           id: string
+          patient_id: string | null
           patient_name: string
           professional_name: string
           reschedule_history: Json | null
@@ -94,6 +95,7 @@ export type Database = {
           created_at?: string
           date: string
           id?: string
+          patient_id?: string | null
           patient_name: string
           professional_name: string
           reschedule_history?: Json | null
@@ -105,6 +107,7 @@ export type Database = {
           created_at?: string
           date?: string
           id?: string
+          patient_id?: string | null
           patient_name?: string
           professional_name?: string
           reschedule_history?: Json | null
@@ -112,7 +115,15 @@ export type Database = {
           status?: string
           time?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'fk_appointments_patient_id'
+            columns: ['patient_id']
+            isOneToOne: false
+            referencedRelation: 'patients'
+            referencedColumns: ['id']
+          },
+        ]
       }
       contact_inquiries: {
         Row: {
@@ -183,57 +194,63 @@ export type Database = {
       notifications: {
         Row: {
           created_at: string
+          custom_data: Json | null
           id: string
+          image_url: string | null
           message: string | null
           segment: string
+          sound: string | null
           title: string
         }
         Insert: {
           created_at?: string
+          custom_data?: Json | null
           id?: string
+          image_url?: string | null
           message?: string | null
           segment: string
+          sound?: string | null
           title: string
         }
         Update: {
           created_at?: string
+          custom_data?: Json | null
           id?: string
+          image_url?: string | null
           message?: string | null
           segment?: string
+          sound?: string | null
           title?: string
         }
         Relationships: []
       }
       patients: {
         Row: {
-          cpf: string
           created_at: string
           email: string
           id: string
           name: string
           status: string
           user_id: string | null
-          whatsapp: string
+          whatsapp: string | null
         }
         Insert: {
-          cpf: string
           created_at?: string
           email: string
           id?: string
           name: string
           status?: string
           user_id?: string | null
-          whatsapp: string
+          whatsapp?: string | null
         }
         Update: {
-          cpf?: string
           created_at?: string
           email?: string
           id?: string
           name?: string
           status?: string
           user_id?: string | null
-          whatsapp?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }

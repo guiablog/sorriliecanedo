@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { useNavigate, Link, useLocation } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -14,23 +14,20 @@ import {
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
 import { useAuthStore } from '@/stores/auth'
-import { cpfMask, whatsappMask } from '@/lib/masks'
-import { isValidCPF } from '@/lib/utils'
-import { useEffect, useState } from 'react'
+import { whatsappMask } from '@/lib/masks'
+import { useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { useAppSettingsStore } from '@/stores/appSettings'
 import { Skeleton } from '@/components/ui/skeleton'
 import { patientService } from '@/services/patientService'
 import { Seo } from '@/components/Seo'
+import { Separator } from '@/components/ui/separator'
 
 const registerSchema = z
   .object({
     name: z
       .string()
       .min(3, { message: 'Nome deve ter pelo menos 3 caracteres.' }),
-    cpf: z.string().refine(isValidCPF, {
-      message: 'Por favor, insira um CPF válido.',
-    }),
     whatsapp: z.string().regex(/^\(\d{2}\) \d{5}-\d{4}$/, {
       message: 'WhatsApp inválido. Use o formato (00) 00000-0000.',
     }),
@@ -49,8 +46,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 
 export default function Register() {
   const navigate = useNavigate()
-  const location = useLocation()
-  const patientLogin = useAuthStore((state) => state.patientLogin)
+  const { patientLogin, signInWithGoogle } = useAuthStore()
   const { settings, loading: settingsLoading } = useAppSettingsStore()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -58,7 +54,6 @@ export default function Register() {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: '',
-      cpf: '',
       whatsapp: '',
       email: '',
       password: '',
@@ -66,22 +61,8 @@ export default function Register() {
     },
   })
 
-  useEffect(() => {
-    if (location.state?.cpf) {
-      form.setValue('cpf', cpfMask(location.state.cpf))
-    }
-  }, [location.state, form])
-
   async function onSubmit(data: RegisterFormValues) {
     setIsLoading(true)
-
-    const existingPatient = await patientService.getPatientByCpf(data.cpf)
-    if (existingPatient) {
-      form.setError('cpf', { message: 'Este CPF já está cadastrado.' })
-      setIsLoading(false)
-      return
-    }
-
     const { error } = await patientService.signUpPatient(data)
 
     if (error) {
@@ -146,6 +127,27 @@ export default function Register() {
               Preencha seus dados para começar.
             </p>
           </div>
+
+          <Button
+            variant="outline"
+            className="w-full mb-4"
+            size="lg"
+            onClick={signInWithGoogle}
+          >
+            <img
+              src="https://img.usecurling.com/i?q=google"
+              alt="Google"
+              className="h-5 w-5 mr-2"
+            />
+            Cadastrar com Google
+          </Button>
+
+          <div className="flex items-center my-4">
+            <Separator className="flex-1" />
+            <span className="px-4 text-sm text-muted-foreground">OU</span>
+            <Separator className="flex-1" />
+          </div>
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -156,25 +158,6 @@ export default function Register() {
                     <FormLabel>Nome Completo</FormLabel>
                     <FormControl>
                       <Input placeholder="Seu nome completo" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="cpf"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CPF</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="000.000.000-00"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(cpfMask(e.target.value))
-                        }
-                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -248,7 +231,7 @@ export default function Register() {
                 size="lg"
                 disabled={isLoading}
               >
-                {isLoading ? 'Cadastrando...' : 'Cadastrar'}
+                {isLoading ? 'Cadastrando...' : 'Cadastrar com E-mail'}
               </Button>
             </form>
           </Form>

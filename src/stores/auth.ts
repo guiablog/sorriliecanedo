@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { adminUserService } from '@/services/adminUserService'
 import { supabase } from '@/lib/supabase/client'
+import { toast } from '@/components/ui/use-toast'
 
 interface AuthState {
   isAuthenticated: boolean
@@ -11,6 +12,7 @@ interface AuthState {
   loading: boolean
   patientLogin: (email: string, pass: string) => Promise<boolean | string>
   adminLogin: (email: string, pass: string) => Promise<boolean | string>
+  signInWithGoogle: () => Promise<boolean | string>
   logout: () => void
   checkSession: () => Promise<void>
 }
@@ -103,6 +105,24 @@ export const useAuthStore = create<AuthState>()(
           return 'Erro ao verificar o perfil do usuário.'
         }
       },
+      signInWithGoogle: async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: `${window.location.origin}/home`,
+          },
+        })
+        if (error) {
+          console.error('Google sign-in error:', error.message)
+          toast({
+            title: 'Erro com Google',
+            description: 'Não foi possível iniciar o login com Google.',
+            variant: 'destructive',
+          })
+          return error.message
+        }
+        return true
+      },
       logout: () => {
         supabase.auth.signOut()
         set({
@@ -151,7 +171,16 @@ export const useAuthStore = create<AuthState>()(
               loading: false,
             })
           } else {
-            get().logout()
+            // This could be a new user from OAuth, wait for trigger
+            // or an existing user with non-active status.
+            // For now, we log them out if profile is not active.
+            // A better UX might show a "pending verification" page.
+            if (session && !patientProfile && !adminProfile) {
+              // Potentially a new user, let's wait a bit for the trigger
+              setTimeout(() => get().checkSession(), 1000)
+            } else {
+              get().logout()
+            }
           }
         }
       },

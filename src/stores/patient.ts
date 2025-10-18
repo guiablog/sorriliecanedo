@@ -5,19 +5,19 @@ import type { RealtimeChannel } from '@supabase/supabase-js'
 import type { Tables } from '@/lib/supabase/types'
 
 export interface Patient {
+  id: string
   user_id: string | null
   name: string
-  cpf: string
-  whatsapp: string
+  whatsapp: string | null
   email: string
   registered: string
   status: 'Ativo' | 'Inativo' | 'Pendente de Verificação'
 }
 
 const mapRowToPatient = (row: Tables<'patients'>): Patient => ({
+  id: row.id,
   user_id: row.user_id,
   name: row.name,
-  cpf: row.cpf,
   whatsapp: row.whatsapp,
   email: row.email,
   registered: row.created_at,
@@ -32,10 +32,10 @@ interface PatientState {
   fetchPatients: () => Promise<void>
   setEmailForPasswordReset: (email: string | null) => void
   updatePatient: (
-    originalCpf: string,
-    data: Partial<Omit<Patient, 'registered' | 'cpf'>>,
+    userId: string,
+    data: Partial<Omit<Patient, 'registered' | 'id' | 'user_id'>>,
   ) => Promise<void>
-  deletePatient: (cpf: string) => Promise<void>
+  deletePatient: (userId: string) => Promise<void>
   subscribe: () => void
   unsubscribe: () => void
 }
@@ -56,18 +56,18 @@ export const usePatientStore = create<PatientState>()((set, get) => ({
     }
   },
   setEmailForPasswordReset: (email) => set({ emailForPasswordReset: email }),
-  updatePatient: async (originalCpf, data) => {
-    const updatedPatient = await patientService.updatePatient(originalCpf, data)
+  updatePatient: async (userId, data) => {
+    const updatedPatient = await patientService.updatePatient(userId, data)
     set((state) => ({
       patients: state.patients.map((p) =>
-        p.cpf === originalCpf ? { ...p, ...updatedPatient } : p,
+        p.user_id === userId ? { ...p, ...updatedPatient } : p,
       ),
     }))
   },
-  deletePatient: async (cpf) => {
-    await patientService.deletePatient(cpf)
+  deletePatient: async (userId) => {
+    await patientService.deletePatient(userId)
     set((state) => ({
-      patients: state.patients.filter((p) => p.cpf !== cpf),
+      patients: state.patients.filter((p) => p.user_id !== userId),
     }))
   },
   subscribe: () => {
@@ -94,17 +94,17 @@ export const usePatientStore = create<PatientState>()((set, get) => ({
               )
               set((state) => ({
                 patients: state.patients.map((p) =>
-                  p.cpf === updatedPatient.cpf ? updatedPatient : p,
+                  p.id === updatedPatient.id ? updatedPatient : p,
                 ),
               }))
               break
             }
             case 'DELETE': {
               const oldPatient = payload.old as Partial<Tables<'patients'>>
-              if (oldPatient.cpf) {
+              if (oldPatient.id) {
                 set((state) => ({
                   patients: state.patients.filter(
-                    (p) => p.cpf !== oldPatient.cpf,
+                    (p) => p.id !== oldPatient.id,
                   ),
                 }))
               }
