@@ -36,30 +36,31 @@ export const DataProvider = ({ children }: DataProviderProps) => {
   const fetchAppSettings = useAppSettingsStore(
     (state) => state.fetchAppSettings,
   )
-  const checkSession = useAuthStore((state) => state.checkSession)
+  const initializeAuthListener = useAuthStore(
+    (state) => state.initializeAuthListener,
+  )
 
   useEffect(() => {
-    const initializeApp = () => {
-      checkSession()
-      fetchPatients()
-      fetchProfessionals()
-      fetchServices()
-      fetchAppointments()
-      fetchContent()
-      fetchNotifications()
-      fetchAppSettings()
-    }
-    initializeApp()
+    const unsubscribeAuth = initializeAuthListener()
+
+    fetchPatients()
+    fetchProfessionals()
+    fetchServices()
+    fetchAppointments()
+    fetchContent()
+    fetchNotifications()
+    fetchAppSettings()
 
     subscribeToPatients()
     subscribeToAppointments()
 
     return () => {
+      unsubscribeAuth()
       unsubscribeFromPatients()
       unsubscribeFromAppointments()
     }
   }, [
-    checkSession,
+    initializeAuthListener,
     fetchPatients,
     fetchProfessionals,
     fetchServices,

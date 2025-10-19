@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,7 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAuthStore } from '@/stores/auth'
 import { toast } from '@/components/ui/use-toast'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useAppSettingsStore } from '@/stores/appSettings'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Seo } from '@/components/Seo'
@@ -30,9 +30,26 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function Login() {
   const navigate = useNavigate()
-  const { patientLogin, signInWithGoogle } = useAuthStore()
+  const {
+    patientLogin,
+    signInWithGoogle,
+    isAuthenticated,
+    loading: authLoading,
+    userType,
+  } = useAuthStore()
   const { settings, loading: settingsLoading } = useAppSettingsStore()
   const [showPassword, setShowPassword] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      if (userType === 'patient') {
+        navigate('/home', { replace: true })
+      } else if (userType === 'admin') {
+        navigate('/admin', { replace: true })
+      }
+    }
+  }, [isAuthenticated, authLoading, userType, navigate])
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -41,20 +58,28 @@ export default function Login() {
   })
 
   async function handleLoginSubmit(data: LoginFormValues) {
+    setIsSubmitting(true)
     const result = await patientLogin(data.email, data.password)
-    if (result === true) {
-      navigate('/home')
-    } else {
+    if (result !== true) {
       toast({
         title: 'Falha no Login',
         description: result as string,
         variant: 'destructive',
       })
     }
+    setIsSubmitting(false)
   }
 
   const defaultLogo =
     'https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black'
+
+  if (authLoading || settingsLoading) {
+    return <Skeleton className="h-screen w-screen" />
+  }
+
+  if (isAuthenticated) {
+    return null
+  }
 
   return (
     <>
@@ -65,15 +90,11 @@ export default function Login() {
       />
       <div className="flex flex-col min-h-screen bg-neutral-light p-6 md:p-8 justify-center items-center animate-fade-in">
         <div className="w-full max-w-sm text-center">
-          {settingsLoading ? (
-            <Skeleton className="h-12 w-48 mx-auto mb-10" />
-          ) : (
-            <img
-              src={settings?.logo_url || defaultLogo}
-              alt="Logo Sorriliê"
-              className="h-12 mx-auto mb-10"
-            />
-          )}
+          <img
+            src={settings?.logo_url || defaultLogo}
+            alt="Logo Sorriliê"
+            className="h-12 mx-auto mb-10"
+          />
 
           <h1 className="text-xl font-medium text-neutral-dark mb-6">
             Faça login e aproveite o App da Clínica Sorriliê
@@ -137,7 +158,11 @@ export default function Login() {
                 type="submit"
                 className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
                 size="lg"
+                disabled={isSubmitting}
               >
+                {isSubmitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 Entrar
               </Button>
             </form>

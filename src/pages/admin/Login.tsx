@@ -21,11 +21,12 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Loader2 } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth'
 import { toast } from '@/components/ui/use-toast'
 import { adminUserService } from '@/services/adminUserService'
 import { Seo } from '@/components/Seo'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'E-mail inválido.' }),
@@ -36,9 +37,24 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function AdminLogin() {
   const navigate = useNavigate()
-  const adminLogin = useAuthStore((state) => state.adminLogin)
-  const [isLoading, setIsLoading] = useState(false)
+  const {
+    adminLogin,
+    isAuthenticated,
+    loading: authLoading,
+    userType,
+  } = useAuthStore()
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [showRegisterLink, setShowRegisterLink] = useState(false)
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      if (userType === 'admin') {
+        navigate('/admin/dashboard', { replace: true })
+      } else if (userType === 'patient') {
+        navigate('/home', { replace: true })
+      }
+    }
+  }, [isAuthenticated, authLoading, userType, navigate])
 
   useEffect(() => {
     const checkAdminCount = async () => {
@@ -54,13 +70,11 @@ export default function AdminLogin() {
   })
 
   const handleLogin = async (data: LoginFormValues) => {
-    setIsLoading(true)
+    setIsSubmitting(true)
     const result = await adminLogin(data.email, data.password)
-    setIsLoading(false)
+    setIsSubmitting(false)
 
-    if (result === true) {
-      navigate('/admin/dashboard')
-    } else {
+    if (result !== true) {
       toast({
         title: 'Falha no Login',
         description: result,
@@ -68,6 +82,14 @@ export default function AdminLogin() {
       })
       form.setError('root', { message: result })
     }
+  }
+
+  if (authLoading) {
+    return <Skeleton className="h-screen w-screen" />
+  }
+
+  if (isAuthenticated) {
+    return null
   }
 
   return (
@@ -144,9 +166,12 @@ export default function AdminLogin() {
                 <Button
                   type="submit"
                   className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                 >
-                  {isLoading ? 'Entrando...' : 'Entrar'}
+                  {isSubmitting && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  {isSubmitting ? 'Entrando...' : 'Entrar'}
                 </Button>
               </form>
             </Form>
