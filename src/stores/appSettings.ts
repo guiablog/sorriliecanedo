@@ -19,8 +19,11 @@ export const useAppSettingsStore = create<AppSettingsState>()((set) => ({
       const settings = await appSettingsService.getAppSettings()
       set({ settings, loading: false })
     } catch (error) {
-      console.error('Failed to fetch app settings', error)
-      set({ loading: false })
+      console.error(
+        'Failed to fetch app settings from Supabase. The application will proceed with default values. This might be due to a network issue, CORS policy, or a server error. Full error details:',
+        error,
+      )
+      set({ loading: false }) // Keep settings as null, allowing the app to use fallbacks
     }
   },
   updateAppSettings: async (settings) => {
