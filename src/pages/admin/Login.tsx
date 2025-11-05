@@ -26,7 +26,7 @@ import { useAuthStore } from '@/stores/auth'
 import { toast } from '@/components/ui/use-toast'
 import { adminUserService } from '@/services/adminUserService'
 import { Seo } from '@/components/Seo'
-import { Skeleton } from '@/components/ui/skeleton'
+import { PageLoader } from '@/components/PageLoader'
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'E-mail inválido.' }),
@@ -84,12 +84,8 @@ export default function AdminLogin() {
     }
   }
 
-  if (authLoading) {
-    return <Skeleton className="h-screen w-screen" />
-  }
-
-  if (isAuthenticated) {
-    return null
+  if (authLoading || isAuthenticated) {
+    return <PageLoader />
   }
 
   return (
