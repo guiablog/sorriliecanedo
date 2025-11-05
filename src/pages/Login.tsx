@@ -181,7 +181,7 @@ export default function Login() {
             onClick={signInWithGoogle}
           >
             <img
-              src="https://img.usecurling.com/i?q=google"
+              src="https://hzxduikaxizacyrdbkvx.supabase.co/storage/v1/object/public/imagens/icon-google-login.svg"
               alt="Google"
               className="h-5 w-5 mr-2"
             />
