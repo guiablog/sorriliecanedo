@@ -11,17 +11,6 @@ export interface AppSettings {
   clinic_phone: string | null
 }
 
-const formatWhatsappNumber = (
-  number: string | null | undefined,
-): string | null => {
-  if (!number) return null
-  let digits = number.replace(/\D/g, '')
-  if (digits.length > 0 && !digits.startsWith('55')) {
-    digits = '55' + digits
-  }
-  return digits
-}
-
 export const appSettingsService = {
   async getAppSettings(): Promise<AppSettings | null> {
     const { data, error } = await supabase
@@ -41,16 +30,9 @@ export const appSettingsService = {
   async updateAppSettings(
     settings: Partial<Omit<AppSettings, 'id'>>,
   ): Promise<AppSettings> {
-    const settingsToUpdate = { ...settings }
-    if (typeof settingsToUpdate.whatsapp_contact === 'string') {
-      settingsToUpdate.whatsapp_contact = formatWhatsappNumber(
-        settingsToUpdate.whatsapp_contact,
-      )
-    }
-
     const { data, error } = await supabase
       .from('app_settings')
-      .upsert({ id: 1, ...settingsToUpdate }, { onConflict: 'id' })
+      .upsert({ id: 1, ...settings }, { onConflict: 'id' })
       .select()
       .single()
 

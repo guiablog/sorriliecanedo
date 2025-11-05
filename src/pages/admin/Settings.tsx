@@ -60,15 +60,14 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form'
-import { whatsappMask } from '@/lib/masks'
 import { AdminUserDetailsModal } from '@/components/AdminUserDetailsModal'
 import { useAuthStore } from '@/stores/auth'
 
 const settingsSchema = z.object({
   whatsapp_contact: z
     .string()
-    .refine((value) => value.replace(/\D/g, '').length >= 10, {
-      message: 'Número de WhatsApp inválido.',
+    .min(10, {
+      message: 'Número de WhatsApp deve ter pelo menos 10 caracteres.',
     }),
   whatsapp_button_enabled: z.boolean(),
   whatsapp_icon_url: z.string().url().optional().nullable(),
@@ -106,9 +105,7 @@ export default function AdminSettings() {
   useEffect(() => {
     if (settings) {
       form.reset({
-        whatsapp_contact: settings.whatsapp_contact
-          ? whatsappMask(settings.whatsapp_contact)
-          : '',
+        whatsapp_contact: settings.whatsapp_contact || '',
         whatsapp_button_enabled: settings.whatsapp_button_enabled ?? true,
         whatsapp_icon_url: settings.whatsapp_icon_url,
       })
@@ -325,13 +322,7 @@ export default function AdminSettings() {
                   <FormItem className="max-w-sm">
                     <Label>WhatsApp para Contato</Label>
                     <FormControl>
-                      <Input
-                        placeholder="(00) 00000-0000"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(whatsappMask(e.target.value))
-                        }
-                      />
+                      <Input placeholder="(00) 00000-0000" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
