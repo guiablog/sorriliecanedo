@@ -1,21 +1,11 @@
-const CACHE_NAME = 'sorrilie-cache-v1'
+const CACHE_NAME = 'sorrilie-odontologia-app-v1'
 const urlsToCache = [
   '/',
   '/index.html',
-  '/src/main.tsx',
-  '/src/main.css',
-  '/favicon.ico',
-  '/skip.png',
-  '/og-image.png',
-  '/placeholder.svg',
-  '/skip.js',
   '/manifest.json',
-  '/android-launchericon-48-48.png',
-  '/android-launchericon-72-72.png',
-  '/android-launchericon-96-96.png',
-  'android-launchericon-144-144.png',
-  '/android-launchericon-192-192.png',
-  '/android-launchericon-512-512.png',
+  '/login',
+  '/home',
+  'https://img.usecurling.com/i?q=sorrilie-odontologia&color=solid-black',
 ]
 
 self.addEventListener('install', (event) => {
@@ -33,7 +23,22 @@ self.addEventListener('fetch', (event) => {
       if (response) {
         return response
       }
-      return fetch(event.request)
+
+      const fetchRequest = event.request.clone()
+
+      return fetch(fetchRequest).then((response) => {
+        if (!response || response.status !== 200 || response.type !== 'basic') {
+          return response
+        }
+
+        const responseToCache = response.clone()
+
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache)
+        })
+
+        return response
+      })
     }),
   )
 })
