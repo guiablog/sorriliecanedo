@@ -55,6 +55,9 @@ const NotFound = lazy(() => import('./pages/NotFound'))
 
 const App = () => {
   useEffect(() => {
+    // Set document language to Brazilian Portuguese
+    document.documentElement.lang = 'pt-BR'
+
     // PWA Setup: Service Worker Registration and Manifest Link
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
