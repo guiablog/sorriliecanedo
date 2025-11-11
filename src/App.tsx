@@ -55,10 +55,11 @@ const NotFound = lazy(() => import('./pages/NotFound'))
 
 const App = () => {
   useEffect(() => {
+    // PWA Setup: Service Worker Registration and Manifest Link
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/service-worker.js')
+          .register('/sw.js') // Use the new service worker file
           .then((registration) => {
             console.log(
               'ServiceWorker registration successful with scope: ',
@@ -69,6 +70,15 @@ const App = () => {
             console.log('ServiceWorker registration failed: ', error)
           })
       })
+    }
+
+    const link = document.createElement('link')
+    link.rel = 'manifest'
+    link.href = '/app.webmanifest' // Use the new manifest file
+    document.head.appendChild(link)
+
+    return () => {
+      document.head.removeChild(link)
     }
   }, [])
 
