@@ -64,11 +64,9 @@ import { AdminUserDetailsModal } from '@/components/AdminUserDetailsModal'
 import { useAuthStore } from '@/stores/auth'
 
 const settingsSchema = z.object({
-  whatsapp_contact: z
-    .string()
-    .min(10, {
-      message: 'Número de WhatsApp deve ter pelo menos 10 caracteres.',
-    }),
+  whatsapp_contact: z.string().min(10, {
+    message: 'Número de WhatsApp deve ter pelo menos 10 caracteres.',
+  }),
   whatsapp_button_enabled: z.boolean(),
   whatsapp_icon_url: z.string().url().optional().nullable(),
 })
