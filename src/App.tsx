@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
@@ -53,93 +53,119 @@ const AdminSettings = lazy(() => import('./pages/admin/Settings'))
 
 const NotFound = lazy(() => import('./pages/NotFound'))
 
-const App = () => (
-  <BrowserRouter>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <DataProvider>
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<SplashScreen />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route
-                path="/forgot-password"
-                element={<PatientForgotPassword />}
-              />
-              <Route
-                path="/reset-password"
-                element={<PatientResetPassword />}
-              />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/register" element={<AdminRegister />} />
-              <Route
-                path="/admin/forgot-password"
-                element={<AdminForgotPassword />}
-              />
-              <Route
-                path="/admin/reset-password"
-                element={<AdminResetPassword />}
-              />
+const App = () => {
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('/service-worker.js')
+          .then((registration) => {
+            console.log(
+              'ServiceWorker registration successful with scope: ',
+              registration.scope,
+            )
+          })
+          .catch((error) => {
+            console.log('ServiceWorker registration failed: ', error)
+          })
+      })
+    }
+  }, [])
 
-              <Route
-                element={
-                  <ProtectedRoute
-                    allowedRoles={['patient']}
-                    redirectPath="/login"
+  return (
+    <BrowserRouter>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <DataProvider>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<SplashScreen />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route
+                  path="/forgot-password"
+                  element={<PatientForgotPassword />}
+                />
+                <Route
+                  path="/reset-password"
+                  element={<PatientResetPassword />}
+                />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/register" element={<AdminRegister />} />
+                <Route
+                  path="/admin/forgot-password"
+                  element={<AdminForgotPassword />}
+                />
+                <Route
+                  path="/admin/reset-password"
+                  element={<AdminResetPassword />}
+                />
+
+                <Route
+                  element={
+                    <ProtectedRoute
+                      allowedRoles={['patient']}
+                      redirectPath="/login"
+                    />
+                  }
+                >
+                  <Route
+                    path="/complete-profile"
+                    element={<CompleteProfile />}
                   />
-                }
-              >
-                <Route path="/complete-profile" element={<CompleteProfile />} />
-                <Route element={<ProfileCompletionGuard />}>
-                  <Route element={<MobileLayout />}>
-                    <Route path="/home" element={<PatientHome />} />
-                    <Route path="/schedule" element={<PatientSchedule />} />
-                    <Route path="/content" element={<PatientContent />} />
-                    <Route path="/profile" element={<PatientProfile />} />
-                    <Route path="/localizar" element={<PatientLocalizar />} />
-                    <Route path="/contact" element={<PatientContact />} />
+                  <Route element={<ProfileCompletionGuard />}>
+                    <Route element={<MobileLayout />}>
+                      <Route path="/home" element={<PatientHome />} />
+                      <Route path="/schedule" element={<PatientSchedule />} />
+                      <Route path="/content" element={<PatientContent />} />
+                      <Route path="/profile" element={<PatientProfile />} />
+                      <Route path="/localizar" element={<PatientLocalizar />} />
+                      <Route path="/contact" element={<PatientContact />} />
+                    </Route>
+                  </Route>
+                </Route>
+
+                <Route
+                  element={
+                    <ProtectedRoute
+                      allowedRoles={['admin']}
+                      redirectPath="/admin/login"
+                    />
+                  }
+                >
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route
+                      index
+                      element={<Navigate to="/admin/dashboard" replace />}
+                    />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="patients" element={<AdminPatients />} />
+                    <Route path="agenda" element={<AdminAgenda />} />
+                    <Route
+                      path="professionals-services"
+                      element={<AdminProfessionalsAndServices />}
+                    />
+                    <Route
+                      path="content"
+                      element={<AdminContentManagement />}
+                    />
+                    <Route
+                      path="notifications"
+                      element={<AdminNotifications />}
+                    />
+                    <Route path="settings" element={<AdminSettings />} />
                   </Route>
                 </Route>
               </Route>
-
-              <Route
-                element={
-                  <ProtectedRoute
-                    allowedRoles={['admin']}
-                    redirectPath="/admin/login"
-                  />
-                }
-              >
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route
-                    index
-                    element={<Navigate to="/admin/dashboard" replace />}
-                  />
-                  <Route path="dashboard" element={<AdminDashboard />} />
-                  <Route path="patients" element={<AdminPatients />} />
-                  <Route path="agenda" element={<AdminAgenda />} />
-                  <Route
-                    path="professionals-services"
-                    element={<AdminProfessionalsAndServices />}
-                  />
-                  <Route path="content" element={<AdminContentManagement />} />
-                  <Route
-                    path="notifications"
-                    element={<AdminNotifications />}
-                  />
-                  <Route path="settings" element={<AdminSettings />} />
-                </Route>
-              </Route>
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </DataProvider>
-    </TooltipProvider>
-  </BrowserRouter>
-)
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </DataProvider>
+      </TooltipProvider>
+    </BrowserRouter>
+  )
+}
 
 export default App
