@@ -62,7 +62,7 @@ const App = () => {
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js') // Use the new service worker file
+          .register('/app-sw.js') // Use the custom service worker file
           .then((registration) => {
             console.log(
               'ServiceWorker registration successful with scope: ',

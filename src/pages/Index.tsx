@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/auth'
 import { useAppSettingsStore } from '@/stores/appSettings'
 import { Seo } from '@/components/Seo'
-import { usePWA } from '@/hooks/use-pwa'
+import { usePWAManager } from '@/hooks/use-pwa-manager'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { Button } from '@/components/ui/button'
 import { Download, ArrowRight } from 'lucide-react'
@@ -12,9 +12,9 @@ export default function SplashScreen() {
   const navigate = useNavigate()
   const { isAuthenticated, userType, loading: authLoading } = useAuthStore()
   const { settings, loading: settingsLoading } = useAppSettingsStore()
-  const { isInstallable, install } = usePWA()
+  const { isInstallable, isInstalled, install } = usePWAManager()
   const isMobile = useIsMobile()
-  const [redirectCancelled, setRedirectCancelled] = useState(false)
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false)
 
   const isLoading = authLoading || settingsLoading
 
@@ -33,13 +33,24 @@ export default function SplashScreen() {
   }
 
   useEffect(() => {
-    if (isInstallable && isMobile) {
-      setRedirectCancelled(true)
+    // If the app is installed (standalone), we don't show the prompt
+    // and we allow navigation to proceed.
+    if (isInstalled) {
+      setShowInstallPrompt(false)
+    } else if (isInstallable && isMobile) {
+      // If it's installable and mobile, we show the prompt and block navigation
+      setShowInstallPrompt(true)
     }
-  }, [isInstallable, isMobile])
+  }, [isInstallable, isMobile, isInstalled])
 
   useEffect(() => {
-    if (isLoading || redirectCancelled) {
+    if (isLoading) {
+      return
+    }
+
+    // If we are showing the install prompt, we pause navigation
+    // unless the user has already installed it (isInstalled becomes true)
+    if (showInstallPrompt && !isInstalled) {
       return
     }
 
@@ -48,7 +59,14 @@ export default function SplashScreen() {
     }, 1500)
 
     return () => clearTimeout(timer)
-  }, [isLoading, isAuthenticated, userType, navigate, redirectCancelled])
+  }, [
+    isLoading,
+    isAuthenticated,
+    userType,
+    navigate,
+    showInstallPrompt,
+    isInstalled,
+  ])
 
   const splashImage = settings?.splash_screen_image_url
 
@@ -72,7 +90,7 @@ export default function SplashScreen() {
           )}
         </div>
 
-        {redirectCancelled && (
+        {showInstallPrompt && !isInstalled && (
           <div className="w-full max-w-xs space-y-4 animate-fade-in-up pb-10">
             <div className="text-center text-white mb-6">
               <h2 className="text-xl font-bold mb-2">Instale o App</h2>
