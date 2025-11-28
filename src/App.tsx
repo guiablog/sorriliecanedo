@@ -80,8 +80,14 @@ const App = () => {
     link.href = '/app.webmanifest' // Use the new manifest file
     document.head.appendChild(link)
 
+    const metaThemeColor = document.createElement('meta')
+    metaThemeColor.name = 'theme-color'
+    metaThemeColor.content = '#14285A' // Primary color
+    document.head.appendChild(metaThemeColor)
+
     return () => {
       document.head.removeChild(link)
+      document.head.removeChild(metaThemeColor)
     }
   }, [])
 
