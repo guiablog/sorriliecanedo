@@ -35,7 +35,5 @@
     "tsconfig.node.json",
     "vite.config.ts"
   ],
-  "config": {
-    "showBadge": false
-  }
+  "config": {}
 }
